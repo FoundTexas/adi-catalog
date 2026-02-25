@@ -1,0 +1,288 @@
+---
+// src/components/TopMenu.astro
+---
+
+<nav class="adi-morphNav" aria-label="ADI quick menu">
+  <div class="adi-morph" id="adiMorph">
+    <button
+      class="adi-pillBtn"
+      type="button"
+      id="adiMorphBtn"
+      aria-expanded="false"
+      aria-controls="adiMorphLinks"
+    >
+      <span class="adi-pillText">Menu</span>
+      <span class="adi-pillIcon" aria-hidden="true">☰</span>
+    </button>
+
+    <div class="adi-links" id="adiMorphLinks">
+      <div class="adi-linksHead"></div>
+
+      <div class="adi-linksRow">
+        <a class="btn btn-outline-light btn-sm" href="#catalogo">Catálogo</a>
+        <a class="btn btn-outline-light btn-sm" href="#precios">Precios</a>
+        <a class="btn btn-outline-light btn-sm" href="#trabajos">Trabajos</a>
+        <a class="btn btn-primary btn-sm" href="#cotizar">Cotizar</a>
+      </div>
+    </div>
+  </div>
+
+  <button class="adi-backdrop" type="button" aria-label="Close menu"></button>
+
+  <style>
+    .adi-morphNav{
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1050;
+    }
+
+    .adi-morph{
+      pointer-events: auto;
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+
+      width: 110px;
+      max-width: calc(100vw - 32px);
+      max-height: 44px;
+
+      border-radius: 999px;
+      overflow: hidden;
+
+      /* ✅ Always dark */
+      background: rgba(20,20,24,.88);
+      color: #fff;
+
+      box-shadow: 0 12px 40px rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.12);
+
+      transition:
+        width .22s ease,
+        max-height .22s ease,
+        border-radius .22s ease,
+        background .22s ease,
+        box-shadow .22s ease,
+        border-color .22s ease;
+      will-change: width, max-height, border-radius, background;
+      z-index: 1052;
+    }
+
+    .adi-pillBtn{
+      width: 100%;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .45rem;
+
+      background: transparent;
+      border: 0;
+      color: inherit;
+      cursor: pointer;
+
+      font-weight: 800;
+      letter-spacing: .02em;
+    }
+
+    .adi-pillText{ font-size: 14px; }
+
+    .adi-pillIcon{
+      font-size: 14px;
+      opacity: .9;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+
+    /* Expanded content area (also dark) */
+    .adi-links{
+      padding: 14px 16px 16px;
+      opacity: 0;
+      transform: translateY(-6px);
+      transition: opacity .18s ease, transform .18s ease;
+      pointer-events: none;
+
+      background: rgba(20,20,24,.92);
+      color: #fff;
+      border-top: 1px solid rgba(255,255,255,.10);
+    }
+
+    .adi-linksHead{
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .adi-linksRow{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+
+      /* ✅ center buttons */
+      justify-content: center;
+    }
+
+    /* Make outline buttons match dark bg */
+    .adi-links .btn-outline-light{
+      border-color: rgba(255,255,255,.22);
+      color: rgba(255,255,255,.92);
+      background: rgba(255,255,255,.04);
+    }
+
+    .adi-links .btn-outline-light:hover{
+      border-color: rgba(180,108,255,.55);
+      background: rgba(180,108,255,.14);
+      color: #fff;
+    }
+
+    /* ===== Expanded state ===== */
+    .adi-morphNav.is-open .adi-morph{
+      width: min(920px, calc(100vw - 32px));
+      max-height: 220px;
+      border-radius: 18px;
+
+      /* ✅ Stay dark like the pill */
+      background: rgba(20,20,24,.95);
+      color: #fff;
+      border-color: rgba(255,255,255,.14);
+      box-shadow: 0 30px 80px rgba(0,0,0,.35);
+    }
+
+    .adi-morphNav.is-open .adi-links{
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .adi-morphNav.is-open .adi-pillBtn{
+      justify-content: space-between;
+      padding: 0 16px;
+      color: #fff;
+    }
+
+    /* ✅ ONLY DESKTOP: hide hamburger when expanded/hover-expanded */
+    @media (min-width: 768px){
+      .adi-morphNav.is-open .adi-pillIcon,
+      .adi-morphNav:not(.is-pinned):hover .adi-pillIcon{
+        opacity: 0;
+        transform: scale(.8);
+        pointer-events: none;
+      }
+    }
+
+    /* Desktop hover expands (only if not pinned) */
+    @media (min-width: 768px){
+      .adi-morphNav:not(.is-pinned):hover .adi-morph{
+        width: min(920px, calc(100vw - 32px));
+        max-height: 220px;
+        border-radius: 18px;
+
+        /* ✅ Stay dark */
+        background: rgba(20,20,24,.95);
+        color: #fff;
+        border-color: rgba(255,255,255,.14);
+        box-shadow: 0 30px 80px rgba(0,0,0,.35);
+      }
+
+      .adi-morphNav:not(.is-pinned):hover .adi-links{
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+
+      .adi-morphNav:not(.is-pinned):hover .adi-pillBtn{
+        justify-content: space-between;
+        padding: 0 16px;
+        color: #fff;
+      }
+    }
+
+    /* Backdrop only when pinned/open (desktop) */
+    .adi-backdrop{
+      position: fixed;
+      inset: 0;
+      border: 0;
+      background: rgba(0,0,0,.22);
+      backdrop-filter: blur(6px);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1051;
+    }
+
+    .adi-morphNav.is-open.is-pinned .adi-backdrop{
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .adi-morph, .adi-links, .adi-pillIcon{ transition: none !important; }
+    }
+  </style>
+
+  <script is:inline>
+    const nav = document.querySelector(".adi-morphNav");
+    const btn = document.getElementById("adiMorphBtn");
+    const backdrop = document.querySelector(".adi-backdrop");
+    const morph = document.getElementById("adiMorph");
+
+    const isDesktop = () => window.matchMedia("(min-width: 768px)").matches;
+
+    function setOpen(nextOpen, pinned=false){
+      nav.classList.toggle("is-open", nextOpen);
+      nav.classList.toggle("is-pinned", pinned && nextOpen);
+      btn?.setAttribute("aria-expanded", String(nextOpen));
+    }
+
+    // Click behavior:
+    // - Mobile: toggle open/close
+    // - Desktop: pin/unpin (hover works when not pinned)
+    btn?.addEventListener("click", (e) => {
+      e.preventDefault();
+      const open = nav.classList.contains("is-open");
+      const pinned = nav.classList.contains("is-pinned");
+
+      if (!isDesktop()) {
+        return setOpen(!open, false);
+      }
+
+      if (!open) return setOpen(true, true);
+      if (pinned) return setOpen(false, false);
+      return setOpen(true, true);
+    });
+
+    backdrop?.addEventListener("click", () => setOpen(false, false));
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") setOpen(false, false);
+    });
+
+    // Clicking a link closes if pinned (desktop) or open (mobile)
+    morph?.addEventListener("click", (e) => {
+      const a = e.target.closest("a");
+      if (!a) return;
+      if (!isDesktop()) return setOpen(false, false);
+      if (nav.classList.contains("is-pinned")) setOpen(false, false);
+    });
+
+    // aria syncing for hover open (desktop only)
+    nav?.addEventListener("mouseleave", () => {
+      if (!nav.classList.contains("is-pinned")) btn?.setAttribute("aria-expanded", "false");
+    });
+
+    nav?.addEventListener("mouseenter", () => {
+      if (!nav.classList.contains("is-pinned") && isDesktop()) {
+        btn?.setAttribute("aria-expanded", "true");
+      }
+    });
+
+    // If resizing from desktop->mobile while pinned, unpin
+    window.addEventListener("resize", () => {
+      if (!isDesktop() && nav.classList.contains("is-pinned")) {
+        nav.classList.remove("is-pinned");
+      }
+    });
+  </script>
+</nav>

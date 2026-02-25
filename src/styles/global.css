@@ -1,0 +1,331 @@
+/* ======================================================
+   ADI — GLOBAL THEME (FULL)
+====================================================== */
+
+:root{
+  --adi-bg: #f6f3fb;
+  --adi-card: rgba(255,255,255,.88);
+  --adi-border: rgba(120,90,160,.18);
+  --adi-soft: rgba(60,40,90,.65);
+
+  --adi-accent: #b46cff;
+  --adi-accent-soft: rgba(180,108,255,.25);
+
+  --adi-text: #2a1f40;
+  --adi-shadow: 0 25px 70px rgba(100,60,150,.12);
+}
+
+/* ======================================================
+   BASE
+====================================================== */
+
+html, body{
+  height: 100%;
+}
+
+body{
+  color: var(--adi-text);
+}
+
+/* optional: make images behave nicely */
+img{
+  max-width: 100%;
+  display: block;
+}
+
+.adi-logo-img {
+  display: block;
+  height: auto;
+  width: 16rem;
+  max-width: 100%;
+}
+
+@media (max-width: 576px){
+  .adi-logo-img{ max-width: 12rem; }
+}
+
+/* ======================================================
+   BACKGROUND
+====================================================== */
+
+.adi-bg{
+  min-height: 100vh;
+  background-color: var(--adi-bg);
+  background-image: url("/bg.svg");
+  background-repeat: repeat;
+  background-size: 500px 500px;
+}
+
+.adi-soft{ color: var(--adi-soft); }
+
+/* ======================================================
+   SECTION LAYOUT
+====================================================== */
+
+.adi-section{
+  padding: 6rem 0;
+  min-height: 100vh;
+  align-items: center;
+}
+
+.adi-hero{
+  padding: 8rem 0 6rem;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
+.adi-divider{
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(120,90,160,.18),
+    transparent
+  );
+  margin: 2.5rem 0;
+}
+
+.adi-title{
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--adi-text);
+}
+
+.adi-subtitle{
+  font-size: 1.25rem;
+  max-width: 540px;
+  line-height: 1.6;
+  color: var(--adi-soft);
+}
+
+/* ======================================================
+   CARD
+====================================================== */
+
+.adi-card{
+  background: var(--adi-card);
+  border: 1px solid var(--adi-border);
+  border-radius: 1.25rem;
+  transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease;
+  backdrop-filter: blur(6px);
+  overflow: visible; /* important: don't clip modals/overlays */
+}
+
+.adi-card:hover{
+  transform: translateY(-6px);
+  border-color: var(--adi-accent-soft);
+  box-shadow: var(--adi-shadow);
+}
+
+/* If you want padding in cards, use utilities (p-4) or enable this:
+.adi-card{ padding: 2rem; }
+*/
+
+/* ======================================================
+   PRODUCT MEDIA
+====================================================== */
+
+.product-media{
+  border-radius: 1.25rem;
+  overflow: hidden; /* clip ONLY the image */
+}
+
+.product-media img{
+  width: 100%;
+  height: 380px;
+  object-fit: contain;
+  transition: transform .6s ease;
+}
+
+.product-media:hover img{
+  transform: scale(1.05);
+}
+
+/* ======================================================
+   SWATCHES
+====================================================== */
+
+.swatches{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.5rem;
+}
+
+.swatch{
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 2px solid rgba(120,90,160,.25);
+  background: rgba(255,255,255,.9);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+  cursor: pointer;
+}
+
+.swatch:hover{
+  transform: translateY(-1px);
+  border-color: var(--adi-accent);
+}
+
+.swatch.is-active{
+  border-color: var(--adi-accent);
+  box-shadow: 0 0 0 3px var(--adi-accent-soft);
+}
+
+.swatch-dot{
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,.12);
+}
+
+/* ======================================================
+   BOOTSTRAP INPUTS (optional but useful)
+====================================================== */
+
+.form-control, .form-select{
+  background-color: rgba(255,255,255,.95) !important;
+  border-color: rgba(120,90,160,.18) !important;
+  color: var(--adi-text) !important;
+}
+
+.form-control::placeholder{
+  color: rgba(60,40,90,.45) !important;
+}
+
+.form-control:focus, .form-select:focus{
+  box-shadow: 0 0 0 .2rem rgba(180,108,255,.20) !important;
+  border-color: var(--adi-accent) !important;
+}
+
+/* ======================================================
+   BUTTONS
+====================================================== */
+
+.btn{
+  transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease;
+}
+
+.btn-primary{
+  background: linear-gradient(135deg, var(--adi-accent), #8e5bff);
+  border: none;
+  letter-spacing: .05em;
+  font-weight: 600;
+  box-shadow: 0 12px 30px rgba(180,108,255,.25);
+}
+
+.btn-primary:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px rgba(180,108,255,.35);
+}
+
+.btn-outline-light{
+  border-color: rgba(120,90,160,.25);
+  color: var(--adi-text);
+  background: rgba(255,255,255,.7);
+}
+
+.btn-outline-light:hover{
+  background: rgba(180,108,255,.08);
+  border-color: var(--adi-accent);
+  color: rgba(255,255,255,.7);
+}
+
+/* ======================================================
+   MODAL (GLOBAL SINGLE MODAL, ALWAYS ON TOP)
+====================================================== */
+
+/* Backdrop fixed to viewport, very high z-index to beat anything */
+.adi-modal-backdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(90,60,120,.35);
+  backdrop-filter: blur(10px);
+
+  /* Always above all (even weird headers/menus) */
+  z-index: 2147483647;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 1rem;
+}
+
+/* Modal box */
+.adi-modal{
+  width: min(820px, 96vw);
+  max-height: 85vh;
+  border-radius: 1.25rem;
+  background: rgba(255,255,255,.98);
+  border: 1px solid rgba(120,90,160,.18);
+  box-shadow: 0 40px 120px rgba(100,60,150,.20);
+  color: var(--adi-text);
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header */
+.adi-modal-head{
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(120,90,160,.12);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 1rem;
+}
+
+.adi-icon-btn{
+  border: 0;
+  background: transparent;
+  font-size: 1.2rem;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: .3rem .6rem;
+  transition: background-color .2s ease, transform .2s ease;
+  color: var(--adi-text);
+}
+
+.adi-icon-btn:hover{
+  background: rgba(120,90,160,.12);
+  transform: translateY(-1px);
+}
+
+/* Body (scrollable) */
+.adi-modal-body{
+  padding: 1.2rem 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Footer */
+.adi-modal-foot{
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(120,90,160,.12);
+  display:flex;
+  justify-content:flex-end;
+  gap: .5rem;
+}
+
+
+/* ======================================================
+   SCROLLBAR (optional)
+====================================================== */
+
+.adi-modal-body::-webkit-scrollbar{
+  width: 8px;
+}
+
+.adi-modal-body::-webkit-scrollbar-thumb{
+  background: rgba(120,90,160,.35);
+  border-radius: 10px;
+}
+
+.adi-modal-body::-webkit-scrollbar-track{
+  background: transparent;
+}
+

@@ -1,0 +1,477 @@
+// src/config/pricing.ts
+
+/* ======================================================
+   TIPOS
+====================================================== */
+
+export type SizeRow = {
+  size: string;
+  widthCm: number;
+  lengthCm: number;
+};
+
+export type Product = {
+  id: string;
+  name: string;
+  category: "tshirt" | "hoodie" | "sweatshirt";
+  description: string;
+
+  colors: {
+    key: string;
+    label: string;
+    hex?: string;
+    image: string;
+  }[];
+
+  spec: {
+    material: string;
+    fit: string;
+    print: string;
+    care?: string;
+  };
+
+  sizeChart?: {
+    title: string;
+    rows: SizeRow[];
+  };
+};
+
+/* ======================================================
+   CONFIG GLOBAL
+====================================================== */
+
+export const PRICING = {
+  wholesaleThreshold: 5,
+
+  contact: {
+    email: "adi.photostock@gmail.com",
+    whatsappUrl: "https://wa.me/525549138324", // cambia por tu número real
+  },
+
+  notes: {
+    vat: "Precios en MXN. Incluyen IVA.",
+    shipping: "Costo de envío no incluido (se calcula según destino).",
+  },
+
+  shipping: {
+    metroCdmx: 0,             // entrega a coordinar
+    nationalRetail: 100,      // envío menudeo
+    nationalWholesale: 0,     // envío mayoreo (si aplica gratis)
+  },
+};
+
+/* ======================================================
+   PRODUCTOS
+====================================================== */
+
+export const PRODUCTS: Product[] = [
+  {
+    id: "tshirt-basic",
+    name: "Playera Heavy Cotton",
+    category: "tshirt",
+    description:
+      "Ideal para el día a día, marcas, eventos y uniformes. Excelente para impresión DTF.",
+
+    colors: [
+      // 🔹 Neutros
+      {
+        key: "negro",
+        label: "Negro",
+        hex: "#111111",
+        image: "/img/tee/negro.webp",
+      },
+      {
+        key: "blanco",
+        label: "Blanco",
+        hex: "#ffffff",
+        image: "/img/tee/blanco.webp",
+      },
+      {
+        key: "jaspe_oscuro",
+        label: "Jaspe Oscuro",
+        hex: "#3a3a3a",
+        image: "/img/tee/jaspe_oscuro.webp",
+      },
+      {
+        key: "beige",
+        label: "Beige",
+        hex: "#d8c3a5",
+        image: "/img/tee/beige.webp",
+      },
+
+      // 🔹 Azules
+      {
+        key: "marino_brillante",
+        label: "Marino Brillante",
+        hex: "#0b1b3a",
+        image: "/img/tee/marino_brillante.webp",
+      },
+      {
+        key: "azul_rey",
+        label: "Azul Rey",
+        hex: "#1f4ed8",
+        image: "/img/tee/azul_rey.webp",
+      },
+      {
+        key: "azul_cielo",
+        label: "Azul Cielo",
+        hex: "#87ceeb",
+        image: "/img/tee/azul_cielo.webp",
+      },
+
+      // 🔹 Verdes
+      {
+        key: "verde_militar",
+        label: "Verde Militar",
+        hex: "#4b5320",
+        image: "/img/tee/verde_militar.webp",
+      },
+      {
+        key: "verde_bandera",
+        label: "Verde Bandera",
+        hex: "#007a33",
+        image: "/img/tee/verde_bandera.webp",
+      },
+      {
+        key: "turquesa",
+        label: "Turquesa",
+        hex: "#1abc9c",
+        image: "/img/tee/turquesa.webp",
+      },
+
+      // 🔹 Amarillos / Cálidos
+      {
+        key: "amarillo",
+        label: "Amarillo",
+        hex: "#f4d03f",
+        image: "/img/tee/amarillo.webp",
+      },
+      {
+        key: "limon",
+        label: "Limón",
+        hex: "#cddc39",
+        image: "/img/tee/limon.webp",
+      },
+      {
+        key: "ocre",
+        label: "Ocre",
+        hex: "#a6403e",
+        image: "/img/tee/ocre.webp",
+      },
+      {
+        key: "oro",
+        label: "Oro",
+        hex: "#d4af37",
+        image: "/img/tee/oro.webp",
+      },
+
+      // 🔹 Rojos / Rosas
+      {
+        key: "rojo_brillante",
+        label: "Rojo Brillante",
+        hex: "#d32f2f",
+        image: "/img/tee/rojo_brillante.webp",
+      },
+      {
+        key: "fucsia",
+        label: "Fucsia",
+        hex: "#e91e63",
+        image: "/img/tee/fucsia.webp",
+      },
+
+      // 🔹 Morado
+      {
+        key: "morado",
+        label: "Morado",
+        hex: "#6a1b9a",
+        image: "/img/tee/morado.webp",
+      },
+    ],
+
+    spec: {
+      material: "Algodón",
+      fit: "Regular",
+      print: "DTF / Vinil textil / Serigrafía (según pedido)",
+      care: "Lavar al revés, agua fría, no planchar directo sobre el estampado.",
+    },
+
+    sizeChart: {
+      title: "Tabla de tallas – Playera",
+      rows: [
+        { size: "S", widthCm: 48, lengthCm: 70 },
+        { size: "M", widthCm: 52, lengthCm: 72 },
+        { size: "L", widthCm: 56, lengthCm: 74 },
+        { size: "XL", widthCm: 60, lengthCm: 76 },
+      ],
+    },
+  },
+
+  {
+    id: "sudadera-cuello-redondo",
+    name: "Sudadera Cuello Redondo",
+    category: "sweatshirt",
+    description:
+      "Sudadera cuello redondo de acabado afelpado por dentro.",
+
+    colors: [
+      {
+        key: "black",
+        label: "Negro",
+        hex: "#111111",
+        image: "/img/crewneck/black.webp",
+      },
+      {
+        key: "blanco",
+        label: "Blanco",
+        hex: "#ffffff",
+        image: "/img/crewneck/blanco.webp",
+      },
+      {
+        key: "beige-sand",
+        label: "Beige Arena",
+        hex: "#CABEA9",
+        image: "/img/crewneck/beige_sand.webp",
+      },
+      {
+        key: "verde-bosque",
+        label: "Verde Bosque",
+        hex: "#2D3126",
+        image: "/img/crewneck/verde_bosque.webp",
+      },
+      {
+        key: "azul-leni",
+        label: "Azul Leni",
+        hex: "#181E2A",
+        image: "/img/crewneck/azul_leni.webp",
+      },
+      {
+        key: "gris-tb",
+        label: "Gris TB",
+        hex: "#686568",
+        image: "/img/crewneck/gris_tb.webp",
+      },
+      {
+        key: "azul-sakai",
+        label: "Azul Sakai",
+        hex: "#36578B",
+        image: "/img/crewneck/azul_sakai.webp",
+      },
+      {
+        key: "rojo",
+        label: "Rojo Davao",
+        hex: "#D70E2D",
+        image: "/img/crewneck/rojo.webp",
+      },
+      {
+        key: "verde-militar",
+        label: "Verde Militar",
+        hex: "#4E4A37",
+        image: "/img/crewneck/verde_militar.webp",
+      },
+      {
+        key: "azul-rey",
+        label: "Azul Rey",
+        hex: "#17499E",
+        image: "/img/crewneck/azul_rey.webp",
+      },
+      {
+        key: "azul-purist",
+        label: "Azul Purist",
+        hex: "#A1D7DC",
+        image: "/img/crewneck/azul_purist.webp",
+      },
+      {
+        key: "gris-cherasco",
+        label: "Gris Cherasco",
+        hex: "#575556",
+        image: "/img/crewneck/gris_cherasco.webp",
+      },
+      {
+        key: "verde-menta",
+        label: "Verde Menta",
+        hex: "#B2D7AB",
+        image: "/img/crewneck/verde_menta.webp",
+      },
+      {
+        key: "naranja",
+        label: "Naranja",
+        hex: "#FEB977",
+        image: "/img/crewneck/naranja.webp",
+      },
+      {
+        key: "azul-heze",
+        label: "Azul Heze",
+        hex: "#3E4357",
+        image: "/img/crewneck/azul_heze.webp",
+      },
+      {
+        key: "marron",
+        label: "Marron",
+        hex: "#421B22",
+        image: "/img/crewneck/marron.webp",
+      },
+      {
+        key: "morado",
+        label: "Morado",
+        hex: "#3A2757",
+        image: "/img/crewneck/morado.webp",
+      },
+      {
+        key: "cafe",
+        label: "Cafe",
+        hex: "#4A2C1F",
+        image: "/img/crewneck/cafe.webp",
+      },
+      {
+        key: "azul-colombia",
+        label: "Azul Colombia",
+        hex: "#6786C2",
+        image: "/img/crewneck/azul_colombia.webp",
+      },
+    ],
+
+    spec: {
+      material: "Mezcla algodón / poliéster (según lote)",
+      fit: "Regular",
+      print: "DTF",
+      care: "Lavar al revés, no secadora en alta temperatura.",
+    },
+
+    // No sizeChart aún → mostrará "Solicitar tallas"
+  },
+
+  {
+    id: "hoodie-basic",
+    name: "Sudadera Hoodie Heavy Blend",
+    category: "hoodie",
+    description:
+      "Sudadera premium con gorro y bolsa frontal. Ideal para streetwear, marcas, merch y uniformes. Excelente para impresión DTF.",
+
+    colors: [
+      // 🔹 Neutros
+      {
+        key: "negro",
+        label: "Negro",
+        hex: "#101010",
+        image: "/img/hoodie/negro.webp",
+      },
+      {
+        key: "blanco",
+        label: "Blanco",
+        hex: "#ffffff",
+        image: "/img/hoodie/blanco.webp",
+      },
+      {
+        key: "gris_oxford",
+        label: "Gris Oxford",
+        hex: "#868f92",
+        image: "/img/hoodie/gris_oxford.webp",
+      },
+      {
+        key: "gris_jaspe",
+        label: "Gris Jaspe Oscuro",
+        hex: "#4a4a4a",
+        image: "/img/hoodie/gris_jaspe.webp",
+      },
+      {
+        key: "beige",
+        label: "Beige",
+        hex: "#8a8570",
+        image: "/img/hoodie/beige.webp",
+      },
+
+      // 🔹 Azules
+      {
+        key: "marino",
+        label: "Azul Marino",
+        hex: "#1c2a4a",
+        image: "/img/hoodie/marino.webp",
+      },
+      {
+        key: "azul_petroleo",
+        label: "Azul Petróleo",
+        hex: "#2f5d62",
+        image: "/img/hoodie/azul_petroleo.webp",
+      },
+      {
+        key: "azul_cielo",
+        label: "Azul Cielo",
+        hex: "#adc3d5",
+        image: "/img/hoodie/azul_cielo.webp",
+      },
+
+      // 🔹 Verdes
+      {
+        key: "verde_militar",
+        label: "Verde Militar",
+        hex: "#6b705c",
+        image: "/img/hoodie/verde_militar.webp",
+      },
+      {
+        key: "verde_brillante",
+        label: "Verde Brillante",
+        hex: "#35bf54",
+        image: "/img/hoodie/verde_brillante.webp",
+      },
+      {
+        key: "menta",
+        label: "Menta",
+        hex: "#aec9b8",
+        image: "/img/hoodie/menta.webp",
+      },
+
+      // 🔹 Amarillos / Cálidos
+      {
+        key: "amarillo_limon",
+        label: "Amarillo Limón",
+        hex: "#bac300",
+        image: "/img/hoodie/amarillo_limon.webp",
+      },
+      {
+        key: "naranja",
+        label: "Naranja",
+        hex: "#ee8a1d",
+        image: "/img/hoodie/naranja.webp",
+      },
+
+      // 🔹 Rojos / Rosas
+      {
+        key: "rojo",
+        label: "Rojo",
+        hex: "#e2001d",
+        image: "/img/hoodie/rojo.webp",
+      },
+      {
+        key: "rosa",
+        label: "Rosa",
+        hex: "#d26892",
+        image: "/img/hoodie/rosa.webp",
+      },
+
+      // 🔹 Morados
+      {
+        key: "lila",
+        label: "Lila",
+        hex: "#c8a2c8",
+        image: "/img/hoodie/lila.webp",
+      },
+    ],
+
+    spec: {
+      material: "Algodón / Poliéster (según modelo)",
+      fit: "Regular",
+      print: "DTF / Vinil textil / Serigrafía (según pedido)",
+      care: "Lavar al revés, agua fría, no planchar directo sobre el estampado.",
+    },
+
+    sizeChart: {
+      title: "Tabla de tallas – Hoodie",
+      rows: [
+        { size: "S", widthCm: 52, lengthCm: 68 },
+        { size: "M", widthCm: 56, lengthCm: 70 },
+        { size: "L", widthCm: 60, lengthCm: 72 },
+        { size: "XL", widthCm: 64, lengthCm: 74 },
+      ],
+    },
+  },
+];
