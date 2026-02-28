@@ -9,7 +9,7 @@ type PriceOpt = {
 };
 
 /** ✅ Fallback por categoría (esto asegura que hoodies/sudaderas siempre aparezcan) */
-const PRICE_BY_CATEGORY: Record<"tshirt" | "hoodie", PriceOpt[]> = {
+const PRICE_BY_CATEGORY: Record<"tshirt" | "hoodie" | "sweatshirt", PriceOpt[]> = {
   tshirt: [
     { id: "custom", label: "Personalizada (DTF)", retail: 250, wholesale: 180 },
     { id: "blank", label: "Sin personalizar", retail: 100, wholesale: 80 },
@@ -18,15 +18,14 @@ const PRICE_BY_CATEGORY: Record<"tshirt" | "hoodie", PriceOpt[]> = {
     { id: "custom", label: "Personalizada (DTF)", retail: 400, wholesale: 350 },
     { id: "blank", label: "Sin personalizar", retail: 300, wholesale: 250 },
   ],
-};
-
-/** (Opcional) Overrides por ID si algún producto es especial */
-const PRICE_BY_PRODUCT: Record<string, PriceOpt[] | undefined> = {
-  // "hoodie-premium": [...], // si algún hoodie tuviera precio distinto lo pones aquí
+  sweatshirt: [
+    { id: "custom", label: "Personalizada (DTF)", retail: 400, wholesale: 350 },
+    { id: "blank", label: "Sin personalizar", retail: 300, wholesale: 250 },
+  ],
 };
 
 const rows = (PRODUCTS ?? []).flatMap((p) => {
-  const opts = PRICE_BY_PRODUCT[p.id] ?? PRICE_BY_CATEGORY[p.category] ?? [];
+  const opts = PRICE_BY_CATEGORY[p.category] ?? [];
   return opts.map((o) => ({
     key: `${p.id}-${o.id}`,
     productName: p.name,
