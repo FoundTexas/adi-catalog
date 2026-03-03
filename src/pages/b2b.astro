@@ -1,0 +1,43 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import HeroB2B from "../components/HeroB2B.astro";
+import ProductsSection from "../components/ProductsSection.astro";
+import PricingTable from "../components/PricingTable.astro";
+import WorkGallery from "../components/WorkGallery.astro";
+import QuoteCalculator from "../components/QuoteCalculator.tsx";
+---
+
+<BaseLayout title="ADI - Catálogo B2B">
+  
+  <HeroB2B />
+
+  <div class="adi-divider container"></div>
+
+  <ProductsSection />
+
+  <div class="adi-divider container"></div>
+
+  <PricingTable />
+
+  <div class="adi-divider container"></div>
+
+  <WorkGallery />
+
+  <div class="adi-divider container"></div>
+
+  <section id="cotizar" class="adi-section">
+    <div class="container">
+      <div class="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-3">
+        <div>
+          <h2 class="fw-bold mb-1">Cotización</h2>
+          <div class="adi-soft">Arma un estimado y mándalo por WhatsApp o correo.</div>
+        </div>
+      </div>
+
+      <QuoteCalculator client:load />
+    </div>
+  </section>
+
+  <div class="adi-divider container"></div>
+
+</BaseLayout>

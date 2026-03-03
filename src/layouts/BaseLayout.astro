@@ -1,6 +1,10 @@
 ---
-const { title = "ADI" } = Astro.props;
+
+const { title = "ADI", menuMode = "b2c", menuAnchors = false } = Astro.props;
 import "../styles/global.css";
+import TopMenu from "../components/TopMenu.astro";
+import DirectContact from "../components/DirectContact.astro";
+
 ---
 
 <!doctype html>
@@ -40,9 +44,12 @@ import "../styles/global.css";
 </head>
 
   <body class="adi-bg">
+     <TopMenu mode={menuMode} showAnchors={menuAnchors} />
     <main>
       <slot />
     </main>
+
+    <DirectContact />
 
     <!-- Bootstrap JS -->
     <script

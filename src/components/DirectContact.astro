@@ -2,18 +2,35 @@
 import { PRICING } from "../config/pricing";
 ---
 
-<section id="contacto" class=" pb-3">
+<section id="contacto" class="pb-3">
+  <div class="container text-center">
+    <p class="adi-soft mb-3">
+      Calidad textil lista para impresión DTF · Producción local
+    </p>
+  </div>
   <div class="container">
     <div class="bg-dark rounded-3 text-white p-4">
-      <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+      <div
+        class="d-flex justify-content-between align-items-start gap-3 flex-wrap"
+      >
         <div>
           <h2 class="fw-bold mb-1">Trato directo</h2>
-          <div class="">¿Lo resolvemos rápido? Escríbenos directo y lo aterrizamos.</div>
+          <div class="">
+            ¿Lo resolvemos rápido? Escríbenos directo y lo aterrizamos.
+          </div>
         </div>
 
         <div class="d-flex gap-2 flex-wrap">
-          <a class="btn btn-primary" href={PRICING.contact.whatsappUrl} target="_blank" rel="noreferrer">WhatsApp</a>
-          <a class="btn btn-outline-light" href={`mailto:${PRICING.contact.email}`}>Correo</a>
+          <a
+            class="btn btn-primary"
+            href={PRICING.contact.whatsappUrl}
+            target="_blank"
+            rel="noreferrer">WhatsApp</a
+          >
+          <a
+            class="btn btn-outline-light"
+            href={`mailto:${PRICING.contact.email}`}>Correo</a
+          >
         </div>
       </div>
     </div>

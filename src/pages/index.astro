@@ -1,47 +1,57 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Hero from "../components/Hero.astro";
-import TopMenu from "../components/TopMenu.astro";
-import ProductsSection from "../components/ProductsSection.astro";
-import PricingTable from "../components/PricingTable.astro";
 import WorkGallery from "../components/WorkGallery.astro";
-import DirectContact from "../components/DirectContact.astro";
-import QuoteCalculator from "../components/QuoteCalculator.tsx";
 ---
 
-<BaseLayout title="ADI - Catálogo B2B">
-  <TopMenu />
-  
+<BaseLayout title="ADI — Arte y Diseño Independiente">
+
   <Hero />
 
-  <div class="adi-divider container"></div>
-
-  <ProductsSection />
-
-  <div class="adi-divider container"></div>
-
-  <PricingTable />
-
+  <!-- SEPARADOR -->
   <div class="adi-divider container"></div>
 
   <WorkGallery />
 
-  <div class="adi-divider container"></div>
+  <!-- BLOQUE EXPLICATIVO -->
+  <section class="adi-section">
+    <div class="container text-center">
 
-  <section id="cotizar" class="adi-section">
-    <div class="container">
-      <div class="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-3">
-        <div>
-          <h2 class="fw-bold mb-1">Cotización</h2>
-          <div class="adi-soft">Arma un estimado y mándalo por WhatsApp o correo.</div>
+      <h2 class="fw-semibold mb-3">
+        ¿Qué necesitas hoy?
+      </h2>
+
+      <div class="row g-4 mt-3">
+
+        <!-- B2C -->
+        <div class="col-md-6">
+          <div class="adi-card p-4 h-100">
+            <h4 class="fw-bold mb-2">Compra individual</h4>
+            <p class="adi-soft mb-3">
+              Compra por pieza directamente desde el catálogo.
+            </p>
+            <a href="/catalogo" class="btn btn-dark">
+              Ver catálogo
+            </a>
+          </div>
         </div>
+
+        <!-- B2B -->
+        <div class="col-md-6">
+          <div class="adi-card p-4 h-100">
+            <h4 class="fw-bold mb-2">Producción para empresas</h4>
+            <p class="adi-soft mb-3">
+              Mayoreo, eventos, marcas y uniformes personalizados.
+            </p>
+            <a href="/b2b" class="btn btn-outline-dark">
+              Cotizar volumen
+            </a>
+          </div>
+        </div>
+
       </div>
 
-      <QuoteCalculator client:load />
     </div>
   </section>
 
-  <div class="adi-divider container"></div>
-
-  <DirectContact />
 </BaseLayout>

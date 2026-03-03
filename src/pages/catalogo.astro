@@ -1,0 +1,178 @@
+---
+export const prerender = false;
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PriceRange from "../components/PriceRange.astro";
+
+const API_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
+
+// ✅ IMPORTANT: Astro.url preserves query params reliably in SSR/dev
+const u = Astro.url;
+
+// Read URL params (reflect URL in UI)
+const q = u.searchParams.get("q") ?? "";
+const sort = u.searchParams.get("sort") ?? "id";
+const order = u.searchParams.get("order") ?? "desc";
+const page = u.searchParams.get("page") ?? "1";
+const limit = u.searchParams.get("limit") ?? "24";
+
+// cents from URL (IMPORTANT: 0 is valid => use has())
+const minCents = u.searchParams.has("minPriceCents")
+  ? (u.searchParams.get("minPriceCents") ?? "0")
+  : "0";
+
+const maxCents = u.searchParams.has("maxPriceCents")
+  ? (u.searchParams.get("maxPriceCents") ?? "130000")
+  : "130000";
+
+// Convert cents -> pesos for UI
+const minPrice = Number(minCents) / 100;
+const maxPrice = Number(maxCents) / 100;
+
+// Build API query towards Nest API
+const apiParams = new URLSearchParams();
+
+// Include q only if it exists in URL OR user typed something
+if (u.searchParams.has("q") || q.trim()) apiParams.set("q", q.trim());
+
+apiParams.set("minPriceCents", minCents);
+apiParams.set("maxPriceCents", maxCents);
+apiParams.set("sort", sort);
+apiParams.set("order", order);
+apiParams.set("page", page);
+apiParams.set("limit", limit);
+
+const apiUrl = `${API_URL}/products?${apiParams.toString()}`;
+
+const res = await fetch(apiUrl);
+if (!res.ok) throw new Error(`API error ${res.status}`);
+
+const data = await res.json();
+
+// Support {items, meta} or legacy array
+const items = Array.isArray(data) ? data : (data.items ?? []);
+const meta = Array.isArray(data)
+  ? { total: items.length, page: Number(page), pages: 1, limit: Number(limit) }
+  : (data.meta ?? { total: 0, page: Number(page), pages: 1, limit: Number(limit) });
+
+function pageLink(nextPage: number) {
+  const x = new URL(u.toString());
+  x.searchParams.set("page", String(nextPage));
+  return x.pathname + x.search;
+}
+
+function formatMoneyFromCents(cents: number) {
+  return `$${((Number(cents) || 0) / 100).toFixed(2)}`;
+}
+
+// Debug
+const debugSearch = u.search;
+const debugHasQ = u.searchParams.has("q");
+const debugQ = q;
+---
+
+<BaseLayout title="ADI - Catálogo" menuMode="b2c" menuAnchors={false}>
+  <section class="adi-section">
+    <div class="container">
+      <div class="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-3">
+        <div>
+          <h1 class="fw-bold mb-1">Catálogo</h1>
+          <div class="adi-soft">Compra por pieza o revisa el catálogo.</div>
+        </div>
+
+      </div>
+
+      <form class="row g-2 align-items-end" method="get" id="filtersForm">
+        <div class="col-12 col-md-4">
+          <label class="form-label">Buscar</label>
+          <input class="form-control" name="q" value={q} placeholder="Playera, hoodie, SKU..." />
+        </div>
+
+        <PriceRange
+          min={0}
+          max={1300}
+          step={10}
+          initialMin={minPrice}
+          initialMax={maxPrice}
+          minName="minPriceCents"
+          maxName="maxPriceCents"
+        />
+
+        <div class="col-6 col-md-2">
+          <label class="form-label">Ordenar</label>
+          <select class="form-select" name="sort">
+            <option value="id" selected={sort === "id"}>Más nuevos</option>
+            <option value="priceCents" selected={sort === "priceCents"}>Precio</option>
+            <option value="name" selected={sort === "name"}>Nombre</option>
+          </select>
+        </div>
+
+        <div class="col-6 col-md-1">
+          <label class="form-label">Dir</label>
+          <select class="form-select" name="order">
+            <option value="desc" selected={order === "desc"}>DESC</option>
+            <option value="asc" selected={order === "asc"}>ASC</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-md-1 d-grid">
+          <button class="btn btn-dark" type="submit">Ir</button>
+        </div>
+
+        <!-- reset to first page when applying filters -->
+        <input type="hidden" name="page" value="1" />
+        <input type="hidden" name="limit" value={limit} />
+      </form>
+
+      <div class="adi-divider my-4"></div>
+
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="adi-soft">
+          {meta.total} productos · Página {meta.page} de {meta.pages}
+        </div>
+      </div>
+
+      <div class="row g-3 mt-1">
+        {items.map((p: any) => (
+          <div class="col-12 col-md-4 col-lg-3">
+            <div class="card h-100 shadow-sm">
+              <div class="ratio ratio-4x3 bg-light">
+                {p.images?.length ? (
+                  <img
+                    src={p.images[0].url}
+                    alt={p.name}
+                    style="object-fit:cover; width:100%; height:100%;"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div class="d-flex align-items-center justify-content-center adi-soft">Sin imagen</div>
+                )}
+              </div>
+
+              <div class="card-body">
+                <div class="small adi-soft">SKU: {p.sku}</div>
+                <h5 class="card-title mt-1 mb-2">{p.name}</h5>
+                <div class="fw-bold">
+                  {formatMoneyFromCents(p.priceCents)} {p.currency}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <nav class="d-flex justify-content-between mt-4">
+        <div>
+          {meta.page > 1 && (
+            <a class="btn btn-outline-dark" href={pageLink(meta.page - 1)}>&larr; Anterior</a>
+          )}
+        </div>
+        <div>
+          {meta.page < meta.pages && (
+            <a class="btn btn-outline-dark" href={pageLink(meta.page + 1)}>Siguiente &rarr;</a>
+          )}
+        </div>
+      </nav>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,9 +1,14 @@
 ---
-// src/components/TopMenu.astro
+// Props
+const {
+  mode = "b2c", // "b2c" | "b2b"
+  showAnchors = false, // true en B2B, false en B2C
+} = Astro.props;
 ---
 
 <nav class="adi-morphNav" aria-label="ADI quick menu">
   <div class="adi-morph" id="adiMorph">
+    <!-- PILL BUTTON -->
     <button
       class="adi-pillBtn"
       type="button"
@@ -11,214 +16,260 @@
       aria-expanded="false"
       aria-controls="adiMorphLinks"
     >
-      <span class="adi-pillText">Menu</span>
-      <span class="adi-pillIcon" aria-hidden="true">☰</span>
+      <span class="adi-centerLogo">
+        <img src="/ADI_mini.svg" alt="ADI" />
+      </span>
+
+      <!-- span class="adi-pillIcon" aria-hidden="true">☰</span -->
     </button>
 
+    <!-- EXPANDED CONTENT -->
     <div class="adi-links" id="adiMorphLinks">
-      <div class="adi-linksHead"></div>
-
       <div class="adi-linksRow">
-        <a class="btn btn-outline-light btn-sm" href="#catalogo">Catálogo</a>
-        <a class="btn btn-outline-light btn-sm" href="#precios">Precios</a>
-        <a class="btn btn-outline-light btn-sm" href="#trabajos">Trabajos</a>
-        <a class="btn btn-primary btn-sm" href="#cotizar">Cotizar</a>
+        <!-- GLOBAL SWITCH -->
+        <a
+          class={`btn btn-sm ${mode === "b2c" ? "btn-primary" : "btn-outline-light"}`}
+          href="/catalogo"
+        >
+          Catálogo (B2C)
+        </a>
+
+        <a
+          class={`btn btn-sm ${mode === "b2b" ? "btn-primary" : "btn-outline-light"}`}
+          href="/b2b"
+        >
+          Mayoreo (B2B)
+        </a>
+
+        <!-- PAGE ANCHORS -->
+        {
+          showAnchors && (
+            <>
+              <span class="adi-sep" aria-hidden="true" />
+              <a class="btn btn-outline-light btn-sm" href="#catalogo">
+                Catálogo
+              </a>
+              <a class="btn btn-outline-light btn-sm" href="#precios">
+                Precios
+              </a>
+              <a class="btn btn-outline-light btn-sm" href="#trabajos">
+                Trabajos
+              </a>
+              <a class="btn btn-primary btn-sm" href="#cotizar">
+                Cotizar
+              </a>
+            </>
+          )
+        }
       </div>
     </div>
   </div>
 
-  <button class="adi-backdrop" type="button" aria-label="Close menu"></button>
+  <button class="adi-backdrop" type="button" aria-label="Cerrar menú"></button>
 
   <style>
-    .adi-morphNav{
+    .adi-morphNav {
       position: fixed;
       inset: 0;
       pointer-events: none;
       z-index: 1050;
     }
 
-    .adi-morph{
+    .adi-morph {
       pointer-events: auto;
       position: fixed;
       top: 18px;
       left: 50%;
       transform: translateX(-50%);
-
-      width: 110px;
+      width: 10rem;
       max-width: calc(100vw - 32px);
-      max-height: 44px;
-
+      max-height: 3.25rem;
       border-radius: 999px;
       overflow: hidden;
 
-      /* ✅ Always dark */
-      background: rgba(20,20,24,.88);
+      background: rgba(20, 20, 24, 0.88);
       color: #fff;
 
-      box-shadow: 0 12px 40px rgba(0,0,0,.18);
-      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.12);
 
       transition:
-        width .22s ease,
-        max-height .22s ease,
-        border-radius .22s ease,
-        background .22s ease,
-        box-shadow .22s ease,
-        border-color .22s ease;
-      will-change: width, max-height, border-radius, background;
+        width 0.22s ease,
+        max-height 0.22s ease,
+        border-radius 0.22s ease,
+        background 0.22s ease,
+        box-shadow 0.22s ease,
+        border-color 0.22s ease;
+      will-change: width, max-height;
       z-index: 1052;
     }
 
-    .adi-pillBtn{
+    .adi-pillBtn {
       width: 100%;
-      height: 44px;
+      height: 10rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: .45rem;
-
+      gap: 0.45rem;
       background: transparent;
       border: 0;
       color: inherit;
       cursor: pointer;
-
       font-weight: 800;
-      letter-spacing: .02em;
+      letter-spacing: 0.02em;
     }
 
-    .adi-pillText{ font-size: 14px; }
-
-    .adi-pillIcon{
+    .adi-pillText {
       font-size: 14px;
-      opacity: .9;
-      transition: opacity .18s ease, transform .18s ease;
     }
 
-    /* Expanded content area (also dark) */
-    .adi-links{
+    .adi-pillIcon {
+      font-size: 14px;
+      opacity: 0.9;
+      transition:
+        opacity 0.18s ease,
+        transform 0.18s ease;
+    }
+
+    .adi-links {
       padding: 14px 16px 16px;
       opacity: 0;
       transform: translateY(-6px);
-      transition: opacity .18s ease, transform .18s ease;
+      transition:
+        opacity 0.18s ease,
+        transform 0.18s ease;
       pointer-events: none;
 
-      background: rgba(20,20,24,.92);
+      background: rgba(20, 20, 24, 0.95);
       color: #fff;
-      border-top: 1px solid rgba(255,255,255,.10);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    .adi-linksHead{
+    .adi-linksHead {
       display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 10px;
+      justify-content: center;
+      margin-bottom: 12px;
     }
 
-    .adi-linksRow{
+    .adi-home-link img {
+      opacity: 0.8;
+      transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+    }
+
+    .adi-home-link:hover img {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+
+    .adi-linksRow {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
       align-items: center;
-
-      /* ✅ center buttons */
       justify-content: center;
     }
 
-    /* Make outline buttons match dark bg */
-    .adi-links .btn-outline-light{
-      border-color: rgba(255,255,255,.22);
-      color: rgba(255,255,255,.92);
-      background: rgba(255,255,255,.04);
+    .adi-sep {
+      width: 1px;
+      height: 18px;
+      background: rgba(255, 255, 255, 0.14);
+      margin: 0 4px;
     }
 
-    .adi-links .btn-outline-light:hover{
-      border-color: rgba(180,108,255,.55);
-      background: rgba(180,108,255,.14);
+    .adi-links .btn-outline-light {
+      border-color: rgba(255, 255, 255, 0.22);
+      color: rgba(255, 255, 255, 0.92);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .adi-links .btn-outline-light:hover {
+      border-color: rgba(180, 108, 255, 0.55);
+      background: rgba(180, 108, 255, 0.14);
       color: #fff;
     }
 
-    /* ===== Expanded state ===== */
-    .adi-morphNav.is-open .adi-morph{
+    .adi-morphNav.is-open .adi-morph {
       width: min(920px, calc(100vw - 32px));
-      max-height: 220px;
+      max-height: 240px;
       border-radius: 18px;
-
-      /* ✅ Stay dark like the pill */
-      background: rgba(20,20,24,.95);
-      color: #fff;
-      border-color: rgba(255,255,255,.14);
-      box-shadow: 0 30px 80px rgba(0,0,0,.35);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
     }
 
-    .adi-morphNav.is-open .adi-links{
+    .adi-morphNav.is-open .adi-links {
       opacity: 1;
       transform: translateY(0);
       pointer-events: auto;
     }
 
-    .adi-morphNav.is-open .adi-pillBtn{
+    .adi-morphNav.is-open .adi-pillBtn {
       justify-content: space-between;
       padding: 0 16px;
-      color: #fff;
     }
 
-    /* ✅ ONLY DESKTOP: hide hamburger when expanded/hover-expanded */
-    @media (min-width: 768px){
-      .adi-morphNav.is-open .adi-pillIcon,
-      .adi-morphNav:not(.is-pinned):hover .adi-pillIcon{
-        opacity: 0;
-        transform: scale(.8);
-        pointer-events: none;
-      }
-    }
-
-    /* Desktop hover expands (only if not pinned) */
-    @media (min-width: 768px){
-      .adi-morphNav:not(.is-pinned):hover .adi-morph{
-        width: min(920px, calc(100vw - 32px));
-        max-height: 220px;
-        border-radius: 18px;
-
-        /* ✅ Stay dark */
-        background: rgba(20,20,24,.95);
-        color: #fff;
-        border-color: rgba(255,255,255,.14);
-        box-shadow: 0 30px 80px rgba(0,0,0,.35);
-      }
-
-      .adi-morphNav:not(.is-pinned):hover .adi-links{
-        opacity: 1;
-        transform: translateY(0);
-        pointer-events: auto;
-      }
-
-      .adi-morphNav:not(.is-pinned):hover .adi-pillBtn{
-        justify-content: space-between;
-        padding: 0 16px;
-        color: #fff;
-      }
-    }
-
-    /* Backdrop only when pinned/open (desktop) */
-    .adi-backdrop{
+    .adi-backdrop {
       position: fixed;
       inset: 0;
       border: 0;
-      background: rgba(0,0,0,.22);
+      background: rgba(0, 0, 0, 0.22);
       backdrop-filter: blur(6px);
       opacity: 0;
       pointer-events: none;
       z-index: 1051;
     }
 
-    .adi-morphNav.is-open.is-pinned .adi-backdrop{
+    .adi-morphNav.is-open.is-pinned .adi-backdrop {
       opacity: 1;
       pointer-events: auto;
     }
 
-    @media (prefers-reduced-motion: reduce){
-      .adi-morph, .adi-links, .adi-pillIcon{ transition: none !important; }
+    @media (prefers-reduced-motion: reduce) {
+      .adi-morph,
+      .adi-links,
+      .adi-pillIcon {
+        transition: none !important;
+      }
+    }
+
+    .adi-pillBtn {
+      position: relative;
+      width: 100%;
+      height: 44px;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    /* Logo centrado absoluto */
+    .adi-centerLogo {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .adi-centerLogo img {
+      height: 2rem;
+      width: auto;
+      opacity: 0.9;
+      transition: 0.2s ease;
+    }
+
+    .adi-centerLogo:hover img {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+
+    /* Icon menu a la derecha */
+    .adi-pillIcon {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      opacity: 0.8;
     }
   </style>
 
@@ -230,24 +281,18 @@
 
     const isDesktop = () => window.matchMedia("(min-width: 768px)").matches;
 
-    function setOpen(nextOpen, pinned=false){
+    function setOpen(nextOpen, pinned = false) {
       nav.classList.toggle("is-open", nextOpen);
       nav.classList.toggle("is-pinned", pinned && nextOpen);
       btn?.setAttribute("aria-expanded", String(nextOpen));
     }
 
-    // Click behavior:
-    // - Mobile: toggle open/close
-    // - Desktop: pin/unpin (hover works when not pinned)
     btn?.addEventListener("click", (e) => {
       e.preventDefault();
       const open = nav.classList.contains("is-open");
       const pinned = nav.classList.contains("is-pinned");
 
-      if (!isDesktop()) {
-        return setOpen(!open, false);
-      }
-
+      if (!isDesktop()) return setOpen(!open, false);
       if (!open) return setOpen(true, true);
       if (pinned) return setOpen(false, false);
       return setOpen(true, true);
@@ -259,7 +304,6 @@
       if (e.key === "Escape") setOpen(false, false);
     });
 
-    // Clicking a link closes if pinned (desktop) or open (mobile)
     morph?.addEventListener("click", (e) => {
       const a = e.target.closest("a");
       if (!a) return;
@@ -267,22 +311,17 @@
       if (nav.classList.contains("is-pinned")) setOpen(false, false);
     });
 
-    // aria syncing for hover open (desktop only)
-    nav?.addEventListener("mouseleave", () => {
-      if (!nav.classList.contains("is-pinned")) btn?.setAttribute("aria-expanded", "false");
-    });
-
-    nav?.addEventListener("mouseenter", () => {
-      if (!nav.classList.contains("is-pinned") && isDesktop()) {
-        btn?.setAttribute("aria-expanded", "true");
-      }
-    });
-
-    // If resizing from desktop->mobile while pinned, unpin
     window.addEventListener("resize", () => {
       if (!isDesktop() && nav.classList.contains("is-pinned")) {
         nav.classList.remove("is-pinned");
       }
+    });
+
+    const logo = document.querySelector(".adi-centerLogo");
+
+    logo?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      window.location.href = "/";
     });
   </script>
 </nav>

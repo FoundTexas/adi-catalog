@@ -1,0 +1,295 @@
+---
+const {
+  // pesos
+  min = 0,
+  max = 1500,      // ✅ 1500.00 pesos => 150000 cents
+  step = 10,
+
+  initialMin = 0,
+  initialMax = 1500,
+
+  // submit cents
+  minName = "minPriceCents",
+  maxName = "maxPriceCents",
+
+  // ids (so you can reuse component)
+  minId = "minPrice",
+  maxId = "maxPrice",
+} = Astro.props;
+
+const minLabelId = `${minId}Label`;
+const maxLabelId = `${maxId}Label`;
+const fillId = `${minId}-${maxId}-fill`;
+const minCentsId = `${minId}Cents`;
+const maxCentsId = `${maxId}Cents`;
+const wrapId = `${minId}-${maxId}-wrap`;
+const overlayId = `${minId}-${maxId}-overlay`;
+
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+let a0 = clamp(Number(initialMin) || 0, min, max);
+let b0 = clamp(Number(initialMax) || max, min, max);
+if (a0 > b0) [a0, b0] = [b0, a0];
+---
+
+<div class="col-12 col-md-4">
+  <label class="form-label d-flex justify-content-between align-items-center">
+    <span>Precio</span>
+    <span class="adi-soft small">
+      $<span id={minLabelId}>{a0.toFixed(2)}</span> —
+      $<span id={maxLabelId}>{b0.toFixed(2)}</span>
+    </span>
+  </label>
+
+  <div class="adi-rangeWrap" id={wrapId}>
+    <div class="adi-rangeTrack"></div>
+    <div class="adi-rangeFill" id={fillId}></div>
+
+    <!-- Inputs (full width) -->
+    <input
+      class="adi-range"
+      type="range"
+      id={minId}
+      min={min}
+      max={max}
+      step={step}
+      value={a0}
+      aria-label="Precio mínimo"
+    />
+
+    <input
+      class="adi-range"
+      type="range"
+      id={maxId}
+      min={min}
+      max={max}
+      step={step}
+      value={b0}
+      aria-label="Precio máximo"
+    />
+
+    <!-- Overlay that decides which thumb you meant -->
+    <div class="adi-rangeOverlay" id={overlayId} aria-hidden="true"></div>
+
+    <!-- Hidden cents -->
+    <input type="hidden" name={minName} id={minCentsId} value={String(Math.round(a0 * 100))} />
+    <input type="hidden" name={maxName} id={maxCentsId} value={String(Math.round(b0 * 100))} />
+  </div>
+</div>
+
+<style>
+  .adi-rangeWrap{
+    position: relative;
+    height: 34px;
+    display: flex;
+    align-items: center;
+  }
+
+  .adi-rangeTrack{
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(0,0,0,.15);
+    pointer-events: none;
+  }
+
+  .adi-rangeFill{
+    position: absolute;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(0,0,0,.8);
+    left: 0%;
+    right: 0%;
+    pointer-events: none;
+  }
+
+  .adi-range{
+    position: absolute;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 34px;
+    margin: 0;
+    background: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    /* keep enabled; we’ll toggle via JS when dragging */
+    pointer-events: auto;
+  }
+
+  .adi-range::-webkit-slider-runnable-track{ height: 6px; background: transparent; border: 0; }
+  .adi-range::-moz-range-track{ height: 6px; background: transparent; border: 0; }
+
+  .adi-range::-webkit-slider-thumb{
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    background: #111;
+    border: 2px solid #fff;
+    box-shadow: 0 6px 16px rgba(0,0,0,.25);
+    cursor: grab;
+  }
+  .adi-range:active::-webkit-slider-thumb{ cursor: grabbing; }
+
+  .adi-range::-moz-range-thumb{
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    background: #111;
+    border: 2px solid #fff;
+    box-shadow: 0 6px 16px rgba(0,0,0,.25);
+    cursor: grab;
+  }
+
+  /* overlay sits above track; captures pointer */
+  .adi-rangeOverlay{
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    cursor: pointer;
+    background: transparent;
+  }
+</style>
+
+<script
+  is:inline
+  define:vars={{
+    MIN_ID: minId,
+    MAX_ID: maxId,
+    WRAP_ID: wrapId,
+    OVERLAY_ID: overlayId,
+    MIN_LABEL_ID: minLabelId,
+    MAX_LABEL_ID: maxLabelId,
+    FILL_ID: fillId,
+    MIN_CENTS_ID: minCentsId,
+    MAX_CENTS_ID: maxCentsId,
+    MIN_VAL: min,
+    MAX_VAL: max,
+    STEP_VAL: step,
+  }}
+>
+  (() => {
+    const wrap = document.getElementById(WRAP_ID);
+    const overlay = document.getElementById(OVERLAY_ID);
+    const minEl = document.getElementById(MIN_ID);
+    const maxEl = document.getElementById(MAX_ID);
+
+    const minLabel = document.getElementById(MIN_LABEL_ID);
+    const maxLabel = document.getElementById(MAX_LABEL_ID);
+    const fill = document.getElementById(FILL_ID);
+    const minCents = document.getElementById(MIN_CENTS_ID);
+    const maxCents = document.getElementById(MAX_CENTS_ID);
+
+    const MIN = Number(MIN_VAL);
+    const MAX = Number(MAX_VAL);
+    const STEP = Number(STEP_VAL) || 1;
+
+    if (!wrap || !overlay || !minEl || !maxEl || !minLabel || !maxLabel || !fill || !minCents || !maxCents) return;
+
+    // turn a pointer X into a value (snapped to step)
+    function xToValue(clientX){
+      const r = wrap.getBoundingClientRect();
+      const t = Math.min(1, Math.max(0, (clientX - r.left) / r.width));
+      const raw = MIN + t * (MAX - MIN);
+      const snapped = Math.round(raw / STEP) * STEP;
+      return Math.min(MAX, Math.max(MIN, snapped));
+    }
+
+    function sync(active){
+      let a = Number(minEl.value || 0);
+      let b = Number(maxEl.value || 0);
+
+      a = Math.min(MAX, Math.max(MIN, a));
+      b = Math.min(MAX, Math.max(MIN, b));
+
+      if (a > b) {
+        if (active === "min") { b = a; maxEl.value = String(b); }
+        else { a = b; minEl.value = String(a); }
+      }
+
+      minLabel.textContent = a.toFixed(2);
+      maxLabel.textContent = b.toFixed(2);
+
+      minCents.value = String(Math.round(a * 100));
+      maxCents.value = String(Math.round(b * 100));
+
+      const aPct = (a / MAX) * 100;
+      const bPct = (b / MAX) * 100;
+      fill.style.left = aPct + "%";
+      fill.style.right = (100 - bPct) + "%";
+    }
+
+    function setDragging(which){
+      // enable only the chosen one for consistent dragging
+      if (which === "min") {
+        minEl.style.pointerEvents = "auto";
+        maxEl.style.pointerEvents = "none";
+        minEl.style.zIndex = "9";
+        maxEl.style.zIndex = "8";
+      } else {
+        maxEl.style.pointerEvents = "auto";
+        minEl.style.pointerEvents = "none";
+        maxEl.style.zIndex = "9";
+        minEl.style.zIndex = "8";
+      }
+    }
+
+    function clearDragging(){
+      minEl.style.pointerEvents = "auto";
+      maxEl.style.pointerEvents = "auto";
+      minEl.style.zIndex = "";
+      maxEl.style.zIndex = "";
+    }
+
+    function nearestThumb(clientX){
+      const r = wrap.getBoundingClientRect();
+      const px = Math.min(r.width, Math.max(0, clientX - r.left));
+      const a = Number(minEl.value || 0);
+      const b = Number(maxEl.value || 0);
+      const aPx = ((a - MIN) / (MAX - MIN)) * r.width;
+      const bPx = ((b - MIN) / (MAX - MIN)) * r.width;
+      return Math.abs(px - aPx) <= Math.abs(px - bPx) ? "min" : "max";
+    }
+
+    // overlay handles initial click/drag intent
+    overlay.addEventListener("pointerdown", (e) => {
+      overlay.setPointerCapture(e.pointerId);
+
+      const which = nearestThumb(e.clientX);
+      setDragging(which);
+
+      const v = xToValue(e.clientX);
+      if (which === "min") minEl.value = String(v);
+      else maxEl.value = String(v);
+
+      sync(which);
+      (which === "min" ? minEl : maxEl).focus();
+    });
+
+    overlay.addEventListener("pointermove", (e) => {
+      // during drag, update active thumb (the one that is enabled)
+      const minActive = maxEl.style.pointerEvents === "none";
+      const which = minActive ? "min" : "max";
+
+      const v = xToValue(e.clientX);
+      if (which === "min") minEl.value = String(v);
+      else maxEl.value = String(v);
+
+      sync(which);
+    });
+
+    overlay.addEventListener("pointerup", () => {
+      clearDragging();
+    });
+
+    // keyboard still works directly on inputs
+    minEl.addEventListener("input", () => sync("min"));
+    maxEl.addEventListener("input", () => sync("max"));
+
+    // init
+    sync("min");
+  })();
+</script>
