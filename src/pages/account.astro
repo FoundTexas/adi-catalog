@@ -4,22 +4,22 @@ export const prerender = false;
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const API_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
+const isProd = import.meta.env.PROD;
 
-// Lee token desde header cookie (SSR)
+const nextPath = "/account";
+
+// SSR cookie header (más confiable que Astro.cookies en algunos setups SSR)
 const cookieHeader = Astro.request.headers.get("cookie") ?? "";
 const tokenMatch = cookieHeader.match(/(?:^|;\s*)adi_token=([^;]+)/);
 const token = tokenMatch ? decodeURIComponent(tokenMatch[1]) : null;
 
-const user =
-  (Astro.locals.user as { id: number; email?: string; role?: string } | null) ?? null;
-
 let orders: any[] = [];
 let ordersError = "";
 
-// base64url -> json (SSR-safe)
-function decodeJwtPayloadSSR(token: string): any | null {
+// ---------- JWT helpers (SSR-safe) ----------
+function decodeJwtPayloadSSR(jwt: string): any | null {
   try {
-    const parts = token.split(".");
+    const parts = jwt.split(".");
     if (parts.length < 2) return null;
 
     const payloadB64Url = parts[1];
@@ -37,29 +37,82 @@ function decodeJwtPayloadSSR(token: string): any | null {
   }
 }
 
-let payload: any | null = null;
+function isTokenExpired(payload: any): boolean {
+  const exp = payload?.exp;
+  if (!exp) return false; // si no hay exp, no lo marcamos como expirado
+  const nowSec = Math.floor(Date.now() / 1000);
+  return Number(exp) <= nowSec;
+}
 
-if (token) {
-  payload = decodeJwtPayloadSSR(token);
+function extractRole(payload: any): "admin" | "user" {
+  const raw =
+    payload?.role ??
+    payload?.user?.role ??
+    payload?.roles?.[0] ??
+    payload?.user?.roles?.[0] ??
+    null;
 
-  console.log(payload);
-  try {
-    const res = await fetch(`${API_URL}/orders/me`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
-    });
+  if (!raw) return "user";
+  const s = String(raw).toLowerCase();
+  return s.includes("admin") ? "admin" : "user";
+}
 
-    if (res.ok) {
-      const data = await res.json();
-      orders = Array.isArray(data) ? data : [];
-    } else {
-      ordersError = `No se pudieron cargar pedidos (${res.status})`;
-    }
-  } catch {
-    ordersError = "No se pudieron cargar pedidos (error de red)";
+function extractEmail(payload: any): string | null {
+  const raw =
+    payload?.email ??
+    payload?.user?.email ??
+    payload?.username ??
+    payload?.sub ??
+    null;
+  return raw ? String(raw) : null;
+}
+
+function logoutAndRedirect() {
+  // borra cookies (path / para cubrir todo el sitio)
+  Astro.cookies.delete("adi_token", { path: "/", secure: isProd, sameSite: "lax" });
+
+  // cleanup por compatibilidad si existía antes
+  Astro.cookies.delete("adi_user", { path: "/", secure: isProd, sameSite: "lax" });
+
+  return Astro.redirect(`/login?next=${encodeURIComponent(nextPath)}`);
+}
+
+// ---------- Validate session ----------
+if (!token) {
+  return logoutAndRedirect();
+}
+
+const payload = decodeJwtPayloadSSR(token);
+if (!payload) {
+  return logoutAndRedirect();
+}
+
+if (isTokenExpired(payload)) {
+  return logoutAndRedirect();
+}
+
+const role = extractRole(payload);
+const email = extractEmail(payload) ?? "—";
+
+// ---------- Load orders ----------
+try {
+  const res = await fetch(`${API_URL}/orders/me`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+
+  if (res.ok) {
+    const data = await res.json();
+    orders = Array.isArray(data) ? data : [];
+  } else {
+    // si es 401/403 probablemente token inválido en API → logout
+    if (res.status === 401 || res.status === 403) return logoutAndRedirect();
+    ordersError = `No se pudieron cargar pedidos (${res.status})`;
   }
+} catch {
+  ordersError = "No se pudieron cargar pedidos (error de red)";
 }
 ---
 
@@ -71,17 +124,16 @@ if (token) {
           <div class="adi-soft small">Cuenta</div>
           <h1 class="fw-bold mb-1">Mi cuenta</h1>
           <div class="adi-soft">
-            {user?.email ?? "—"} · rol:{" "}
-            <span class="fw-semibold">{user?.role ?? "unknown"}</span>
+            {email} · rol: <span class="fw-semibold">{role}</span>
           </div>
 
-          <!-- opcional: muestra un hint mínimo en UI (sin exponer token) -->
-          {payload && (
-            <div class="adi-soft small mt-1">
-              jwt: {payload?.email ?? payload?.user?.email ?? "no-email"} · rawRole:{" "}
-              {String(payload?.role ?? payload?.user?.role ?? payload?.roles?.[0] ?? payload?.user?.roles?.[0] ?? "none")}
-            </div>
-          )}
+          {/*
+          // Debug opcional (quítalo en prod):
+          <div class="adi-soft small mt-1">
+            sub: {String(payload?.sub ?? "—")} · rawRole:{" "}
+            {String(payload?.role ?? payload?.roles?.[0] ?? payload?.user?.role ?? payload?.user?.roles?.[0] ?? "—")}
+          </div>
+          */}
         </div>
 
         <form method="post" action="/logout" class="m-0">
@@ -92,7 +144,7 @@ if (token) {
       <div class="adi-card p-3 p-md-4 mb-3">
         <div class="d-flex gap-2 flex-wrap">
           <a class="btn btn-dark" href="/catalogo">Ir al catálogo</a>
-          {payload?.role === "admin" && (
+          {role === "admin" && (
             <a class="btn btn-primary" href="/admin/bulk">Admin · Bulk Upload</a>
           )}
         </div>

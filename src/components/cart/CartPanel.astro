@@ -1,0 +1,430 @@
+---
+// src/components/CartPanelCart.astro
+const { catalogHref = "/catalogo", checkoutHref = "/checkout" } = Astro.props;
+
+const API_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
+---
+
+<div class="adi-card p-3 adi-cartCard" data-adi-cart>
+  <div class="adi-cartHeader">
+    <div class="fw-semibold">Carrito</div>
+    <button class="btn btn-sm btn-outline-light" type="button" data-adi-clear style="display:none;">
+      Vaciar
+    </button>
+  </div>
+
+  <!-- Empty (no scroll) -->
+  <div data-adi-empty class="text-center adi-soft adi-cartEmpty">
+    <div class="mt-2">Tu carrito está vacío.</div>
+    <div class="mt-3">
+      <a class="btn btn-dark w-100" href={catalogHref}>Ir al catálogo</a>
+    </div>
+  </div>
+
+  <!-- Items (scroll lives HERE) -->
+  <div data-adi-items class="adi-cartItems" style="display:none;"></div>
+
+  <div class="adi-cartFooter">
+    <a
+      class="btn btn-outline-dark w-100 disabled"
+      data-adi-checkout
+      href={checkoutHref}
+      aria-disabled="true"
+    >
+      Checkout
+    </a>
+  </div>
+</div>
+
+<style>
+  .adi-cartCard{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    min-height:0;
+  }
+
+  .adi-cartHeader{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+
+  .adi-cartEmpty{ overflow:hidden; }
+
+  .adi-cartItems{
+    display:grid;
+    gap:10px;
+    overflow:auto;
+    min-height:0;
+    max-height: 52vh;
+    padding-right:6px;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .adi-cartFooter{ margin-top:auto; }
+
+  /* item card */
+  .adi-cartItem{
+    border-radius:16px;
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(255,255,255,.10);
+    padding:12px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  /* top row: thumb + text */
+  .adi-cartTop{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    min-width:0;
+  }
+
+  .adi-cartThumb{
+    flex: 0 0 84px;      /* ✅ hard width */
+    width: 84px;
+    border-radius:14px;
+    overflow:hidden;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(0,0,0,.16);
+  }
+
+  /* ratio must fill the thumb */
+  .adi-cartThumb .ratio{
+    width:100%;
+  }
+
+  /* allow absolute remove button inside */
+  .adi-cartImgBox{
+    position:relative;
+    border-radius:14px;
+    overflow:hidden;
+  }
+
+  .adi-cartRemove{
+    position:absolute;
+    top:6px;
+    left:6px;
+    z-index:2;
+    padding:2px 6px;
+    line-height:1;
+    background:rgba(255,255,255,.92);
+    backdrop-filter: blur(4px);
+  }
+
+  /* ensure image behaves */
+  .adi-cartImgBox img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+
+  .adi-cartText{ min-width:0; }
+  .adi-cartTitle{
+    font-weight:650;
+    line-height:1.2;
+    margin-bottom:3px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .adi-cartUnitPrice{
+    font-size:12px;
+    opacity:.85;
+  }
+
+  /* bottom row: qty + total */
+  .adi-cartBottom{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+
+  .adi-cartQty{
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+
+  .adi-cartQty .btn{
+    padding: 4px 8px;
+    line-height:1;
+  }
+
+  .adi-qtyPill{
+    min-width: 30px;
+    height: 26px;
+    padding: 0 9px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:999px;
+    border: 1px solid rgba(255,255,255,.16);
+    background: rgba(255,255,255,.06);
+    font-size:12px;
+    font-weight:750;
+    user-select:none;
+  }
+
+  .adi-lineTotal{
+    font-size:12px;
+    font-weight:800;
+    white-space:nowrap;
+    opacity:.95;
+  }
+
+  .adi-cartDelete{
+  position:absolute;
+  top:8px;
+  right:8px;
+
+  cursor:pointer;
+
+  width:22px;
+  height:22px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:12px;
+  line-height:1;
+}
+
+  @media (max-width: 420px){
+    .adi-cartThumb{ flex-basis:76px; width:76px; }
+    .adi-cartItems{ max-height: 56vh; }
+  }
+</style>
+
+<script is:inline define:vars={{ API_URL }}>
+  const CART_KEY = "adi_cart_v1";
+
+  function readCart(){
+    try{
+      const raw = localStorage.getItem(CART_KEY);
+      const data = raw ? JSON.parse(raw) : null;
+      return Array.isArray(data) ? data : [];
+    }catch{ return []; }
+  }
+
+  function writeCart(items){
+    localStorage.setItem(CART_KEY, JSON.stringify(items));
+    window.dispatchEvent(new Event("adi:cart-changed"));
+  }
+
+  function cartCount(items){
+    return items.reduce((sum, it) => sum + (Number(it.qty) || 0), 0);
+  }
+
+  function money(cents, currency="MXN"){
+    const n = Number(cents) || 0;
+    return `$${(n / 100).toFixed(2)} ${currency}`;
+  }
+
+  function escapeHtml(s){
+    return String(s)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+  function escapeAttr(s){
+    return escapeHtml(String(s)).replaceAll("`","&#096;");
+  }
+
+  function resolveImageUrl(url){
+    if(!url) return null;
+    const s = String(url).trim();
+    if(!s) return null;
+
+    if(/^https?:\/\//i.test(s)) return s;
+    if(s.startsWith("//")) return window.location.protocol + s;
+
+    const api = String(API_URL).replace(/\/$/,"");
+    if(s.startsWith("/")) return api + s;
+
+    return api + "/" + s.replace(/^\//,"");
+  }
+
+  function upsertItem(nextItem){
+    const items = readCart();
+    const key = String(nextItem.id ?? nextItem.sku ?? nextItem.name ?? "");
+    if(!key) return;
+
+    const idx = items.findIndex(x => String(x.id ?? x.sku ?? x.name ?? "") === key);
+    const normalizedImageUrl = resolveImageUrl(nextItem.imageUrl);
+
+    if(idx === -1){
+      items.push({
+        id: nextItem.id ?? null,
+        sku: nextItem.sku ?? null,
+        name: String(nextItem.name ?? "Producto"),
+        priceCents: Number(nextItem.priceCents ?? 0),
+        currency: String(nextItem.currency ?? "MXN"),
+        imageUrl: normalizedImageUrl,
+        qty: Math.max(1, Number(nextItem.qty ?? 1)),
+        variant: nextItem.variant ?? null,
+      });
+    }else{
+      if(!items[idx].imageUrl && normalizedImageUrl) items[idx].imageUrl = normalizedImageUrl;
+      items[idx].qty = Math.max(1, (Number(items[idx].qty) || 0) + Math.max(1, Number(nextItem.qty ?? 1)));
+    }
+
+    writeCart(items);
+  }
+
+  window.ADI_CART = {
+    add(item){ upsertItem(item); },
+    clear(){ writeCart([]); },
+    get(){ return readCart(); },
+  };
+
+  function renderCart(root){
+    const items = readCart();
+
+    const empty = root.querySelector("[data-adi-empty]");
+    const list = root.querySelector("[data-adi-items]");
+    const clearBtn = root.querySelector("[data-adi-clear]");
+    const checkoutBtn = root.querySelector("[data-adi-checkout]");
+    const badge = document.getElementById("adiFabCount");
+
+    const count = cartCount(items);
+    if(badge){
+      if(count > 0){ badge.textContent = String(count); badge.style.display = ""; }
+      else badge.style.display = "none";
+    }
+
+    if(items.length === 0){
+      empty.style.display = "";
+      list.style.display = "none";
+      clearBtn.style.display = "none";
+      checkoutBtn.classList.add("disabled");
+      checkoutBtn.setAttribute("aria-disabled","true");
+      return;
+    }
+
+    empty.style.display = "none";
+    list.style.display = "grid";
+    clearBtn.style.display = "";
+
+    checkoutBtn.classList.remove("disabled");
+    checkoutBtn.removeAttribute("aria-disabled");
+
+    list.innerHTML = items.map((it, idx) => {
+      const title = escapeHtml(it.name ?? "Producto");
+      const qty = Math.max(1, Number(it.qty) || 1);
+      const priceCents = Number(it.priceCents) || 0;
+      const lineTotal = priceCents * qty;
+
+      const imgUrl = resolveImageUrl(it.imageUrl);
+
+      const imgBlock = imgUrl
+        ? `<img src="${escapeAttr(imgUrl)}" alt="" loading="lazy" />`
+        : `<div class="d-flex align-items-center justify-content-center adi-soft" style="width:100%;height:100%;">Sin imagen</div>`;
+
+      return `
+<div class="adi-cartItem position-relative">
+
+  <span
+    class="adi-fabBadge adi-cartDelete"
+    data-rm="${idx}"
+    role="button"
+    aria-label="Eliminar producto"
+  >
+    ×
+  </span>
+
+  <div class="adi-cartTop">
+
+    <div class="adi-cartThumb">
+      <div class="ratio ratio-1x1 bg-light">
+        ${imgBlock}
+      </div>
+    </div>
+
+    <div class="adi-cartText">
+      <div class="adi-cartTitle">${title}</div>
+      <div class="adi-cartUnitPrice">
+        Precio: ${money(priceCents, it.currency)}
+      </div>
+    </div>
+
+  </div>
+
+  <div class="adi-cartBottom gap-2">
+
+    <div class="adi-cartQty gap-2">
+      <button class="btn btn-sm btn-outline-light" data-dec="${idx}">−</button>
+
+      <span class="adi-qtyPill">${qty}</span>
+
+      <button class="btn btn-sm btn-outline-light" data-inc="${idx}">+</button>
+    </div>
+
+    <div class="adi-lineTotal">
+      Total: ${money(lineTotal, it.currency)}
+    </div>
+
+  </div>
+
+</div>
+      `;
+    }).join("");
+
+    list.querySelectorAll("[data-inc]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const i = Number(btn.getAttribute("data-inc"));
+        const items = readCart();
+        if(!items[i]) return;
+        items[i].qty = Math.max(1, (Number(items[i].qty) || 0) + 1);
+        writeCart(items);
+      });
+    });
+
+    list.querySelectorAll("[data-dec]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const i = Number(btn.getAttribute("data-dec"));
+        const items = readCart();
+        if(!items[i]) return;
+        const q = (Number(items[i].qty) || 0) - 1;
+        if(q <= 0) items.splice(i, 1);
+        else items[i].qty = q;
+        writeCart(items);
+      });
+    });
+
+    list.querySelectorAll("[data-rm]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const i = Number(btn.getAttribute("data-rm"));
+        const items = readCart();
+        if(!items[i]) return;
+        items.splice(i, 1);
+        writeCart(items);
+      });
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const root = document.querySelector("[data-adi-cart]");
+    if(!root) return;
+
+    renderCart(root);
+
+    root.querySelector("[data-adi-clear]")?.addEventListener("click", () => writeCart([]));
+
+    window.addEventListener("adi:cart-changed", () => renderCart(root));
+    window.addEventListener("storage", (e) => {
+      if(e.key === CART_KEY) renderCart(root);
+    });
+  });
+</script>

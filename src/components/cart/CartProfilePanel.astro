@@ -1,0 +1,70 @@
+---
+const {
+  loginHref = "/login",
+  logoutHref = "/logout",
+  ordersHref = "/account",
+  bulkHref = "/admin/bulk",
+} = Astro.props;
+---
+
+<div class="adi-card p-3 mb-3" data-adi-profile>
+  <div class="d-flex align-items-start justify-content-between gap-3">
+    <div>
+      <div class="fw-semibold">Perfil</div>
+      <div class="adi-soft small" data-adi-profile-line>Cargando sesión…</div>
+    </div>
+    <span class="badge text-bg-light border" data-adi-role style="display:none;">user</span>
+  </div>
+
+  <div class="d-grid gap-2 mt-3">
+    <a class="btn btn-primary" href={loginHref} data-adi-login style="display:none;">Iniciar sesión</a>
+    <a class="btn btn-outline-light" href={ordersHref} data-adi-orders style="display:none;">Mis pedidos</a>
+  </div>
+</div>
+
+<script is:inline>
+  async function loadSession() {
+    try {
+      const res = await fetch("/api/session.json", { headers: { Accept: "application/json" } });
+      if (!res.ok) return { authenticated: false };
+      return await res.json();
+    } catch {
+      return { authenticated: false };
+    }
+  }
+
+  function setLoggedOutUI(root) {
+    root.querySelector("[data-adi-profile-line]").textContent = "No has iniciado sesión";
+    root.querySelector("[data-adi-role]").style.display = "none";
+
+    root.querySelector("[data-adi-login]").style.display = "";
+    root.querySelector("[data-adi-orders]").style.display = "none";
+    root.querySelector("[data-adi-bulk]").style.display = "none";
+    root.querySelector("[data-adi-logout]").style.display = "none";
+  }
+
+  function setLoggedInUI(root, sess) {
+    const email = sess?.email || "Sesión activa";
+    const role = sess?.role || "user";
+
+    root.querySelector("[data-adi-profile-line]").textContent = email;
+
+    const badge = root.querySelector("[data-adi-role]");
+    badge.textContent = role;
+    badge.style.display = "";
+
+    root.querySelector("[data-adi-login]").style.display = "none";
+    root.querySelector("[data-adi-orders]").style.display = "";
+    root.querySelector("[data-adi-logout]").style.display = "";
+    root.querySelector("[data-adi-bulk]").style.display = role === "admin" ? "" : "none";
+  }
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    const root = document.querySelector("[data-adi-profile]");
+    if (!root) return;
+
+    const sess = await loadSession();
+    if (!sess?.authenticated) return setLoggedOutUI(root);
+    setLoggedInUI(root, sess);
+  });
+</script>

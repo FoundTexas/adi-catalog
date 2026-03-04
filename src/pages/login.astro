@@ -7,48 +7,11 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 const API_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
 const isProd = import.meta.env.PROD;
 
-// where to go after login
 const nextUrlRaw = Astro.url.searchParams.get("next") ?? "/account";
-
-// evita open-redirects: solo rutas internas
 const nextUrl =
-  nextUrlRaw.startsWith("/") && !nextUrlRaw.startsWith("//")
-    ? nextUrlRaw
-    : "/account";
+  nextUrlRaw.startsWith("/") && !nextUrlRaw.startsWith("//") ? nextUrlRaw : "/account";
 
 let error = "";
-
-// base64url -> json (SSR-safe)
-function decodeJwtPayloadSSR(token: string): any | null {
-  try {
-    const parts = token.split(".");
-    if (parts.length < 2) return null;
-
-    const payloadB64Url = parts[1];
-    const pad = "=".repeat((4 - (payloadB64Url.length % 4)) % 4);
-    const b64 = (payloadB64Url + pad).replace(/-/g, "+").replace(/_/g, "/");
-
-    // atob exists in Astro runtime; fallback to Buffer
-    const json =
-      typeof atob === "function"
-        ? atob(b64)
-        : Buffer.from(b64, "base64").toString("utf8");
-
-    return JSON.parse(json);
-  } catch {
-    return null;
-  }
-}
-
-// helper: try multiple common JWT shapes
-function extractRole(payload: any): string {
-  return (
-    payload?.role ||
-    payload?.user?.role ||
-    payload?.roles?.[0] ||
-    "user"
-  );
-}
 
 if (Astro.request.method === "POST") {
   const form = await Astro.request.formData();
@@ -74,37 +37,16 @@ if (Astro.request.method === "POST") {
       if (!token) {
         error = "Login failed: missing accessToken";
       } else {
-        const payload = decodeJwtPayloadSSR(token);
-        const role = extractRole(payload);
-
-        // ✅ token cookie (server only)
         Astro.cookies.set("adi_token", token, {
           httpOnly: true,
           sameSite: "lax",
-          secure: isProd, // localhost => false
-          path: "/",      // 🔥 crucial para /admin/*
-          maxAge: 60 * 60 * 24 * 7,
-        });
-
-        // ✅ UI cookie (client-readable)
-        const safeUser = {
-          email: payload?.email ?? payload?.user?.email ?? email,
-          role,
-        };
-
-        // base64 (browser) with safe fallbacks
-        const adiUser =
-          typeof btoa === "function"
-            ? btoa(JSON.stringify(safeUser))
-            : Buffer.from(JSON.stringify(safeUser), "utf8").toString("base64");
-
-        Astro.cookies.set("adi_user", adiUser, {
-          httpOnly: false,
-          sameSite: "lax",
           secure: isProd,
-          path: "/",      // 🔥 crucial para que se vea en todo el sitio
+          path: "/",
           maxAge: 60 * 60 * 24 * 7,
         });
+
+        // ✅ ya NO usamos adi_user
+        Astro.cookies.delete("adi_user", { path: "/", secure: isProd, sameSite: "lax" });
 
         return Astro.redirect(nextUrl);
       }
@@ -123,44 +65,22 @@ if (Astro.request.method === "POST") {
           <div class="adi-soft">Accede a tu cuenta y pedidos.</div>
         </div>
 
-        {error && (
-          <div class="alert alert-danger mb-3" role="alert">
-            {error}
-          </div>
-        )}
+        {error && <div class="alert alert-danger mb-3" role="alert">{error}</div>}
 
         <form method="post" class="d-grid gap-3">
           <div>
             <label class="form-label">Email</label>
-            <input
-              class="form-control"
-              name="email"
-              type="email"
-              required
-              autocomplete="email"
-              placeholder="admin@admin.com"
-            />
+            <input class="form-control" name="email" type="email" required autocomplete="email" />
           </div>
 
           <div>
             <label class="form-label">Password</label>
-            <input
-              class="form-control"
-              name="password"
-              type="password"
-              required
-              autocomplete="current-password"
-              placeholder="••••••••"
-            />
+            <input class="form-control" name="password" type="password" required autocomplete="current-password" />
           </div>
 
-          <button class="btn btn-primary w-100" type="submit">
-            Entrar
-          </button>
+          <button class="btn btn-primary w-100" type="submit">Entrar</button>
 
-          <a class="btn btn-outline-light w-100" href="/catalogo">
-            Volver al catálogo
-          </a>
+          <a class="btn btn-outline-light w-100" href="/catalogo">Volver al catálogo</a>
         </form>
       </div>
 

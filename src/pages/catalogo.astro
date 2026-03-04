@@ -6,35 +6,31 @@ import PriceRange from "../components/PriceRange.astro";
 
 const API_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
 
-// ✅ IMPORTANT: Astro.url preserves query params reliably in SSR/dev
 const u = Astro.url;
 
-// Read URL params (reflect URL in UI)
+// Read URL params
 const q = u.searchParams.get("q") ?? "";
 const sort = u.searchParams.get("sort") ?? "id";
 const order = u.searchParams.get("order") ?? "desc";
 const page = u.searchParams.get("page") ?? "1";
 const limit = u.searchParams.get("limit") ?? "24";
 
-// cents from URL (IMPORTANT: 0 is valid => use has())
+// cents from URL (0 is valid)
 const minCents = u.searchParams.has("minPriceCents")
   ? (u.searchParams.get("minPriceCents") ?? "0")
   : "0";
 
 const maxCents = u.searchParams.has("maxPriceCents")
   ? (u.searchParams.get("maxPriceCents") ?? "130000")
-: "130000";
+  : "130000";
 
 // Convert cents -> pesos for UI
 const minPrice = Number(minCents) / 100;
 const maxPrice = Number(maxCents) / 100;
 
-// Build API query towards Nest API
+// Build API query
 const apiParams = new URLSearchParams();
-
-// Include q only if it exists in URL OR user typed something
 if (u.searchParams.has("q") || q.trim()) apiParams.set("q", q.trim());
-
 apiParams.set("minPriceCents", minCents);
 apiParams.set("maxPriceCents", maxCents);
 apiParams.set("sort", sort);
@@ -44,7 +40,7 @@ apiParams.set("limit", limit);
 
 const apiUrl = `${API_URL}/products?${apiParams.toString()}`;
 
-const res = await fetch(apiUrl);
+const res = await fetch(apiUrl, { headers: { Accept: "application/json" } });
 if (!res.ok) throw new Error(`API error ${res.status}`);
 
 const data = await res.json();
@@ -53,7 +49,12 @@ const data = await res.json();
 const items = Array.isArray(data) ? data : (data.items ?? []);
 const meta = Array.isArray(data)
   ? { total: items.length, page: Number(page), pages: 1, limit: Number(limit) }
-  : (data.meta ?? { total: 0, page: Number(page), pages: 1, limit: Number(limit) });
+  : (data.meta ?? {
+      total: 0,
+      page: Number(page),
+      pages: 1,
+      limit: Number(limit),
+    });
 
 function pageLink(nextPage: number) {
   const x = new URL(u.toString());
@@ -65,27 +66,35 @@ function formatMoneyFromCents(cents: number) {
   return `$${((Number(cents) || 0) / 100).toFixed(2)}`;
 }
 
-// Debug
-const debugSearch = u.search;
-const debugHasQ = u.searchParams.has("q");
-const debugQ = q;
+function firstImageUrl(p: any) {
+  if (!p?.images?.length) return "";
+  const url = String(p.images[0]?.url ?? "");
+  if (!url) return "";
+  return API_URL + url;
+}
 ---
 
 <BaseLayout title="ADI - Catálogo" menuMode="b2c" menuAnchors={false}>
   <section class="adi-section">
     <div class="container">
-      <div class="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-3">
+      <div
+        class="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-3"
+      >
         <div>
           <h1 class="fw-bold mb-1">Catálogo</h1>
           <div class="adi-soft">Compra por pieza o revisa el catálogo.</div>
         </div>
-
       </div>
 
       <form class="row g-2 align-items-end" method="get" id="filtersForm">
         <div class="col-12 col-md-4">
           <label class="form-label">Buscar</label>
-          <input class="form-control" name="q" value={q} placeholder="Playera, hoodie, SKU..." />
+          <input
+            class="form-control"
+            name="q"
+            value={q}
+            placeholder="Playera, hoodie, SKU..."
+          />
         </div>
 
         <PriceRange
@@ -102,7 +111,9 @@ const debugQ = q;
           <label class="form-label">Ordenar</label>
           <select class="form-select" name="sort">
             <option value="id" selected={sort === "id"}>Más nuevos</option>
-            <option value="priceCents" selected={sort === "priceCents"}>Precio</option>
+            <option value="priceCents" selected={sort === "priceCents"}
+              >Precio</option
+            >
             <option value="name" selected={sort === "name"}>Nombre</option>
           </select>
         </div>
@@ -119,60 +130,139 @@ const debugQ = q;
           <button class="btn btn-dark" type="submit">Ir</button>
         </div>
 
-        <!-- reset to first page when applying filters -->
         <input type="hidden" name="page" value="1" />
         <input type="hidden" name="limit" value={limit} />
       </form>
 
       <div class="adi-divider my-4"></div>
 
-      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div
+        class="d-flex justify-content-between align-items-center flex-wrap gap-2"
+      >
         <div class="adi-soft">
           {meta.total} productos · Página {meta.page} de {meta.pages}
         </div>
       </div>
 
       <div class="row g-3 mt-1">
-        {items.map((p: any) => (
-          <div class="col-12 col-md-4 col-lg-3">
-            <div class="card h-100 shadow-sm">
-              <div class="ratio ratio-1x1 bg-light">
-                {p.images?.length ? (
-                  <img
-                    src={API_URL + p.images[0].url}
-                    alt={p.name}
-                    style="object-fit:cover; width:100%; height:100%;"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div class="d-flex align-items-center justify-content-center adi-soft">Sin imagen</div>
-                )}
-              </div>
+        {
+          items.map((p: any) => (
+            <div class="col-12 col-md-4 col-lg-3">
+              <div class="card h-100 shadow-sm">
+                <div class="ratio ratio-1x1 bg-light">
+                  {p.images?.length ? (
+                    <img
+                      src={firstImageUrl(p)}
+                      alt={p.name}
+                      style="object-fit:cover; width:100%; height:100%;"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div class="d-flex align-items-center justify-content-center adi-soft">
+                      Sin imagen
+                    </div>
+                  )}
+                </div>
 
-              <div class="card-body">
-                <div class="small adi-soft">SKU: {p.sku}</div>
-                <h5 class="card-title mt-1 mb-2">{p.name}</h5>
-                <div class="fw-bold">
-                  {formatMoneyFromCents(p.priceCents)} {p.currency}
+                <div class="card-body d-flex flex-column">
+                  <div class="small adi-soft">SKU: {p.sku}</div>
+                  <h5 class="card-title mt-1 mb-2">{p.name}</h5>
+
+                  <div class="fw-bold">
+                    {formatMoneyFromCents(p.priceCents)} {p.currency}
+                  </div>
+
+                  <div class="mt-auto pt-2">
+                    <button
+                      class="btn btn-dark w-100 d-inline-flex align-items-center justify-content-center gap-2"
+                      type="button"
+                      onclick={`window.ADI_CART?.add(${JSON.stringify({
+                        id: p.id,
+                        sku: p.sku,
+                        name: p.name,
+                        priceCents: p.priceCents,
+                        currency: p.currency,
+                        imageUrl: p.images?.[0]?.url ?? null,
+                        qty: 1,
+                      })})`}
+                    >
+                      <span>Agregar al carrito</span>
+
+                      <span class="adi-btnCartIcon" aria-hidden="true">
+                        <svg
+                          viewBox="-1.5 0 19 19"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path d="M14.252 4.59a.924.924 0 0 1 .921.92v3.602a1.048 1.048 0 0 1-.916 1.017l-8.511.883a.573.573 0 0 1-.145.019.577.577 0 1 0 0 1.154h8.488a.563.563 0 1 1 0 1.126h-.91a1.03 1.03 0 1 1-1.104 0H6.849a1.03 1.03 0 1 1-1.104 0H5.6a1.703 1.703 0 1 1 0-3.406.585.585 0 0 1 .128.014L3.111 3.911H1.39a.563.563 0 1 1 0-1.125h2.09a.562.562 0 0 1 .515.337l.64 1.466h9.617z" />
+                        </svg>
+                      </span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        }
       </div>
 
       <nav class="d-flex justify-content-between mt-4">
         <div>
-          {meta.page > 1 && (
-            <a class="btn btn-outline-dark" href={pageLink(meta.page - 1)}>&larr; Anterior</a>
-          )}
+          {
+            meta.page > 1 && (
+              <a class="btn btn-outline-dark" href={pageLink(meta.page - 1)}>
+                &larr; Anterior
+              </a>
+            )
+          }
         </div>
         <div>
-          {meta.page < meta.pages && (
-            <a class="btn btn-outline-dark" href={pageLink(meta.page + 1)}>Siguiente &rarr;</a>
-          )}
+          {
+            meta.page < meta.pages && (
+              <a class="btn btn-outline-dark" href={pageLink(meta.page + 1)}>
+                Siguiente &rarr;
+              </a>
+            )
+          }
         </div>
       </nav>
     </div>
   </section>
+
+  <script is:inline>
+    document.addEventListener("click", (e) => {
+      const btn = e.target?.closest?.("[data-add-to-cart]");
+      if (!btn) return;
+
+      const item = {
+        id: btn.getAttribute("data-id") || null,
+        sku: btn.getAttribute("data-sku") || null,
+        name: btn.getAttribute("data-name") || "Producto",
+        priceCents: Number(btn.getAttribute("data-pricecents") || 0),
+        currency: btn.getAttribute("data-currency") || "MXN",
+        imageUrl: btn.getAttribute("data-imageurl") || null,
+        qty: 1,
+      };
+
+      if (window.ADI_CART?.add) window.ADI_CART.add(item);
+      else
+        console.warn("ADI_CART not available (CartProfileMenu not mounted?)");
+    });
+  </script>
+
+  <style>
+  .adi-btnCartIcon{
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    opacity: .95;
+  }
+  .adi-btnCartIcon svg{
+    width: 18px;
+    height: 18px;
+    display: block;
+    fill: #fff;
+  }
+</style>
 </BaseLayout>
