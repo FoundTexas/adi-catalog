@@ -1,0 +1,9 @@
+---
+
+const isProd = import.meta.env.PROD;
+
+Astro.cookies.delete("adi_token", { path: "/", secure: isProd, sameSite: "lax" });
+Astro.cookies.delete("adi_user",  { path: "/", secure: isProd, sameSite: "lax" });
+return Astro.redirect("/");
+
+---

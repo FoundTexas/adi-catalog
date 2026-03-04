@@ -1,0 +1,276 @@
+---
+// src/components/CartProfileMenu.astro
+const {
+  loginHref = "/login",
+  logoutHref = "/logout",
+  ordersHref = "/account",
+  bulkHref = "/admin/bulk",
+  catalogHref = "/catalogo",
+} = Astro.props;
+---
+
+<!-- Floating button -->
+<button
+  class="adi-fab"
+  type="button"
+  data-bs-toggle="offcanvas"
+  data-bs-target="#adiSidePanel"
+  aria-controls="adiSidePanel"
+  title="Carrito / Perfil"
+>
+  <span class="adi-fabSvg" aria-hidden="true">
+    <svg
+      fill="#ffffff"
+      viewBox="-1.5 0 19 19"
+      xmlns="http://www.w3.org/2000/svg"
+      class="cf-icon-svg"
+    >
+      <path
+        d="M14.252 4.59a.924.924 0 0 1 .921.92v3.602a1.048 1.048 0 0 1-.916 1.017l-8.511.883a.573.573 0 0 1-.145.019.577.577 0 1 0 0 1.154h8.488a.563.563 0 1 1 0 1.126h-.91a1.03 1.03 0 1 1-1.104 0H6.849a1.03 1.03 0 1 1-1.104 0H5.6a1.703 1.703 0 1 1 0-3.406.585.585 0 0 1 .128.014L3.111 3.911H1.39a.563.563 0 1 1 0-1.125h2.09a.562.562 0 0 1 .515.337l.64 1.466h9.617z"
+      />
+    </svg>
+  </span>
+
+  <span class="adi-fabBadge" id="adiFabCount" style="display:none;">0</span>
+</button>
+
+<!-- Offcanvas -->
+<div
+  class="offcanvas offcanvas-end"
+  tabindex="-1"
+  id="adiSidePanel"
+  aria-labelledby="adiSidePanelLabel"
+>
+  <div class="offcanvas-header">
+    <div>
+      <div class="adi-soft small">ADI</div>
+      <h5 class="offcanvas-title" id="adiSidePanelLabel">Carrito & Perfil</h5>
+    </div>
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="offcanvas"
+      aria-label="Cerrar"
+    ></button>
+  </div>
+
+  <div class="offcanvas-body">
+    <!-- PROFILE -->
+    <div class="adi-card p-3 mb-3">
+      <div class="d-flex align-items-start justify-content-between gap-3">
+        <div>
+          <div class="fw-semibold">Perfil</div>
+          <div class="adi-soft small" id="adiProfileLine">No has iniciado sesión</div>
+        </div>
+
+        <span
+          class="badge text-bg-light border"
+          id="adiRoleBadge"
+          style="display:none;"
+        >user</span>
+      </div>
+
+      <div class="d-grid gap-2 mt-3">
+        <!-- logged out -->
+        <a class="btn btn-primary" href={loginHref} id="adiGoLoginBtn">Iniciar sesión</a>
+
+        <!-- logged in -->
+        <a class="btn btn-outline-light" href={ordersHref} id="adiOrdersBtn" style="display:none;">
+          Mis pedidos
+        </a>
+
+        <a class="btn btn-outline-light" href={bulkHref} id="adiBulkBtn" style="display:none;">
+          Admin · Bulk upload
+        </a>
+
+        <a class="btn btn-outline-light" href={logoutHref} id="adiLogoutBtn" style="display:none;">
+          Cerrar sesión
+        </a>
+      </div>
+    </div>
+
+    <!-- CART -->
+    <div class="adi-card p-3">
+      <div class="fw-semibold mb-2">Carrito</div>
+
+      <div id="adiCartEmpty" class="text-center adi-soft">
+        <div class="mt-2">Tu carrito está vacío.</div>
+        <div class="mt-3">
+          <a class="btn btn-dark w-100" href={catalogHref}>Ir al catálogo</a>
+        </div>
+      </div>
+
+      <div id="adiCartItems" style="display:none;"></div>
+    </div>
+  </div>
+
+  <div class="p-3 border-top">
+    <button class="btn btn-outline-dark w-100" disabled id="adiCheckoutBtn">
+      Checkout (próximamente)
+    </button>
+  </div>
+</div>
+
+<style>
+  /* Floating action button (FAB) */
+  .adi-fab {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+
+    z-index: 1049; /* below bootstrap offcanvas (1055) */
+
+    width: 52px;
+    height: 52px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 999px !important;
+    -webkit-appearance: none;
+    appearance: none;
+
+    background: rgba(20, 20, 24, 0.88);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: var(--adi-shadow);
+    backdrop-filter: blur(8px);
+
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  }
+
+  .adi-fab:hover {
+    transform: translateY(-2px);
+    border-color: var(--adi-accent-soft);
+    box-shadow: 0 30px 80px rgba(100, 60, 150, 0.16);
+  }
+
+  .adi-fab:active {
+    transform: translateY(0);
+  }
+
+  .adi-fabSvg {
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .adi-fabSvg svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+  }
+
+  .adi-fabBadge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    font-size: 11px;
+    padding: 2px 7px;
+
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--adi-accent), #8e5bff);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 10px 20px rgba(180, 108, 255, 0.25);
+  }
+
+  /* Offcanvas theme */
+  .offcanvas {
+    background: var(--adi-bg);
+    color: var(--adi-text);
+  }
+
+  @media (max-width: 420px) {
+    .adi-fab {
+      top: 12px;
+      right: 12px;
+      width: 50px;
+      height: 50px;
+    }
+  }
+</style>
+
+<script is:inline>
+  function getCookie(name) {
+    const m = document.cookie.match(new RegExp("(?:^|;\\s*)" + name + "=([^;]+)"));
+    return m ? decodeURIComponent(m[1]) : null;
+  }
+
+  function getUserFromCookie() {
+    const raw = getCookie("adi_user");
+    if (!raw) return null;
+    try {
+      return JSON.parse(atob(raw));
+    } catch {
+      return null;
+    }
+  }
+
+  function setLoggedOutUI() {
+    document.getElementById("adiProfileLine").textContent = "No has iniciado sesión";
+    document.getElementById("adiRoleBadge").style.display = "none";
+
+    document.getElementById("adiGoLoginBtn").style.display = "";
+    document.getElementById("adiOrdersBtn").style.display = "none";
+    document.getElementById("adiBulkBtn").style.display = "none";
+    document.getElementById("adiLogoutBtn").style.display = "none";
+  }
+
+  function setLoggedInUI(user) {
+    const email = user?.email || "Sesión activa";
+    const role = user?.role || "user";
+
+    document.getElementById("adiProfileLine").textContent = email;
+
+    const badge = document.getElementById("adiRoleBadge");
+    badge.textContent = role;
+    badge.style.display = "";
+
+    document.getElementById("adiGoLoginBtn").style.display = "none";
+    document.getElementById("adiOrdersBtn").style.display = "";
+    document.getElementById("adiLogoutBtn").style.display = "";
+    document.getElementById("adiBulkBtn").style.display = role === "admin" ? "" : "none";
+  }
+
+  function initAuthUI() {
+    const user = getUserFromCookie();
+    if (!user) return setLoggedOutUI();
+    setLoggedInUI(user);
+  }
+
+  function initCartBadge() {
+    const badge = document.getElementById("adiFabCount");
+    badge.style.display = "none";
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    initAuthUI();
+    initCartBadge();
+  });
+
+  // optional: keep button from visually "floating" over the open panel
+  document.addEventListener("shown.bs.offcanvas", (e) => {
+    if (e?.target?.id === "adiSidePanel") {
+      document.querySelector(".adi-fab")?.classList.add("is-hidden");
+    }
+  });
+  document.addEventListener("hidden.bs.offcanvas", (e) => {
+    if (e?.target?.id === "adiSidePanel") {
+      document.querySelector(".adi-fab")?.classList.remove("is-hidden");
+    }
+  });
+</script>
+
+<style>
+  /* hide FAB while panel open (prevents overlap) */
+  .adi-fab.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-6px);
+  }
+</style>

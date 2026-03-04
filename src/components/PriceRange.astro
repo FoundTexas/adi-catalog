@@ -2,7 +2,7 @@
 const {
   // pesos
   min = 0,
-  max = 1500,      // ✅ 1500.00 pesos => 150000 cents
+  max = 1500, // ✅ 1500.00 pesos => 150000 cents
   step = 10,
 
   initialMin = 0,
@@ -35,8 +35,9 @@ if (a0 > b0) [a0, b0] = [b0, a0];
   <label class="form-label d-flex justify-content-between align-items-center">
     <span>Precio</span>
     <span class="adi-soft small">
-      $<span id={minLabelId}>{a0.toFixed(2)}</span> —
-      $<span id={maxLabelId}>{b0.toFixed(2)}</span>
+      $<span id={minLabelId}>{a0.toFixed(2)}</span> — $<span id={maxLabelId}
+        >{b0.toFixed(2)}</span
+      >
     </span>
   </label>
 
@@ -71,40 +72,50 @@ if (a0 > b0) [a0, b0] = [b0, a0];
     <div class="adi-rangeOverlay" id={overlayId} aria-hidden="true"></div>
 
     <!-- Hidden cents -->
-    <input type="hidden" name={minName} id={minCentsId} value={String(Math.round(a0 * 100))} />
-    <input type="hidden" name={maxName} id={maxCentsId} value={String(Math.round(b0 * 100))} />
+    <input
+      type="hidden"
+      name={minName}
+      id={minCentsId}
+      value={String(Math.round(a0 * 100))}
+    />
+    <input
+      type="hidden"
+      name={maxName}
+      id={maxCentsId}
+      value={String(Math.round(b0 * 100))}
+    />
   </div>
 </div>
 
 <style>
-  .adi-rangeWrap{
+  .adi-rangeWrap {
     position: relative;
     height: 34px;
     display: flex;
     align-items: center;
   }
 
-  .adi-rangeTrack{
+  .adi-rangeTrack {
     position: absolute;
     left: 0;
     right: 0;
     height: 6px;
     border-radius: 999px;
-    background: rgba(0,0,0,.15);
+    background: rgba(0, 0, 0, 0.15);
     pointer-events: none;
   }
 
-  .adi-rangeFill{
+  .adi-rangeFill {
     position: absolute;
     height: 6px;
     border-radius: 999px;
-    background: rgba(0,0,0,.8);
+    background: rgba(0, 0, 0, 0.8);
     left: 0%;
     right: 0%;
     pointer-events: none;
   }
 
-  .adi-range{
+  .adi-range {
     position: absolute;
     left: 0;
     right: 0;
@@ -118,10 +129,18 @@ if (a0 > b0) [a0, b0] = [b0, a0];
     pointer-events: auto;
   }
 
-  .adi-range::-webkit-slider-runnable-track{ height: 6px; background: transparent; border: 0; }
-  .adi-range::-moz-range-track{ height: 6px; background: transparent; border: 0; }
+  .adi-range::-webkit-slider-runnable-track {
+    height: 6px;
+    background: transparent;
+    border: 0;
+  }
+  .adi-range::-moz-range-track {
+    height: 6px;
+    background: transparent;
+    border: 0;
+  }
 
-  .adi-range::-webkit-slider-thumb{
+  .adi-range::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     width: 16px;
@@ -129,23 +148,25 @@ if (a0 > b0) [a0, b0] = [b0, a0];
     border-radius: 999px;
     background: #111;
     border: 2px solid #fff;
-    box-shadow: 0 6px 16px rgba(0,0,0,.25);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
     cursor: grab;
   }
-  .adi-range:active::-webkit-slider-thumb{ cursor: grabbing; }
+  .adi-range:active::-webkit-slider-thumb {
+    cursor: grabbing;
+  }
 
-  .adi-range::-moz-range-thumb{
+  .adi-range::-moz-range-thumb {
     width: 16px;
     height: 16px;
     border-radius: 999px;
     background: #111;
     border: 2px solid #fff;
-    box-shadow: 0 6px 16px rgba(0,0,0,.25);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
     cursor: grab;
   }
 
   /* overlay sits above track; captures pointer */
-  .adi-rangeOverlay{
+  .adi-rangeOverlay {
     position: absolute;
     inset: 0;
     z-index: 10;
@@ -187,10 +208,24 @@ if (a0 > b0) [a0, b0] = [b0, a0];
     const MAX = Number(MAX_VAL);
     const STEP = Number(STEP_VAL) || 1;
 
-    if (!wrap || !overlay || !minEl || !maxEl || !minLabel || !maxLabel || !fill || !minCents || !maxCents) return;
+    if (
+      !wrap ||
+      !overlay ||
+      !minEl ||
+      !maxEl ||
+      !minLabel ||
+      !maxLabel ||
+      !fill ||
+      !minCents ||
+      !maxCents
+    )
+      return;
 
-    // turn a pointer X into a value (snapped to step)
-    function xToValue(clientX){
+    let dragging = false;
+    let activeThumb = "min"; // "min" | "max"
+    let activePointerId = null;
+
+    function xToValue(clientX) {
       const r = wrap.getBoundingClientRect();
       const t = Math.min(1, Math.max(0, (clientX - r.left) / r.width));
       const raw = MIN + t * (MAX - MIN);
@@ -198,98 +233,102 @@ if (a0 > b0) [a0, b0] = [b0, a0];
       return Math.min(MAX, Math.max(MIN, snapped));
     }
 
-    function sync(active){
-      let a = Number(minEl.value || 0);
-      let b = Number(maxEl.value || 0);
+    function clampVal(v) {
+      return Math.min(MAX, Math.max(MIN, Number(v) || 0));
+    }
 
-      a = Math.min(MAX, Math.max(MIN, a));
-      b = Math.min(MAX, Math.max(MIN, b));
+    function sync(active) {
+      let a = clampVal(minEl.value);
+      let b = clampVal(maxEl.value);
 
+      // evita cruce
       if (a > b) {
-        if (active === "min") { b = a; maxEl.value = String(b); }
-        else { a = b; minEl.value = String(a); }
+        if (active === "min") {
+          b = a;
+          maxEl.value = String(b);
+        } else {
+          a = b;
+          minEl.value = String(a);
+        }
       }
 
       minLabel.textContent = a.toFixed(2);
       maxLabel.textContent = b.toFixed(2);
-
       minCents.value = String(Math.round(a * 100));
       maxCents.value = String(Math.round(b * 100));
 
-      const aPct = (a / MAX) * 100;
-      const bPct = (b / MAX) * 100;
+      // porcentaje correcto (soporta MIN != 0)
+      const denom = MAX - MIN || 1;
+      const aPct = ((a - MIN) / denom) * 100;
+      const bPct = ((b - MIN) / denom) * 100;
+
       fill.style.left = aPct + "%";
-      fill.style.right = (100 - bPct) + "%";
+      fill.style.right = 100 - bPct + "%";
     }
 
-    function setDragging(which){
-      // enable only the chosen one for consistent dragging
-      if (which === "min") {
-        minEl.style.pointerEvents = "auto";
-        maxEl.style.pointerEvents = "none";
-        minEl.style.zIndex = "9";
-        maxEl.style.zIndex = "8";
-      } else {
-        maxEl.style.pointerEvents = "auto";
-        minEl.style.pointerEvents = "none";
-        maxEl.style.zIndex = "9";
-        minEl.style.zIndex = "8";
-      }
-    }
-
-    function clearDragging(){
-      minEl.style.pointerEvents = "auto";
-      maxEl.style.pointerEvents = "auto";
-      minEl.style.zIndex = "";
-      maxEl.style.zIndex = "";
-    }
-
-    function nearestThumb(clientX){
+    function nearestThumb(clientX) {
       const r = wrap.getBoundingClientRect();
       const px = Math.min(r.width, Math.max(0, clientX - r.left));
-      const a = Number(minEl.value || 0);
-      const b = Number(maxEl.value || 0);
-      const aPx = ((a - MIN) / (MAX - MIN)) * r.width;
-      const bPx = ((b - MIN) / (MAX - MIN)) * r.width;
+
+      const a = clampVal(minEl.value);
+      const b = clampVal(maxEl.value);
+
+      const denom = MAX - MIN || 1;
+      const aPx = ((a - MIN) / denom) * r.width;
+      const bPx = ((b - MIN) / denom) * r.width;
+
       return Math.abs(px - aPx) <= Math.abs(px - bPx) ? "min" : "max";
     }
 
-    // overlay handles initial click/drag intent
-    overlay.addEventListener("pointerdown", (e) => {
-      overlay.setPointerCapture(e.pointerId);
-
-      const which = nearestThumb(e.clientX);
-      setDragging(which);
-
-      const v = xToValue(e.clientX);
+    function applyValue(which, v) {
       if (which === "min") minEl.value = String(v);
       else maxEl.value = String(v);
-
       sync(which);
-      (which === "min" ? minEl : maxEl).focus();
+    }
+
+    overlay.addEventListener("pointerdown", (e) => {
+      dragging = true;
+      activeThumb = nearestThumb(e.clientX);
+      activePointerId = e.pointerId;
+
+      overlay.setPointerCapture(e.pointerId);
+
+      const v = xToValue(e.clientX);
+      applyValue(activeThumb, v);
     });
 
     overlay.addEventListener("pointermove", (e) => {
-      // during drag, update active thumb (the one that is enabled)
-      const minActive = maxEl.style.pointerEvents === "none";
-      const which = minActive ? "min" : "max";
+      // ✅ clave: NO mover nada si no estás arrastrando
+      if (!dragging) return;
+      if (activePointerId != null && e.pointerId !== activePointerId) return;
 
       const v = xToValue(e.clientX);
-      if (which === "min") minEl.value = String(v);
-      else maxEl.value = String(v);
-
-      sync(which);
+      applyValue(activeThumb, v);
     });
 
-    overlay.addEventListener("pointerup", () => {
-      clearDragging();
+    function endDrag(e) {
+      if (!dragging) return;
+      dragging = false;
+
+      try {
+        if (activePointerId != null)
+          overlay.releasePointerCapture(activePointerId);
+      } catch {}
+
+      activePointerId = null;
+    }
+
+    overlay.addEventListener("pointerup", endDrag);
+    overlay.addEventListener("pointercancel", endDrag);
+    overlay.addEventListener("lostpointercapture", () => {
+      dragging = false;
+      activePointerId = null;
     });
 
-    // keyboard still works directly on inputs
+    // keyboard
     minEl.addEventListener("input", () => sync("min"));
     maxEl.addEventListener("input", () => sync("max"));
 
-    // init
     sync("min");
   })();
 </script>

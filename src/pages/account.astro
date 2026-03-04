@@ -1,0 +1,142 @@
+---
+export const prerender = false;
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const API_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
+
+// Lee token desde header cookie (SSR)
+const cookieHeader = Astro.request.headers.get("cookie") ?? "";
+const tokenMatch = cookieHeader.match(/(?:^|;\s*)adi_token=([^;]+)/);
+const token = tokenMatch ? decodeURIComponent(tokenMatch[1]) : null;
+
+const user =
+  (Astro.locals.user as { id: number; email?: string; role?: string } | null) ?? null;
+
+let orders: any[] = [];
+let ordersError = "";
+
+// base64url -> json (SSR-safe)
+function decodeJwtPayloadSSR(token: string): any | null {
+  try {
+    const parts = token.split(".");
+    if (parts.length < 2) return null;
+
+    const payloadB64Url = parts[1];
+    const pad = "=".repeat((4 - (payloadB64Url.length % 4)) % 4);
+    const b64 = (payloadB64Url + pad).replace(/-/g, "+").replace(/_/g, "/");
+
+    const json =
+      typeof atob === "function"
+        ? atob(b64)
+        : Buffer.from(b64, "base64").toString("utf8");
+
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
+let payload: any | null = null;
+
+if (token) {
+  payload = decodeJwtPayloadSSR(token);
+
+  console.log(payload);
+  try {
+    const res = await fetch(`${API_URL}/orders/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      orders = Array.isArray(data) ? data : [];
+    } else {
+      ordersError = `No se pudieron cargar pedidos (${res.status})`;
+    }
+  } catch {
+    ordersError = "No se pudieron cargar pedidos (error de red)";
+  }
+}
+---
+
+<BaseLayout title="ADI — Mi cuenta">
+  <section class="adi-section">
+    <div class="container" style="max-width: 980px;">
+      <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-3">
+        <div>
+          <div class="adi-soft small">Cuenta</div>
+          <h1 class="fw-bold mb-1">Mi cuenta</h1>
+          <div class="adi-soft">
+            {user?.email ?? "—"} · rol:{" "}
+            <span class="fw-semibold">{user?.role ?? "unknown"}</span>
+          </div>
+
+          <!-- opcional: muestra un hint mínimo en UI (sin exponer token) -->
+          {payload && (
+            <div class="adi-soft small mt-1">
+              jwt: {payload?.email ?? payload?.user?.email ?? "no-email"} · rawRole:{" "}
+              {String(payload?.role ?? payload?.user?.role ?? payload?.roles?.[0] ?? payload?.user?.roles?.[0] ?? "none")}
+            </div>
+          )}
+        </div>
+
+        <form method="post" action="/logout" class="m-0">
+          <button class="btn btn-outline-light" type="submit">Cerrar sesión</button>
+        </form>
+      </div>
+
+      <div class="adi-card p-3 p-md-4 mb-3">
+        <div class="d-flex gap-2 flex-wrap">
+          <a class="btn btn-dark" href="/catalogo">Ir al catálogo</a>
+          {payload?.role === "admin" && (
+            <a class="btn btn-primary" href="/admin/bulk">Admin · Bulk Upload</a>
+          )}
+        </div>
+      </div>
+
+      <div class="adi-card p-3 p-md-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+          <h2 class="h5 fw-bold mb-0">Mis pedidos</h2>
+          <div class="adi-soft small">{orders.length} pedidos</div>
+        </div>
+
+        {ordersError && <div class="alert alert-danger mb-0">{ordersError}</div>}
+
+        {!ordersError && orders.length === 0 && (
+          <div class="text-center adi-soft py-4">
+            Aún no tienes pedidos.
+          </div>
+        )}
+
+        {!ordersError && orders.length > 0 && (
+          <div class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Status</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orders.map((o) => (
+                  <tr>
+                    <td class="fw-semibold">#{o.id}</td>
+                    <td>{o.status}</td>
+                    <td class="fw-semibold">
+                      ${(Number(o.totalCents ?? 0) / 100).toFixed(2)} {o.currency ?? "MXN"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
