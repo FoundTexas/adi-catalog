@@ -1,0 +1,449 @@
+---
+export const prerender = false;
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+type CheckoutResult = "success" | "pending" | "failure";
+
+const API_URL = (import.meta.env.PUBLIC_API_URL || "http://localhost:3000").replace(/\/+$/, "");
+
+const rawResult = Astro.params.result ?? "";
+const normalizedResult = String(rawResult).toLowerCase();
+
+let safeResult: CheckoutResult = "failure";
+
+if (
+  normalizedResult === "success" ||
+  normalizedResult === "pending" ||
+  normalizedResult === "failure"
+) {
+  safeResult = normalizedResult;
+}
+
+const orderId =
+  Astro.url.searchParams.get("order") ||
+  Astro.url.searchParams.get("external_reference") ||
+  "";
+
+const paymentId = Astro.url.searchParams.get("payment_id") ?? "";
+const status = Astro.url.searchParams.get("status") ?? "";
+const merchantOrderId = Astro.url.searchParams.get("merchant_order_id") ?? "";
+const collectionId = Astro.url.searchParams.get("collection_id") ?? "";
+const collectionStatus = Astro.url.searchParams.get("collection_status") ?? "";
+const preferenceId = Astro.url.searchParams.get("preference_id") ?? "";
+const paymentType = Astro.url.searchParams.get("payment_type") ?? "";
+const siteId = Astro.url.searchParams.get("site_id") ?? "";
+const processingMode = Astro.url.searchParams.get("processing_mode") ?? "";
+const externalReference = Astro.url.searchParams.get("external_reference") ?? "";
+
+const views: Record<
+  CheckoutResult,
+  {
+    title: string;
+    heading: string;
+    message: string;
+    badgeClass: string;
+  }
+> = {
+  success: {
+    title: "Pago exitoso — ADI",
+    heading: "Pago exitoso",
+    message:
+      "Tu pago fue enviado correctamente. En breve validaremos el resultado final de la operación.",
+    badgeClass: "text-bg-success",
+  },
+  pending: {
+    title: "Pago pendiente — ADI",
+    heading: "Pago pendiente",
+    message:
+      "Tu pago sigue en proceso o revisión. Puedes revisar el estado de tu orden más tarde.",
+    badgeClass: "text-bg-warning",
+  },
+  failure: {
+    title: "Pago no completado — ADI",
+    heading: "Pago no completado",
+    message:
+      "No se pudo completar el pago. Puedes reintentarlo usando la misma orden sin crear otra.",
+    badgeClass: "text-bg-danger",
+  },
+};
+
+const view = views[safeResult];
+const title = view.title;
+
+const safeOrderId = orderId && orderId !== "null" ? orderId : "—";
+const safePaymentId = paymentId && paymentId !== "null" ? paymentId : "—";
+const safeMerchantOrderId =
+  merchantOrderId && merchantOrderId !== "null" ? merchantOrderId : "—";
+const safeCollectionId = collectionId && collectionId !== "null" ? collectionId : "—";
+const safePreferenceId = preferenceId && preferenceId !== "null" ? preferenceId : "—";
+const safePaymentType = paymentType && paymentType !== "null" ? paymentType : "—";
+const safeSiteId = siteId && siteId !== "null" ? siteId : "—";
+const safeProcessingMode =
+  processingMode && processingMode !== "null" ? processingMode : "—";
+const safeExternalReference =
+  externalReference && externalReference !== "null" ? externalReference : "—";
+
+const safeStatus =
+  status && status !== "null"
+    ? status
+    : collectionStatus && collectionStatus !== "null"
+      ? collectionStatus
+      : "—";
+---
+
+<BaseLayout title={title}>
+  <section class="adi-section">
+    <div class="container py-5">
+      <div class="row justify-content-center">
+        <div class="col-lg-9">
+          <div class="adi-card p-4 p-md-5">
+            <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap mb-3">
+              <h1 class="h3 mb-0">{view.heading}</h1>
+              <span class={`badge ${view.badgeClass}`}>{safeResult}</span>
+            </div>
+
+            <p class="adi-soft mb-4">{view.message}</p>
+
+            <div class="adi-resultGrid mb-4">
+              <div class="adi-resultItem">
+                <div class="adi-resultLabel">Orden</div>
+                <div class="adi-resultValue" id="orderIdValue">{safeOrderId}</div>
+              </div>
+
+              <div class="adi-resultItem">
+                <div class="adi-resultLabel">Status</div>
+                <div class="adi-resultValue" id="orderStatusValue">{safeStatus}</div>
+              </div>
+
+              <div class="adi-resultItem">
+                <div class="adi-resultLabel">Payment ID</div>
+                <div class="adi-resultValue">{safePaymentId}</div>
+              </div>
+
+              <div class="adi-resultItem">
+                <div class="adi-resultLabel">Merchant Order ID</div>
+                <div class="adi-resultValue">{safeMerchantOrderId}</div>
+              </div>
+
+              <div class="adi-resultItem">
+                <div class="adi-resultLabel">Collection ID</div>
+                <div class="adi-resultValue">{safeCollectionId}</div>
+              </div>
+
+              <div class="adi-resultItem">
+                <div class="adi-resultLabel">Preference ID</div>
+                <div class="adi-resultValue">{safePreferenceId}</div>
+              </div>
+
+              <div class="adi-resultItem">
+                <div class="adi-resultLabel">Payment Type</div>
+                <div class="adi-resultValue">{safePaymentType}</div>
+              </div>
+
+              <div class="adi-resultItem">
+                <div class="adi-resultLabel">External Reference</div>
+                <div class="adi-resultValue">{safeExternalReference}</div>
+              </div>
+
+              <div class="adi-resultItem">
+                <div class="adi-resultLabel">Site ID</div>
+                <div class="adi-resultValue">{safeSiteId}</div>
+              </div>
+
+              <div class="adi-resultItem">
+                <div class="adi-resultLabel">Processing Mode</div>
+                <div class="adi-resultValue">{safeProcessingMode}</div>
+              </div>
+            </div>
+
+            <div id="orderAlert" class="alert alert-warning mb-4 d-none" role="alert"></div>
+
+            <div id="orderSummary" class="mb-4 d-none">
+              <h2 class="h5 mb-3">Resumen de la orden</h2>
+
+              <div class="adi-resultGrid mb-3">
+                <div class="adi-resultItem">
+                  <div class="adi-resultLabel">Email</div>
+                  <div class="adi-resultValue" id="orderBuyerEmail">—</div>
+                </div>
+
+                <div class="adi-resultItem">
+                  <div class="adi-resultLabel">Teléfono</div>
+                  <div class="adi-resultValue" id="orderBuyerPhone">—</div>
+                </div>
+
+                <div class="adi-resultItem">
+                  <div class="adi-resultLabel">Total</div>
+                  <div class="adi-resultValue" id="orderTotal">—</div>
+                </div>
+
+                <div class="adi-resultItem">
+                  <div class="adi-resultLabel">Moneda</div>
+                  <div class="adi-resultValue" id="orderCurrency">—</div>
+                </div>
+              </div>
+
+              <h3 class="h6 mb-3">Productos</h3>
+              <div class="adi-itemsList" id="orderItems"></div>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap mt-4">
+              <a class="btn btn-dark" href="/catalogo">Ir al catálogo</a>
+              <a class="btn btn-outline-light" href="/checkout">Volver a checkout</a>
+
+              <button
+                id="retryPaymentBtn"
+                class="btn btn-warning text-dark d-none"
+                data-order-id={safeOrderId}
+                data-api-url={API_URL}
+                type="button"
+              >
+                Reintentar pago
+              </button>
+            </div>
+
+            <p id="retryMsg" class="mt-3 adi-soft mb-0"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .adi-resultGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .adi-resultItem {
+    border-radius: 14px;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    min-width: 0;
+  }
+
+  .adi-resultLabel {
+    font-size: 12px;
+    opacity: 0.75;
+    margin-bottom: 4px;
+  }
+
+  .adi-resultValue {
+    font-weight: 700;
+    word-break: break-word;
+  }
+
+  .adi-itemsList {
+    display: grid;
+    gap: 10px;
+  }
+
+  .adi-itemRow {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    border-radius: 14px;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .adi-itemMain {
+    min-width: 0;
+  }
+
+  .adi-itemName {
+    font-weight: 700;
+    word-break: break-word;
+  }
+
+  .adi-itemMeta {
+    font-size: 12px;
+    opacity: 0.75;
+    margin-top: 4px;
+  }
+
+  .adi-itemPrice {
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 640px) {
+    .adi-resultGrid {
+      grid-template-columns: 1fr;
+    }
+
+    .adi-itemRow {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .adi-itemPrice {
+      white-space: normal;
+    }
+  }
+</style>
+
+<script is:inline define:vars={{ API_URL, safeResult, safeOrderId }}>
+  const CART_KEY = "adi_cart_v1";
+
+  try {
+    const path = window.location.pathname.toLowerCase();
+    if (path.endsWith("/checkout/success")) {
+      localStorage.removeItem(CART_KEY);
+      window.dispatchEvent(new Event("adi:cart-changed"));
+    }
+  } catch {}
+
+  const orderAlert = document.getElementById("orderAlert");
+  const orderSummary = document.getElementById("orderSummary");
+  const retryBtn = document.getElementById("retryPaymentBtn");
+  const retryMsg = document.getElementById("retryMsg");
+  const orderStatusValue = document.getElementById("orderStatusValue");
+
+  function showAlert(message) {
+    if (!orderAlert) return;
+    orderAlert.textContent = message;
+    orderAlert.classList.remove("d-none");
+  }
+
+  function hideAlert() {
+    if (!orderAlert) return;
+    orderAlert.textContent = "";
+    orderAlert.classList.add("d-none");
+  }
+
+  function money(value, currency = "MXN") {
+    return new Intl.NumberFormat("es-MX", {
+      style: "currency",
+      currency,
+    }).format((Number(value || 0)) / 100);
+  }
+
+  function renderOrder(order) {
+    const emailEl = document.getElementById("orderBuyerEmail");
+    const phoneEl = document.getElementById("orderBuyerPhone");
+    const totalEl = document.getElementById("orderTotal");
+    const currencyEl = document.getElementById("orderCurrency");
+    const itemsEl = document.getElementById("orderItems");
+
+    if (emailEl) emailEl.textContent = order?.buyerEmail ?? "—";
+    if (phoneEl) phoneEl.textContent = order?.buyerPhone ?? "—";
+    if (totalEl) totalEl.textContent = money(order?.totalCents, order?.currency ?? "MXN");
+    if (currencyEl) currencyEl.textContent = order?.currency ?? "MXN";
+    if (orderStatusValue && order?.status) orderStatusValue.textContent = order.status;
+
+    if (itemsEl) {
+      itemsEl.innerHTML = "";
+      const items = Array.isArray(order?.items) ? order.items : [];
+
+      for (const item of items) {
+        const qty = Math.max(1, Number(item?.qty ?? item?.quantity) || 1);
+        const name = item?.name ?? item?.title ?? "Producto";
+        const unitPriceCents =
+          item?.priceCents != null
+            ? Number(item.priceCents) || 0
+            : Math.round((Number(item?.unitPricePesos ?? item?.unit_price) || 0) * 100);
+        const lineTotal = qty * unitPriceCents;
+
+        const row = document.createElement("div");
+        row.className = "adi-itemRow";
+        row.innerHTML = `
+          <div class="adi-itemMain">
+            <div class="adi-itemName">${name}</div>
+            <div class="adi-itemMeta">Cantidad: ${qty}</div>
+          </div>
+          <div class="adi-itemPrice">${money(lineTotal, order?.currency ?? "MXN")}</div>
+        `;
+        itemsEl.appendChild(row);
+      }
+    }
+
+    if (orderSummary) orderSummary.classList.remove("d-none");
+
+    const canRetry =
+      safeResult === "failure" &&
+      Boolean(order?.canRetryPayment) &&
+      typeof order?.id === "string" &&
+      order.id.length > 0;
+
+    if (retryBtn) {
+      if (canRetry) {
+        retryBtn.classList.remove("d-none");
+        retryBtn.setAttribute("data-order-id", order.id);
+      } else {
+        retryBtn.classList.add("d-none");
+      }
+    }
+  }
+
+  async function loadOrder() {
+    if (!safeOrderId || safeOrderId === "—") return;
+
+    try {
+      const res = await fetch(`${API_URL}/checkout/orders/${encodeURIComponent(safeOrderId)}`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        showAlert(`No se pudo consultar la orden (${res.status}).`);
+        return;
+      }
+
+      const order = await res.json();
+      hideAlert();
+      renderOrder(order);
+    } catch {
+      showAlert("No se pudo consultar la orden.");
+    }
+  }
+
+  retryBtn?.addEventListener("click", async () => {
+    const button = retryBtn;
+    const orderId = button.getAttribute("data-order-id");
+    const apiUrl = button.getAttribute("data-api-url");
+
+    if (!orderId || !apiUrl) return;
+
+    button.setAttribute("disabled", "true");
+    retryMsg.textContent = "Generando un nuevo intento de pago...";
+
+    try {
+      const res = await fetch(
+        `${apiUrl}/checkout/orders/${encodeURIComponent(orderId)}/retry-payment`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      );
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok || !data?.paymentUrl) {
+        throw new Error(data?.message || "No se pudo generar el reintento de pago.");
+      }
+
+      retryMsg.textContent = "Redirigiendo a Mercado Pago...";
+      window.location.href = data.paymentUrl;
+    } catch (error) {
+      retryMsg.textContent =
+        error instanceof Error
+          ? error.message
+          : "Ocurrió un error al reintentar el pago.";
+      button.removeAttribute("disabled");
+    }
+  });
+
+  loadOrder();
+</script>

@@ -1,7 +1,7 @@
 ---
 // Props
 const {
-  mode = "b2c", // "b2c" | "b2b"
+  mode = "none", // "b2c" | "b2b" | "none"
   showAnchors = false, // true en B2B, false en B2C
 } = Astro.props;
 ---
@@ -28,14 +28,14 @@ const {
       <div class="adi-linksRow">
         <!-- GLOBAL SWITCH -->
         <a
-          class={`btn btn-sm ${mode === "b2c" ? "btn-primary" : "btn-outline-light"}`}
+          class={`btn btn-sm ${mode === "none" ? "btn-outline-light" : mode === "b2c" ?  "btn-primary" : "btn-outline-light"}`}
           href="/catalogo"
         >
           Catálogo (B2C)
         </a>
 
         <a
-          class={`btn btn-sm ${mode === "b2b" ? "btn-primary" : "btn-outline-light"}`}
+          class={`btn btn-sm ${mode === "none" ? "btn-outline-light" : mode === "b2b" ?  "btn-primary" : "btn-outline-light"}`}
           href="/b2b"
         >
           Mayoreo (B2B)

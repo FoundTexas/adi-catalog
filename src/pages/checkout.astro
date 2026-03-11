@@ -1,0 +1,470 @@
+---
+export const prerender = false;
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const API_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
+const title = "Checkout — ADI";
+
+// ---------- SSR cookie/token ----------
+const cookieHeader = Astro.request.headers.get("cookie") ?? "";
+const tokenMatch = cookieHeader.match(/(?:^|;\s*)adi_token=([^;]+)/);
+const token = tokenMatch ? decodeURIComponent(tokenMatch[1]) : null;
+
+// ---------- JWT helpers (SSR-safe) ----------
+function decodeJwtPayloadSSR(jwt: string): any | null {
+  try {
+    const parts = jwt.split(".");
+    if (parts.length < 2) return null;
+
+    const payloadB64Url = parts[1];
+    const pad = "=".repeat((4 - (payloadB64Url.length % 4)) % 4);
+    const b64 = (payloadB64Url + pad).replace(/-/g, "+").replace(/_/g, "/");
+
+    const json =
+      typeof atob === "function"
+        ? atob(b64)
+        : Buffer.from(b64, "base64").toString("utf8");
+
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
+function isTokenExpired(payload: any): boolean {
+  const exp = payload?.exp;
+  if (!exp) return false;
+  const nowSec = Math.floor(Date.now() / 1000);
+  return Number(exp) <= nowSec;
+}
+
+function extractEmail(payload: any): string {
+  const raw =
+    payload?.email ??
+    payload?.user?.email ??
+    payload?.username ??
+    null;
+
+  return raw ? String(raw) : "";
+}
+
+let sessionEmail = "";
+let sessionToken = "";
+
+if (token) {
+  const payload = decodeJwtPayloadSSR(token);
+  if (payload && !isTokenExpired(payload)) {
+    sessionEmail = extractEmail(payload);
+    sessionToken = token;
+  }
+}
+---
+
+<BaseLayout title={title}>
+  <section class="adi-section">
+    <div class="container py-4">
+      <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+        <h1 class="h4 mb-0">Checkout</h1>
+        <a class="btn btn-sm btn-outline-light" href="/catalogo">Seguir comprando</a>
+      </div>
+
+      <div class="row g-3 align-items-start">
+        <div class="col-lg-7">
+          <div class="adi-card p-3">
+            <div class="d-flex align-items-center justify-content-between gap-2">
+              <div class="fw-semibold">Resumen</div>
+              <span class="adi-soft small" id="checkoutCount"></span>
+            </div>
+
+            <div id="checkoutEmpty" class="text-center adi-soft py-4" style="display:none;">
+              <div class="mt-1">Tu carrito está vacío.</div>
+              <div class="mt-3">
+                <a class="btn btn-dark w-100" href="/catalogo">Ir al catálogo</a>
+              </div>
+            </div>
+
+            <div id="checkoutItems" class="adi-checkoutItems" style="display:none;"></div>
+          </div>
+        </div>
+
+        <div class="col-lg-5">
+          <div class="adi-card p-3">
+            <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+              <div class="fw-semibold">Datos de contacto</div>
+
+              {sessionEmail && (
+                <span class="badge text-bg-success">Sesión iniciada</span>
+              )}
+            </div>
+
+            {sessionEmail && (
+              <div class="small adi-soft mb-2">
+                Usando el correo de tu cuenta.
+              </div>
+            )}
+
+            <label class="form-label">Email</label>
+            <input
+              id="buyerEmail"
+              class="form-control mb-2"
+              type="email"
+              placeholder="tu@email.com"
+              autocomplete="email"
+              value={sessionEmail}
+              readonly={!!sessionEmail}
+            />
+
+            <label class="form-label">Teléfono</label>
+            <input
+              id="buyerPhone"
+              class="form-control"
+              type="tel"
+              placeholder="+52..."
+              autocomplete="tel"
+            />
+          </div>
+
+          <div class="adi-card p-3 mt-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="fw-semibold">Total</div>
+              <div id="checkoutTotal" class="fw-bold">$0.00 MXN</div>
+            </div>
+
+            <button id="mpPayBtn" class="btn btn-dark w-100 mt-3" type="button">
+              <span class="d-inline-flex align-items-center justify-content-center">
+                <img src="/mp.svg" alt="Mercado Pago" width="auto" height="52" />
+              </span>
+            </button>
+
+            <div id="checkoutErr" class="text-danger small mt-2" style="display:none;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .adi-checkoutItems {
+    display: grid;
+    gap: 10px;
+    overflow: auto;
+    min-height: 0;
+    max-height: 74vh;
+    padding-right: 6px;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .adi-checkoutItem {
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .adi-checkoutTop {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    min-width: 0;
+  }
+
+  .adi-checkoutThumb {
+    flex: 0 0 84px;
+    width: 84px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.16);
+  }
+
+  .adi-checkoutThumb .ratio { width: 100%; }
+
+  .adi-checkoutThumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .adi-checkoutText { min-width: 0; }
+
+  .adi-checkoutTitle {
+    font-weight: 650;
+    line-height: 1.2;
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .adi-checkoutUnitPrice {
+    font-size: 12px;
+    opacity: 0.85;
+  }
+
+  .adi-checkoutBottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .adi-qtyPill {
+    min-width: 30px;
+    height: 26px;
+    padding: 0 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.06);
+    font-size: 12px;
+    font-weight: 750;
+    user-select: none;
+  }
+
+  .adi-lineTotal {
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+    opacity: 0.95;
+  }
+
+  @media (max-width: 420px) {
+    .adi-checkoutThumb { flex-basis: 76px; width: 76px; }
+    .adi-checkoutItems { max-height: 60vh; }
+  }
+</style>
+
+<script
+  is:inline
+  define:vars={{ API_URL, SSR_EMAIL: sessionEmail, SSR_TOKEN: sessionToken }}
+>
+  const CART_KEY = "adi_cart_v1";
+
+  function readCart() {
+    try {
+      const raw = localStorage.getItem(CART_KEY);
+      const data = raw ? JSON.parse(raw) : null;
+      return Array.isArray(data) ? data : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function cartCount(items) {
+    return items.reduce((sum, it) => sum + (Number(it.qty) || 0), 0);
+  }
+
+  function money(cents, currency = "MXN") {
+    const n = Number(cents) || 0;
+    return `$${(n / 100).toFixed(2)} ${currency}`;
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function escapeAttr(s) {
+    return escapeHtml(String(s)).replaceAll("`", "&#096;");
+  }
+
+  function resolveImageUrl(url) {
+    if (!url) return null;
+    const s = String(url).trim();
+    if (!s) return null;
+
+    if (/^https?:\/\//i.test(s)) return s;
+    if (s.startsWith("//")) return window.location.protocol + s;
+
+    const api = String(API_URL).replace(/\/$/, "");
+    if (s.startsWith("/")) return api + s;
+
+    return api + "/" + s.replace(/^\//, "");
+  }
+
+  function calcTotal(items) {
+    return items.reduce(
+      (sum, it) => sum + (Number(it.priceCents) || 0) * (Number(it.qty) || 0),
+      0
+    );
+  }
+
+  function showErr(msg) {
+    const err = document.getElementById("checkoutErr");
+    err.textContent = msg || "Error";
+    err.style.display = "";
+  }
+
+  function clearErr() {
+    const err = document.getElementById("checkoutErr");
+    err.textContent = "";
+    err.style.display = "none";
+  }
+
+  function setPayBtnLoading(isLoading) {
+    const btn = document.getElementById("mpPayBtn");
+    if (!btn) return;
+    btn.disabled = !!isLoading;
+    btn.style.opacity = isLoading ? ".85" : "";
+  }
+
+  function render() {
+    const items = readCart();
+
+    const countEl = document.getElementById("checkoutCount");
+    const emptyEl = document.getElementById("checkoutEmpty");
+    const host = document.getElementById("checkoutItems");
+    const totalEl = document.getElementById("checkoutTotal");
+    const payBtn = document.getElementById("mpPayBtn");
+
+    const count = cartCount(items);
+    if (countEl) countEl.textContent = count ? `${count} artículo(s)` : "";
+
+    if (!items.length) {
+      emptyEl.style.display = "";
+      host.style.display = "none";
+      totalEl.textContent = "$0.00 MXN";
+      payBtn.disabled = true;
+      return;
+    }
+
+    emptyEl.style.display = "none";
+    host.style.display = "grid";
+    payBtn.disabled = false;
+
+    host.innerHTML = items
+      .map((it) => {
+        const title = escapeHtml(it.name ?? "Producto");
+        const qty = Math.max(1, Number(it.qty) || 1);
+        const priceCents = Number(it.priceCents) || 0;
+        const lineTotal = priceCents * qty;
+
+        const imgUrl = resolveImageUrl(it.imageUrl);
+        const imgBlock = imgUrl
+          ? `<img src="${escapeAttr(imgUrl)}" alt="" loading="lazy" />`
+          : `<div class="d-flex align-items-center justify-content-center adi-soft" style="width:100%;height:100%;">Sin imagen</div>`;
+
+        return `
+<div class="adi-checkoutItem">
+  <div class="adi-checkoutTop">
+    <div class="adi-checkoutThumb">
+      <div class="ratio ratio-1x1 bg-light">
+        ${imgBlock}
+      </div>
+    </div>
+
+    <div class="adi-checkoutText">
+      <div class="adi-checkoutTitle">${title}</div>
+      <div class="adi-checkoutUnitPrice">Precio: ${money(priceCents, it.currency)}</div>
+    </div>
+  </div>
+
+  <div class="adi-checkoutBottom">
+    <div class="d-flex align-items-center gap-2">
+      <span class="adi-soft small">Cantidad</span>
+      <span class="adi-qtyPill">${qty}</span>
+    </div>
+
+    <div class="adi-lineTotal">Total: ${money(lineTotal, it.currency)}</div>
+  </div>
+</div>`;
+      })
+      .join("");
+
+    totalEl.textContent = money(calcTotal(items), "MXN");
+  }
+
+  async function startMpCheckout() {
+    clearErr();
+
+    const items = readCart();
+    const emailEl = document.getElementById("buyerEmail");
+    const phoneEl = document.getElementById("buyerPhone");
+
+    const email = emailEl ? emailEl.value.trim() : "";
+    const phone = phoneEl ? phoneEl.value.trim() : "";
+
+    if (!items.length) return showErr("Tu carrito está vacío.");
+    if (!email) return showErr("Escribe tu email.");
+
+    setPayBtnLoading(true);
+
+    try {
+      const payload = {
+        buyer: { email, phone },
+        items: items.map((it) => ({
+          id: String(it.id ?? it.sku ?? it.name ?? ""),
+          name: String(it.name ?? "Producto"),
+          qty: Number(it.qty) || 1,
+          priceCents: Number(it.priceCents) || 0,
+          currency: it.currency || "MXN",
+        })),
+      };
+
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      if (SSR_TOKEN) {
+        headers.Authorization = `Bearer ${SSR_TOKEN}`;
+      }
+
+      const res = await fetch(`${API_URL.replace(/\/$/, "")}/checkout/mercadopago`, {
+        method: "POST",
+        headers,
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const txt = await res.text().catch(() => "");
+        return showErr(txt || "No se pudo iniciar el pago.");
+      }
+
+      const data = await res.json();
+      const redirectUrl = data?.sandboxInitPoint || data?.initPoint;
+
+      if (!redirectUrl) {
+        return showErr("Respuesta inválida del servidor.");
+      }
+
+      window.location.href = redirectUrl;
+    } catch (e) {
+      console.error(e);
+      showErr("Error iniciando el pago.");
+    } finally {
+      setPayBtnLoading(false);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    render();
+
+    const emailInput = document.getElementById("buyerEmail");
+    if (emailInput && SSR_EMAIL) {
+      emailInput.value = SSR_EMAIL;
+      emailInput.readOnly = true;
+    }
+
+    document.getElementById("mpPayBtn")?.addEventListener("click", startMpCheckout);
+
+    window.addEventListener("storage", (e) => {
+      if (e.key === CART_KEY) render();
+    });
+
+    window.addEventListener("adi:cart-changed", render);
+  });
+</script>

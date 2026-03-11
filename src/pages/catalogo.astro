@@ -1,8 +1,8 @@
 ---
 export const prerender = false;
 
-import BaseLayout from "../layouts/BaseLayout.astro";
 import PriceRange from "../components/PriceRange.astro";
+import AppLayout from "../layouts/AppLayout.astro";
 
 const API_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
 
@@ -74,7 +74,7 @@ function firstImageUrl(p: any) {
 }
 ---
 
-<BaseLayout title="ADI - Catálogo" menuMode="b2c" menuAnchors={false}>
+<AppLayout title="ADI - Catálogo" menuMode="b2c">
   <section class="adi-section">
     <div class="container">
       <div
@@ -265,4 +265,4 @@ function firstImageUrl(p: any) {
     fill: #fff;
   }
 </style>
-</BaseLayout>
+</AppLayout>

@@ -3,7 +3,12 @@ import type { MiddlewareHandler } from "astro";
 import { getTokenFromCookie, decodeJwtPayload } from "./lib/auth";
 
 export const onRequest: MiddlewareHandler = async (ctx, next) => {
-  const path = ctx.url.pathname;
+  const path = ctx.url.pathname.toLowerCase();
+
+  const isCheckoutReturn =
+    path === "/checkout/success" ||
+    path === "/checkout/pending" ||
+    path === "/checkout/failure";
 
   const token = getTokenFromCookie(ctx.request.headers.get("cookie"));
   const payload = token ? decodeJwtPayload(token) : null;
@@ -22,6 +27,10 @@ export const onRequest: MiddlewareHandler = async (ctx, next) => {
     };
   } else {
     ctx.locals.user = null;
+  }
+
+  if (isCheckoutReturn) {
+    return next();
   }
 
   const isAccountRoute = path.startsWith("/account");

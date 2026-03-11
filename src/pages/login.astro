@@ -2,7 +2,7 @@
 // src/pages/login.astro
 export const prerender = false;
 
-import BaseLayout from "../layouts/BaseLayout.astro";
+import AppLayout from "../layouts/AppLayout.astro";
 
 const API_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
 const isProd = import.meta.env.PROD;
@@ -55,7 +55,7 @@ if (Astro.request.method === "POST") {
 }
 ---
 
-<BaseLayout title="ADI — Login">
+<AppLayout title="ADI — Login">
   <section class="adi-section">
     <div class="container" style="max-width: 520px;">
       <div class="adi-card p-4 p-md-5">
@@ -89,4 +89,4 @@ if (Astro.request.method === "POST") {
       </div>
     </div>
   </section>
-</BaseLayout>
+</AppLayout>

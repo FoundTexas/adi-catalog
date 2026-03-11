@@ -1,9 +1,8 @@
 ---
-const { title = "ADI", menuMode = "b2c", menuAnchors = false } = Astro.props;
+const { title = "ADI", menuMode = "none", menuAnchors = false } = Astro.props;
 import "../styles/global.css";
 import TopMenu from "../components/TopMenu.astro";
 import DirectContact from "../components/DirectContact.astro";
-import CartProfileMenu from "../components/CartProfileMenu.astro";
 ---
 
 <!doctype html>
@@ -57,13 +56,10 @@ import CartProfileMenu from "../components/CartProfileMenu.astro";
   </head>
 
   <body class="adi-bg">
-    <CartProfileMenu user={Astro.locals.user} />
-    <TopMenu mode={menuMode} showAnchors={menuAnchors} />
+
     <main>
       <slot />
     </main>
-
-    <DirectContact />
 
     <!-- Bootstrap JS -->
     <script

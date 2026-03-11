@@ -1,13 +1,13 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
 import HeroB2B from "../components/HeroB2B.astro";
 import ProductsSection from "../components/ProductsSection.astro";
 import PricingTable from "../components/PricingTable.astro";
 import WorkGallery from "../components/WorkGallery.astro";
 import QuoteCalculator from "../components/QuoteCalculator.tsx";
+import AppLayout from "../layouts/AppLayout.astro";
 ---
 
-<BaseLayout title="ADI - Catálogo B2B">
+<AppLayout title="ADI - Catálogo B2B" menuMode = "b2b">
   
   <HeroB2B />
 
@@ -25,7 +25,7 @@ import QuoteCalculator from "../components/QuoteCalculator.tsx";
 
   <div class="adi-divider container"></div>
 
-  <section id="cotizar" class="adi-section">
+  <!-- section id="cotizar" class="adi-section">
     <div class="container">
       <div class="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-3">
         <div>
@@ -38,6 +38,6 @@ import QuoteCalculator from "../components/QuoteCalculator.tsx";
     </div>
   </section>
 
-  <div class="adi-divider container"></div>
+  <div class="adi-divider container"></div -->
 
-</BaseLayout>
+</AppLayout>

@@ -13,50 +13,91 @@ const {
       <div class="fw-semibold">Perfil</div>
       <div class="adi-soft small" data-adi-profile-line>Cargando sesión…</div>
     </div>
-    <span class="badge text-bg-light border" data-adi-role style="display:none;">user</span>
+
+    <span class="badge text-bg-light border" data-adi-role style="display:none;">
+      user
+    </span>
   </div>
 
   <div class="d-grid gap-2 mt-3">
-    <a class="btn btn-primary" href={loginHref} data-adi-login style="display:none;">Iniciar sesión</a>
-    <a class="btn btn-outline-light" href={ordersHref} data-adi-orders style="display:none;">Mis pedidos</a>
+    <a class="btn btn-primary" href={loginHref} data-adi-login style="display:none;">
+      Iniciar sesión
+    </a>
+
+    <a class="btn btn-outline-light" href={ordersHref} data-adi-orders style="display:none;">
+      Mis pedidos
+    </a>
+
+    <a class="btn btn-outline-light" href={bulkHref} data-adi-bulk style="display:none;">
+      Admin · Bulk Upload
+    </a>
+
+    <form method="post" action={logoutHref} class="m-0" data-adi-logout style="display:none;">
+      <button class="btn btn-outline-danger w-100" type="submit">
+        Cerrar sesión
+      </button>
+    </form>
   </div>
 </div>
 
 <script is:inline>
   async function loadSession() {
     try {
-      const res = await fetch("/api/session.json", { headers: { Accept: "application/json" } });
-      if (!res.ok) return { authenticated: false };
+      const res = await fetch("/api/session.json", {
+        method: "GET",
+        headers: { Accept: "application/json" },
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        return { authenticated: false };
+      }
+
       return await res.json();
-    } catch {
+    } catch (err) {
+      console.error("loadSession error:", err);
       return { authenticated: false };
     }
   }
 
-  function setLoggedOutUI(root) {
-    root.querySelector("[data-adi-profile-line]").textContent = "No has iniciado sesión";
-    root.querySelector("[data-adi-role]").style.display = "none";
+  function qs(root, selector) {
+    return root ? root.querySelector(selector) : null;
+  }
 
-    root.querySelector("[data-adi-login]").style.display = "";
-    root.querySelector("[data-adi-orders]").style.display = "none";
-    root.querySelector("[data-adi-bulk]").style.display = "none";
-    root.querySelector("[data-adi-logout]").style.display = "none";
+  function setDisplay(el, value) {
+    if (el) el.style.display = value;
+  }
+
+  function setText(el, value) {
+    if (el) el.textContent = value;
+  }
+
+  function setLoggedOutUI(root) {
+    setText(qs(root, "[data-adi-profile-line]"), "No has iniciado sesión");
+    setDisplay(qs(root, "[data-adi-role]"), "none");
+
+    setDisplay(qs(root, "[data-adi-login]"), "");
+    setDisplay(qs(root, "[data-adi-orders]"), "none");
+    setDisplay(qs(root, "[data-adi-bulk]"), "none");
+    setDisplay(qs(root, "[data-adi-logout]"), "none");
   }
 
   function setLoggedInUI(root, sess) {
     const email = sess?.email || "Sesión activa";
     const role = sess?.role || "user";
 
-    root.querySelector("[data-adi-profile-line]").textContent = email;
+    setText(qs(root, "[data-adi-profile-line]"), email);
 
-    const badge = root.querySelector("[data-adi-role]");
-    badge.textContent = role;
-    badge.style.display = "";
+    const badge = qs(root, "[data-adi-role]");
+    if (badge) {
+      badge.textContent = role;
+      badge.style.display = "";
+    }
 
-    root.querySelector("[data-adi-login]").style.display = "none";
-    root.querySelector("[data-adi-orders]").style.display = "";
-    root.querySelector("[data-adi-logout]").style.display = "";
-    root.querySelector("[data-adi-bulk]").style.display = role === "admin" ? "" : "none";
+    setDisplay(qs(root, "[data-adi-login]"), "none");
+    setDisplay(qs(root, "[data-adi-orders]"), "");
+    setDisplay(qs(root, "[data-adi-logout]"), "");
+    setDisplay(qs(root, "[data-adi-bulk]"), role === "admin" ? "" : "none");
   }
 
   document.addEventListener("DOMContentLoaded", async () => {
@@ -64,7 +105,13 @@ const {
     if (!root) return;
 
     const sess = await loadSession();
-    if (!sess?.authenticated) return setLoggedOutUI(root);
+    console.log("cart session:", sess);
+
+    if (!sess?.authenticated) {
+      setLoggedOutUI(root);
+      return;
+    }
+
     setLoggedInUI(root, sess);
   });
 </script>

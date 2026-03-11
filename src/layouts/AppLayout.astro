@@ -1,0 +1,18 @@
+---
+const {
+  title = "ADI",
+  menuMode = "none",
+} = Astro.props;
+
+import BaseLayout from "./BaseLayout.astro";
+import DirectContact from "../components/DirectContact.astro";
+import CartProfileMenu from "../components/CartProfileMenu.astro";
+---
+
+<BaseLayout title={title} menuMode = {menuMode}>
+  <CartProfileMenu user={Astro.locals.user} />
+
+  <slot />
+
+  <DirectContact />
+</BaseLayout>
