@@ -29,9 +29,9 @@ export default function ProductsCatalog({ products }: Props) {
 
   return (
     <>
-      <div className="row g-3 justify-content-center align-items-center">
+      <div className="row g-3 justify-content-center align-items-start">
         {products.map((p) => (
-          <div key={p.id} className="col-md-6">
+          <div key={p.id} className="col-md-6 col-lg-4">
             <ProductCard product={p} onOpenSize={openSizeFor} />
           </div>
         ))}

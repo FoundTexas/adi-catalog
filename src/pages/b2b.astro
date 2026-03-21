@@ -4,26 +4,27 @@ import ProductsSection from "../components/ProductsSection.astro";
 import PricingTable from "../components/PricingTable.astro";
 import WorkGallery from "../components/WorkGallery.astro";
 import QuoteCalculator from "../components/QuoteCalculator.tsx";
-import AppLayout from "../layouts/AppLayout.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import TopMenu from "../components/TopMenu.astro";
+import DirectContact from "../components/DirectContact.astro";
 ---
 
-<AppLayout title="ADI - Catálogo B2B" menuMode = "b2b">
+<BaseLayout
+  title="ADI B2B | Uniformes, merch y producción textil por volumen"
+  description="Cotiza producción textil por volumen para empresas, eventos y marcas. Uniformes, merch y personalización textil con atención directa."
+  canonical="https://adi.foundtexas.net/b2b"
+>
+
+
+  <TopMenu mode = "b2b" />
   
   <HeroB2B />
 
-  <div class="adi-divider container"></div>
-
   <ProductsSection />
-
-  <div class="adi-divider container"></div>
 
   <PricingTable />
 
-  <div class="adi-divider container"></div>
-
   <WorkGallery />
-
-  <div class="adi-divider container"></div>
 
   <!-- section id="cotizar" class="adi-section">
     <div class="container">
@@ -40,4 +41,6 @@ import AppLayout from "../layouts/AppLayout.astro";
 
   <div class="adi-divider container"></div -->
 
-</AppLayout>
+  <DirectContact />
+
+</BaseLayout>

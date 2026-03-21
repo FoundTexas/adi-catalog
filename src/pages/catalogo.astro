@@ -1,98 +1,38 @@
 ---
-export const prerender = false;
-
 import PriceRange from "../components/PriceRange.astro";
+import TopMenu from "../components/TopMenu.astro";
 import AppLayout from "../layouts/AppLayout.astro";
 
 const API_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
-
-const u = Astro.url;
-
-// Read URL params
-const q = u.searchParams.get("q") ?? "";
-const sort = u.searchParams.get("sort") ?? "id";
-const order = u.searchParams.get("order") ?? "desc";
-const page = u.searchParams.get("page") ?? "1";
-const limit = u.searchParams.get("limit") ?? "24";
-
-// cents from URL (0 is valid)
-const minCents = u.searchParams.has("minPriceCents")
-  ? (u.searchParams.get("minPriceCents") ?? "0")
-  : "0";
-
-const maxCents = u.searchParams.has("maxPriceCents")
-  ? (u.searchParams.get("maxPriceCents") ?? "130000")
-  : "130000";
-
-// Convert cents -> pesos for UI
-const minPrice = Number(minCents) / 100;
-const maxPrice = Number(maxCents) / 100;
-
-// Build API query
-const apiParams = new URLSearchParams();
-if (u.searchParams.has("q") || q.trim()) apiParams.set("q", q.trim());
-apiParams.set("minPriceCents", minCents);
-apiParams.set("maxPriceCents", maxCents);
-apiParams.set("sort", sort);
-apiParams.set("order", order);
-apiParams.set("page", page);
-apiParams.set("limit", limit);
-
-const apiUrl = `${API_URL}/products?${apiParams.toString()}`;
-
-const res = await fetch(apiUrl, { headers: { Accept: "application/json" } });
-if (!res.ok) throw new Error(`API error ${res.status}`);
-
-const data = await res.json();
-
-// Support {items, meta} or legacy array
-const items = Array.isArray(data) ? data : (data.items ?? []);
-const meta = Array.isArray(data)
-  ? { total: items.length, page: Number(page), pages: 1, limit: Number(limit) }
-  : (data.meta ?? {
-      total: 0,
-      page: Number(page),
-      pages: 1,
-      limit: Number(limit),
-    });
-
-function pageLink(nextPage: number) {
-  const x = new URL(u.toString());
-  x.searchParams.set("page", String(nextPage));
-  return x.pathname + x.search;
-}
-
-function formatMoneyFromCents(cents: number) {
-  return `$${((Number(cents) || 0) / 100).toFixed(2)}`;
-}
-
-function firstImageUrl(p: any) {
-  if (!p?.images?.length) return "";
-  const url = String(p.images[0]?.url ?? "");
-  if (!url) return "";
-  return API_URL + url;
-}
 ---
 
-<AppLayout title="ADI - Catálogo" menuMode="b2c">
+<AppLayout
+  title="Catálogo ADI | Diseño mexicano independiente"
+  description="Explora prendas y diseños de artistas mexicanos independientes. Compra por pieza o descubre colecciones creativas de ADI."
+  canonical="https://adi.foundtexas.net/catalogo"
+>
+  <TopMenu mode="b2c" />
+
   <section class="adi-section">
     <div class="container">
-      <div
-        class="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-3"
-      >
+
+      <div class="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-3">
         <div>
           <h1 class="fw-bold mb-1">Catálogo</h1>
-          <div class="adi-soft">Compra por pieza o revisa el catálogo.</div>
+          <div class="adi-soft">
+            Compra por pieza y explora diseños independientes mexicanos.
+          </div>
         </div>
       </div>
 
-      <form class="row g-2 align-items-end" method="get" id="filtersForm">
+      <form class="row g-2 align-items-end" id="filtersForm">
         <div class="col-12 col-md-4">
-          <label class="form-label">Buscar</label>
+          <label class="form-label" for="catalog-search">Buscar</label>
           <input
+            id="catalog-search"
             class="form-control"
             name="q"
-            value={q}
+            value=""
             placeholder="Playera, hoodie, SKU..."
           />
         </div>
@@ -101,28 +41,26 @@ function firstImageUrl(p: any) {
           min={0}
           max={1300}
           step={10}
-          initialMin={minPrice}
-          initialMax={maxPrice}
+          initialMin={0}
+          initialMax={1300}
           minName="minPriceCents"
           maxName="maxPriceCents"
         />
 
         <div class="col-6 col-md-2">
-          <label class="form-label">Ordenar</label>
-          <select class="form-select" name="sort">
-            <option value="id" selected={sort === "id"}>Más nuevos</option>
-            <option value="priceCents" selected={sort === "priceCents"}
-              >Precio</option
-            >
-            <option value="name" selected={sort === "name"}>Nombre</option>
+          <label class="form-label" for="catalog-sort">Ordenar</label>
+          <select class="form-select" id="catalog-sort" name="sort">
+            <option value="id">Más nuevos</option>
+            <option value="priceCents">Precio</option>
+            <option value="name">Nombre</option>
           </select>
         </div>
 
         <div class="col-6 col-md-1">
-          <label class="form-label">Dir</label>
-          <select class="form-select" name="order">
-            <option value="desc" selected={order === "desc"}>DESC</option>
-            <option value="asc" selected={order === "asc"}>ASC</option>
+          <label class="form-label" for="catalog-order">Dir</label>
+          <select class="form-select" id="catalog-order" name="order">
+            <option value="desc">DESC</option>
+            <option value="asc">ASC</option>
           </select>
         </div>
 
@@ -131,138 +69,333 @@ function firstImageUrl(p: any) {
         </div>
 
         <input type="hidden" name="page" value="1" />
-        <input type="hidden" name="limit" value={limit} />
+        <input type="hidden" name="limit" value="24" />
       </form>
 
       <div class="adi-divider my-4"></div>
 
-      <div
-        class="d-flex justify-content-between align-items-center flex-wrap gap-2"
-      >
-        <div class="adi-soft">
-          {meta.total} productos · Página {meta.page} de {meta.pages}
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="adi-soft" id="catalogMeta">
+          Cargando productos...
         </div>
       </div>
 
-      <div class="row g-3 mt-1">
-        {
-          items.map((p: any) => (
-            <div class="col-12 col-md-4 col-lg-3">
-              <div class="card h-100 shadow-sm">
-                <div class="ratio ratio-1x1 bg-light">
-                  {p.images?.length ? (
-                    <img
-                      src={firstImageUrl(p)}
-                      alt={p.name}
-                      style="object-fit:cover; width:100%; height:100%;"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div class="d-flex align-items-center justify-content-center adi-soft">
-                      Sin imagen
-                    </div>
-                  )}
-                </div>
-
-                <div class="card-body d-flex flex-column">
-                  <div class="small adi-soft">SKU: {p.sku}</div>
-                  <h5 class="card-title mt-1 mb-2">{p.name}</h5>
-
-                  <div class="fw-bold">
-                    {formatMoneyFromCents(p.priceCents)} {p.currency}
-                  </div>
-
-                  <div class="mt-auto pt-2">
-                    <button
-                      class="btn btn-dark w-100 d-inline-flex align-items-center justify-content-center gap-2"
-                      type="button"
-                      onclick={`window.ADI_CART?.add(${JSON.stringify({
-                        id: p.id,
-                        sku: p.sku,
-                        name: p.name,
-                        priceCents: p.priceCents,
-                        currency: p.currency,
-                        imageUrl: p.images?.[0]?.url ?? null,
-                        qty: 1,
-                      })})`}
-                    >
-                      <span>Agregar al carrito</span>
-
-                      <span class="adi-btnCartIcon" aria-hidden="true">
-                        <svg
-                          viewBox="-1.5 0 19 19"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path d="M14.252 4.59a.924.924 0 0 1 .921.92v3.602a1.048 1.048 0 0 1-.916 1.017l-8.511.883a.573.573 0 0 1-.145.019.577.577 0 1 0 0 1.154h8.488a.563.563 0 1 1 0 1.126h-.91a1.03 1.03 0 1 1-1.104 0H6.849a1.03 1.03 0 1 1-1.104 0H5.6a1.703 1.703 0 1 1 0-3.406.585.585 0 0 1 .128.014L3.111 3.911H1.39a.563.563 0 1 1 0-1.125h2.09a.562.562 0 0 1 .515.337l.64 1.466h9.617z" />
-                        </svg>
-                      </span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))
-        }
+      <div class="row g-3 mt-1" id="catalogGrid">
+        <div class="col-12">
+          <div class="adi-soft">Cargando catálogo...</div>
+        </div>
       </div>
 
-      <nav class="d-flex justify-content-between mt-4">
-        <div>
-          {
-            meta.page > 1 && (
-              <a class="btn btn-outline-dark" href={pageLink(meta.page - 1)}>
-                &larr; Anterior
-              </a>
-            )
-          }
-        </div>
-        <div>
-          {
-            meta.page < meta.pages && (
-              <a class="btn btn-outline-dark" href={pageLink(meta.page + 1)}>
-                Siguiente &rarr;
-              </a>
-            )
-          }
-        </div>
+      <nav class="d-flex justify-content-between mt-4" id="catalogPagination">
+        <div></div>
+        <div></div>
       </nav>
     </div>
   </section>
 
-  <script is:inline>
-    document.addEventListener("click", (e) => {
-      const btn = e.target?.closest?.("[data-add-to-cart]");
-      if (!btn) return;
+  <script is:inline define:vars={{ API_URL }}>
+    const apiBaseUrl = (API_URL || "http://localhost:3000").replace(/\/+$/, "");
+    const form = document.getElementById("filtersForm");
+    const grid = document.getElementById("catalogGrid");
+    const metaEl = document.getElementById("catalogMeta");
+    const paginationEl = document.getElementById("catalogPagination");
 
-      const item = {
-        id: btn.getAttribute("data-id") || null,
-        sku: btn.getAttribute("data-sku") || null,
-        name: btn.getAttribute("data-name") || "Producto",
-        priceCents: Number(btn.getAttribute("data-pricecents") || 0),
-        currency: btn.getAttribute("data-currency") || "MXN",
-        imageUrl: btn.getAttribute("data-imageurl") || null,
-        qty: 1,
+    function getUrlState() {
+      const url = new URL(window.location.href);
+
+      return {
+        q: url.searchParams.get("q") ?? "",
+        sort: url.searchParams.get("sort") ?? "id",
+        order: url.searchParams.get("order") ?? "desc",
+        page: Number(url.searchParams.get("page") ?? "1"),
+        limit: Number(url.searchParams.get("limit") ?? "24"),
+        minPriceCents: url.searchParams.has("minPriceCents")
+          ? Number(url.searchParams.get("minPriceCents") ?? "0")
+          : 0,
+        maxPriceCents: url.searchParams.has("maxPriceCents")
+          ? Number(url.searchParams.get("maxPriceCents") ?? "130000")
+          : 130000,
+      };
+    }
+
+    function applyStateToForm(state) {
+      const qEl = form?.querySelector('[name="q"]');
+      const sortEl = form?.querySelector('[name="sort"]');
+      const orderEl = form?.querySelector('[name="order"]');
+      const pageEl = form?.querySelector('[name="page"]');
+      const limitEl = form?.querySelector('[name="limit"]');
+      const minEl = form?.querySelector('[name="minPriceCents"]');
+      const maxEl = form?.querySelector('[name="maxPriceCents"]');
+
+      if (qEl) qEl.value = state.q;
+      if (sortEl) sortEl.value = state.sort;
+      if (orderEl) orderEl.value = state.order;
+      if (pageEl) pageEl.value = String(state.page);
+      if (limitEl) limitEl.value = String(state.limit);
+      if (minEl) minEl.value = String(state.minPriceCents);
+      if (maxEl) maxEl.value = String(state.maxPriceCents);
+
+      const minVisible = document.querySelector('[data-price-min-value]');
+      const maxVisible = document.querySelector('[data-price-max-value]');
+      if (minVisible) minVisible.textContent = `$${(state.minPriceCents / 100).toFixed(0)}`;
+      if (maxVisible) maxVisible.textContent = `$${(state.maxPriceCents / 100).toFixed(0)}`;
+    }
+
+    function buildApiUrl(state) {
+      const params = new URLSearchParams();
+
+      if (state.q.trim()) params.set("q", state.q.trim());
+      params.set("minPriceCents", String(state.minPriceCents));
+      params.set("maxPriceCents", String(state.maxPriceCents));
+      params.set("sort", state.sort);
+      params.set("order", state.order);
+      params.set("page", String(state.page));
+      params.set("limit", String(state.limit));
+
+      return `${apiBaseUrl}/products?${params.toString()}`;
+    }
+
+    function updateBrowserUrl(state) {
+      const url = new URL(window.location.href);
+
+      if (state.q.trim()) url.searchParams.set("q", state.q.trim());
+      else url.searchParams.delete("q");
+
+      url.searchParams.set("minPriceCents", String(state.minPriceCents));
+      url.searchParams.set("maxPriceCents", String(state.maxPriceCents));
+      url.searchParams.set("sort", state.sort);
+      url.searchParams.set("order", state.order);
+      url.searchParams.set("page", String(state.page));
+      url.searchParams.set("limit", String(state.limit));
+
+      window.history.replaceState({}, "", url.pathname + url.search);
+    }
+
+    function formatMoneyFromCents(cents) {
+      return `$${((Number(cents) || 0) / 100).toFixed(2)}`;
+    }
+
+    function firstImageUrl(product) {
+      if (!product?.images?.length) return "";
+      const url = String(product.images[0]?.url ?? "");
+      if (!url) return "";
+      return apiBaseUrl + url;
+    }
+
+    function renderMeta(meta) {
+      if (!metaEl) return;
+      metaEl.textContent = `${meta.total} productos · Página ${meta.page} de ${meta.pages}`;
+    }
+
+    function renderGrid(items) {
+      if (!grid) return;
+
+      if (!items.length) {
+        grid.innerHTML = `
+          <div class="col-12">
+            <div class="adi-soft">No se encontraron productos.</div>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = items
+        .map((p) => {
+          const image = firstImageUrl(p);
+          return `
+            <div class="col-12 col-md-4 col-lg-3">
+              <div class="card h-100 shadow-sm">
+                <div class="ratio ratio-1x1 bg-light">
+                  ${
+                    image
+                      ? `<img
+                          src="${image}"
+                          alt="${p.name}"
+                          style="object-fit:cover; width:100%; height:100%;"
+                          loading="lazy"
+                        />`
+                      : `<div class="d-flex align-items-center justify-content-center adi-soft">
+                          Sin imagen
+                        </div>`
+                  }
+                </div>
+
+                <div class="card-body d-flex flex-column">
+                  <div class="small adi-soft">SKU: ${p.sku ?? ""}</div>
+                  <h5 class="card-title mt-1 mb-2">${p.name ?? "Producto"}</h5>
+
+                  <div class="fw-bold">
+                    ${formatMoneyFromCents(p.priceCents)} ${p.currency ?? "MXN"}
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    function renderPagination(meta, state) {
+      if (!paginationEl) return;
+
+      const prevHref =
+        meta.page > 1
+          ? buildPageHref({ ...state, page: meta.page - 1 })
+          : null;
+
+      const nextHref =
+        meta.page < meta.pages
+          ? buildPageHref({ ...state, page: meta.page + 1 })
+          : null;
+
+      paginationEl.innerHTML = `
+        <div>
+          ${
+            prevHref
+              ? `<a class="btn btn-outline-dark" href="${prevHref}" data-page-link="${meta.page - 1}">
+                  &larr; Anterior
+                </a>`
+              : ``
+          }
+        </div>
+        <div>
+          ${
+            nextHref
+              ? `<a class="btn btn-outline-dark" href="${nextHref}" data-page-link="${meta.page + 1}">
+                  Siguiente &rarr;
+                </a>`
+              : ``
+          }
+        </div>
+      `;
+    }
+
+    function buildPageHref(state) {
+      const url = new URL(window.location.href);
+
+      if (state.q.trim()) url.searchParams.set("q", state.q.trim());
+      else url.searchParams.delete("q");
+
+      url.searchParams.set("minPriceCents", String(state.minPriceCents));
+      url.searchParams.set("maxPriceCents", String(state.maxPriceCents));
+      url.searchParams.set("sort", state.sort);
+      url.searchParams.set("order", state.order);
+      url.searchParams.set("page", String(state.page));
+      url.searchParams.set("limit", String(state.limit));
+
+      return url.pathname + url.search;
+    }
+
+    async function loadCatalog(state) {
+      try {
+        if (metaEl) metaEl.textContent = "Cargando productos...";
+        if (grid) {
+          grid.innerHTML = `
+            <div class="col-12">
+              <div class="adi-soft">Cargando catálogo...</div>
+            </div>
+          `;
+        }
+
+        const res = await fetch(buildApiUrl(state), {
+          headers: { Accept: "application/json" },
+        });
+
+        if (!res.ok) {
+          throw new Error(`API error ${res.status}`);
+        }
+
+        const data = await res.json();
+
+        const items = Array.isArray(data) ? data : (data.items ?? []);
+        const meta = Array.isArray(data)
+          ? {
+              total: items.length,
+              page: state.page,
+              pages: 1,
+              limit: state.limit,
+            }
+          : (data.meta ?? {
+              total: 0,
+              page: state.page,
+              pages: 1,
+              limit: state.limit,
+            });
+
+        renderMeta(meta);
+        renderGrid(items);
+        renderPagination(meta, state);
+        updateBrowserUrl(state);
+      } catch (error) {
+        if (metaEl) metaEl.textContent = "No se pudo cargar el catálogo.";
+        if (grid) {
+          grid.innerHTML = `
+            <div class="col-12">
+              <div class="adi-soft">No se pudo cargar el catálogo.</div>
+            </div>
+          `;
+        }
+        console.error(error);
+      }
+    }
+
+    form?.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const nextState = {
+        q: form.querySelector('[name="q"]')?.value ?? "",
+        sort: form.querySelector('[name="sort"]')?.value ?? "id",
+        order: form.querySelector('[name="order"]')?.value ?? "desc",
+        page: 1,
+        limit: Number(form.querySelector('[name="limit"]')?.value ?? "24"),
+        minPriceCents: Number(form.querySelector('[name="minPriceCents"]')?.value ?? "0"),
+        maxPriceCents: Number(form.querySelector('[name="maxPriceCents"]')?.value ?? "130000"),
       };
 
-      if (window.ADI_CART?.add) window.ADI_CART.add(item);
-      else
-        console.warn("ADI_CART not available (CartProfileMenu not mounted?)");
+      loadCatalog(nextState);
     });
+
+    paginationEl?.addEventListener("click", (e) => {
+      const link = e.target.closest("[data-page-link]");
+      if (!link) return;
+
+      e.preventDefault();
+
+      const currentState = getUrlState();
+      const nextPage = Number(link.getAttribute("data-page-link") || "1");
+
+      loadCatalog({
+        ...currentState,
+        page: nextPage,
+      });
+    });
+
+    const initialState = getUrlState();
+    applyStateToForm(initialState);
+    loadCatalog(initialState);
   </script>
 
   <style>
-  .adi-btnCartIcon{
-    width: 18px;
-    height: 18px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    opacity: .95;
-  }
-  .adi-btnCartIcon svg{
-    width: 18px;
-    height: 18px;
-    display: block;
-    fill: #fff;
-  }
-</style>
+    .adi-catalog-logo img {
+      width: auto;
+      max-height: 100px;
+      display: block;
+    }
+
+    .adi-btnCartIcon {
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.95;
+    }
+
+    .adi-btnCartIcon svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+      fill: #fff;
+    }
+  </style>
 </AppLayout>

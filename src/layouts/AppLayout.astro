@@ -1,7 +1,11 @@
 ---
 const {
   title = "ADI",
-  menuMode = "none",
+  description = "Producción textil personalizada para empresas, marcas y emprendedores.",
+  canonical = "https://adi.foundtexas.net/",
+  image = "https://adi.foundtexas.net/og/adi-og-home.jpg",
+  noIndex = false,
+  schema = null,
 } = Astro.props;
 
 import BaseLayout from "./BaseLayout.astro";
@@ -9,8 +13,15 @@ import DirectContact from "../components/DirectContact.astro";
 import CartProfileMenu from "../components/CartProfileMenu.astro";
 ---
 
-<BaseLayout title={title} menuMode = {menuMode}>
-  <CartProfileMenu user={Astro.locals.user} />
+<BaseLayout
+  title={title}
+  description={description}
+  canonical={canonical}
+  image={image}
+  noIndex={noIndex}
+  schema={schema}
+>
+  <!--CartProfileMenu user={Astro.locals.user} /-->
 
   <slot />
 

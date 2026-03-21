@@ -6,20 +6,18 @@ type WorkImage = {
 };
 
 type WorkItem = {
-  id: string; // folder slug
-  title: string; // prettified folder name
-  cover: WorkImage; // first image in folder
-  images: WorkImage[]; // all images in folder
+  id: string;
+  title: string;
+  cover: WorkImage;
+  images: WorkImage[];
   sortKey: string;
 };
 
-// 1) Import everything under src/assets/works/<folder>/<file>
 const workFiles = import.meta.glob<{ default: ImageMetadata }>(
   "../assets/works/*/*.{jpg,jpeg,png,webp,avif}",
   { eager: true },
 );
 
-// Helpers
 const toTitle = (slug: string) =>
   slug
     .replace(/[-_]+/g, " ")
@@ -28,27 +26,23 @@ const toTitle = (slug: string) =>
     .replace(/\b\w/g, (m) => m.toUpperCase());
 
 const getFolder = (path: string) => {
-  // .../works/<folder>/<file>
   const parts = path.split("/");
   return parts[parts.length - 2] ?? "work";
 };
 
 const getFile = (path: string) => path.split("/").pop() ?? "";
 
-// 2) Group by folder
 const byFolder = new Map<string, { path: string; img: ImageMetadata }[]>();
 
 for (const [path, mod] of Object.entries(workFiles)) {
   const folder = getFolder(path);
   const arr = byFolder.get(folder) ?? [];
-  arr.push({ path, img: (mod as any).default });
+  arr.push({ path, img: mod.default });
   byFolder.set(folder, arr);
 }
 
-// 3) Build items
 const items: WorkItem[] = Array.from(byFolder.entries())
   .map(([folder, arr]) => {
-    // sort files alphabetically to determine cover/ordering
     arr.sort((a, b) => getFile(a.path).localeCompare(getFile(b.path)));
 
     const images: WorkImage[] = arr.map(({ img }) => ({
@@ -114,7 +108,6 @@ const items: WorkItem[] = Array.from(byFolder.entries())
     </div>
   </div>
 
-  {/* ONE GLOBAL WORK MODAL (slider) */}
   <div class="adi-photo-backdrop" data-work-modal hidden>
     <div
       class="adi-photo-modal"
@@ -126,8 +119,10 @@ const items: WorkItem[] = Array.from(byFolder.entries())
         class="adi-photo-close"
         type="button"
         data-work-close
-        aria-label="Cerrar">✕</button
+        aria-label="Cerrar"
       >
+        ✕
+      </button>
 
       <div class="adi-work-head">
         <div class="adi-work-title" data-work-title>Trabajo</div>
@@ -139,15 +134,21 @@ const items: WorkItem[] = Array.from(byFolder.entries())
           class="adi-work-nav is-prev"
           type="button"
           data-work-prev
-          aria-label="Anterior">‹</button
+          aria-label="Anterior"
         >
+          ‹
+        </button>
+
         <img class="adi-photo-img" data-work-img alt="" />
+
         <button
           class="adi-work-nav is-next"
           type="button"
           data-work-next
-          aria-label="Siguiente">›</button
+          aria-label="Siguiente"
         >
+          ›
+        </button>
       </div>
 
       <div class="adi-work-dots" data-work-dots></div>
@@ -156,9 +157,6 @@ const items: WorkItem[] = Array.from(byFolder.entries())
 </section>
 
 <script is:inline>
-  /* ===========================
-     Parallax (strong, per tile)
-  =========================== */
   const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -176,7 +174,7 @@ const items: WorkItem[] = Array.from(byFolder.entries())
         }
         requestTick();
       },
-      { threshold: 0.01 },
+      { threshold: 0.01 }
     );
 
     tiles.forEach((t) => io.observe(t));
@@ -192,9 +190,8 @@ const items: WorkItem[] = Array.from(byFolder.entries())
         const rect = tile.getBoundingClientRect();
         const progress = (vh - rect.top) / (vh + rect.height);
         const p = clamp(progress, 0, 1);
-        const centered = (p - 0.5) * 2; // [-1..1]
+        const centered = (p - 0.5) * 2;
 
-        // Exaggerated depth
         const depthY = 200;
         const driftX = 0;
         const baseScale = 0.9;
@@ -219,9 +216,6 @@ const items: WorkItem[] = Array.from(byFolder.entries())
     requestTick();
   }
 
-  /* ===========================
-     Modal + Slider
-  =========================== */
   const grid = document.querySelector("[data-photo-grid]");
   const modal = document.querySelector("[data-work-modal]");
   const img = document.querySelector("[data-work-img]");
@@ -262,8 +256,7 @@ const items: WorkItem[] = Array.from(byFolder.entries())
 
   const updateUI = (title) => {
     if (titleEl) titleEl.textContent = title || "Trabajo";
-    if (counterEl)
-      counterEl.textContent = `${idx + 1} / ${currentImages.length || 1}`;
+    if (counterEl) counterEl.textContent = `${idx + 1} / ${currentImages.length || 1}`;
     if (prevBtn) prevBtn.disabled = currentImages.length <= 1;
     if (nextBtn) nextBtn.disabled = currentImages.length <= 1;
     renderDots();
@@ -274,7 +267,6 @@ const items: WorkItem[] = Array.from(byFolder.entries())
     idx = (next + currentImages.length) % currentImages.length;
     const src = currentImages[idx];
     if (img) img.src = src;
-    // keep alt as title; set in open()
     updateUI(titleEl?.textContent || "");
   };
 
@@ -327,22 +319,22 @@ const items: WorkItem[] = Array.from(byFolder.entries())
 
   window.addEventListener("keydown", (e) => {
     if (!modal || modal.hidden) return;
-
     if (e.key === "Escape") return close();
     if (e.key === "ArrowLeft") return go(idx - 1);
     if (e.key === "ArrowRight") return go(idx + 1);
   });
 
-  // Basic swipe (mobile)
-  let sx = 0,
-    sy = 0,
-    tracking = false;
+  let sx = 0;
+  let sy = 0;
+  let tracking = false;
   const stage = document.querySelector(".adi-work-stage");
+
   stage?.addEventListener("pointerdown", (e) => {
     tracking = true;
     sx = e.clientX;
     sy = e.clientY;
   });
+
   stage?.addEventListener("pointerup", (e) => {
     if (!tracking) return;
     tracking = false;
@@ -357,50 +349,43 @@ const items: WorkItem[] = Array.from(byFolder.entries())
 </script>
 
 <style>
-  /* ======================================================
-     WorkGallery — COMPLETE STYLE (REVISED)
-     - Sharp rectangles (no radius)
-     - Parallax layer inside tiles
-     - Modal shows FULL image (no crop)
-     - No overflow (grid + modal fixed)
-  ====================================================== */
-
-  /* Section flow */
   .adi-section-flow {
     display: block;
     min-height: auto;
     padding: 6rem 0;
   }
 
-  /* Full-width wrap */
   .adi-works-wrap {
     width: 100%;
     margin-top: 1rem;
     padding: 0 12px;
   }
+
   @media (min-width: 576px) {
     .adi-works-wrap {
       padding: 0 16px;
     }
   }
+
   @media (min-width: 992px) {
     .adi-works-wrap {
       padding: 0 24px;
     }
   }
 
-  /* Grid */
   .adi-works-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 12px;
   }
+
   @media (min-width: 768px) {
     .adi-works-grid {
       grid-template-columns: repeat(2, 1fr);
       gap: 14px;
     }
   }
+
   @media (min-width: 1200px) {
     .adi-works-grid {
       grid-template-columns: repeat(3, 1fr);
@@ -408,28 +393,21 @@ const items: WorkItem[] = Array.from(byFolder.entries())
     }
   }
 
-  /* Tile */
   .adi-works-tile {
     position: relative;
     margin: 0;
     padding: 0;
-
     border-radius: 0;
     border: 1px solid rgba(120, 90, 160, 0.18);
     background: rgba(255, 255, 255, 0.7);
     box-shadow: 0 18px 60px rgba(100, 60, 150, 0.1);
-
     overflow: hidden;
-
-    /* tweak this to make cards more squared/rectangular */
     aspect-ratio: 5 / 4;
     height: auto;
-
     cursor: zoom-in;
     text-align: left;
     appearance: none;
     width: 100%;
-
     transition:
       transform 0.25s ease,
       box-shadow 0.25s ease,
@@ -447,14 +425,12 @@ const items: WorkItem[] = Array.from(byFolder.entries())
     outline-offset: 3px;
   }
 
-  /* Parallax layer */
   .adi-works-media {
     position: absolute;
     inset: -33%;
     --px: 0px;
     --py: 0px;
     --pz: 0;
-
     transform: translate3d(var(--px), var(--py), 0) scale(var(--pz));
     will-change: transform;
     filter: saturate(1) contrast(1.1);
@@ -468,7 +444,6 @@ const items: WorkItem[] = Array.from(byFolder.entries())
     transform: translateZ(0);
   }
 
-  /* Depth overlays */
   .adi-works-tile::before {
     content: "";
     position: absolute;
@@ -499,88 +474,65 @@ const items: WorkItem[] = Array.from(byFolder.entries())
     z-index: 2;
   }
 
-  /* Caption */
   .adi-works-cap {
     position: absolute;
     left: 12px;
     right: 12px;
     bottom: 12px;
     z-index: 3;
-
     padding: 0.7rem 0.95rem;
     border-radius: 0;
-
     border: 1px solid rgba(255, 255, 255, 0.55);
     background: rgba(255, 255, 255, 0.62);
     backdrop-filter: blur(10px);
-
     color: #2a1f40;
     font-weight: 800;
-
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  /* ======================================================
-     MODAL + SLIDER (FULL IMAGE, NO CROP)
-  ====================================================== */
-
-  /* Backdrop */
   .adi-photo-backdrop {
     position: fixed;
     inset: 0;
     z-index: 2147483647;
-
     background: rgba(20, 10, 35, 0.72);
     backdrop-filter: blur(10px);
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     padding: 16px;
   }
 
-  /* Modal box */
   .adi-photo-modal {
     position: relative;
     width: min(1200px, 96vw);
     height: min(88vh, 920px);
-
     background: rgba(0, 0, 0, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 0;
-
-    overflow: hidden; /* ✅ clip everything */
+    overflow: hidden;
     box-shadow: 0 50px 150px rgba(0, 0, 0, 0.35);
-
     display: grid;
     grid-template-rows: auto 1fr auto;
-
-    /* ✅ prevents grid children from forcing overflow */
     min-width: 0;
     min-height: 0;
   }
 
-  /* Header */
   .adi-work-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-
     padding: 12px 14px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     color: #fff;
-
     min-width: 0;
   }
 
   .adi-work-title {
     font-weight: 900;
     letter-spacing: 0.02em;
-
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -593,67 +545,47 @@ const items: WorkItem[] = Array.from(byFolder.entries())
     white-space: nowrap;
   }
 
-  /* Stage (IMPORTANT FIX: flex centers and avoids crop) */
   .adi-work-stage {
     position: relative;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
-    /* ✅ prevents expanding the grid row */
     min-height: 0;
     min-width: 0;
-
-    /* ✅ ensures nothing spills out */
     overflow: hidden;
-
     background: #111;
     user-select: none;
     touch-action: pan-y;
   }
 
-  /* Image (FULLY visible, never cropped) */
   .adi-photo-img {
     display: block;
-
-    /* ✅ keep entire image visible */
     max-width: 100%;
     max-height: 100%;
-
     width: auto;
     height: auto;
-
     object-fit: contain;
-
     background: rgba(0, 0, 0, 0.2);
   }
 
-  /* Nav */
   .adi-work-nav {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-
     width: 44px;
     height: 44px;
-
     border: 0;
     border-radius: 0;
     cursor: pointer;
-
     background: rgba(0, 0, 0, 0.55);
     color: #fff;
     font-size: 28px;
-
     display: grid;
     place-items: center;
-
     transition:
       transform 0.2s ease,
       background-color 0.2s ease,
       opacity 0.2s ease;
-
     z-index: 2;
   }
 
@@ -670,17 +602,16 @@ const items: WorkItem[] = Array.from(byFolder.entries())
   .adi-work-nav.is-prev {
     left: 10px;
   }
+
   .adi-work-nav.is-next {
     right: 10px;
   }
 
-  /* Dots */
   .adi-work-dots {
     display: flex;
     gap: 8px;
     justify-content: center;
     align-items: center;
-
     padding: 12px 14px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(0, 0, 0, 0.45);
@@ -689,11 +620,9 @@ const items: WorkItem[] = Array.from(byFolder.entries())
   .adi-dot {
     width: 10px;
     height: 10px;
-
     border-radius: 999px;
     border: 1px solid rgba(255, 255, 255, 0.35);
     background: rgba(255, 255, 255, 0.1);
-
     cursor: pointer;
     padding: 0;
   }
@@ -703,31 +632,24 @@ const items: WorkItem[] = Array.from(byFolder.entries())
     border-color: rgba(255, 255, 255, 0.85);
   }
 
-  /* Close button */
   .adi-photo-close {
     position: absolute;
     top: 10px;
     right: 10px;
-
     width: 42px;
     height: 42px;
-
     border: 0;
     border-radius: 0;
     cursor: pointer;
-
     background: rgba(0, 0, 0, 0.7);
     color: #fff;
     font-size: 18px;
     line-height: 1;
-
     display: grid;
     place-items: center;
-
     transition:
       transform 0.2s ease,
       background-color 0.2s ease;
-
     z-index: 3;
   }
 
@@ -736,7 +658,6 @@ const items: WorkItem[] = Array.from(byFolder.entries())
     background: rgba(0, 0, 0, 0.86);
   }
 
-  /* Mobile tweaks */
   @media (max-width: 520px) {
     .adi-work-nav {
       width: 40px;
@@ -745,7 +666,6 @@ const items: WorkItem[] = Array.from(byFolder.entries())
     }
   }
 
-  /* Reduced motion */
   @media (prefers-reduced-motion: reduce) {
     .adi-works-media {
       transform: none !important;

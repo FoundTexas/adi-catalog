@@ -4,6 +4,7 @@ import CartProfilePanel from "./cart/CartProfilePanel.astro";
 import CartPanel from "./cart/CartPanel.astro";
 
 const {
+  homeHref = "/",
   loginHref = "/login",
   logoutHref = "/logout",
   ordersHref = "/account",
@@ -15,13 +16,39 @@ const {
 
 <CartFab targetId="adiSidePanel" />
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="adiSidePanel" aria-labelledby="adiSidePanelLabel">
-  <div class="offcanvas-header">
-    <div>
-      <div class="adi-soft small">ADI</div>
+<div
+  class="offcanvas offcanvas-end"
+  tabindex="-1"
+  id="adiSidePanel"
+  aria-labelledby="adiSidePanelLabel"
+>
+  <div class="offcanvas-header align-items-start">
+    <div class="adi-cart-header">
+      <a
+        href={homeHref}
+        class="adi-cart-logo"
+        aria-label="Volver al inicio de ADI"
+        data-adi-home
+      >
+        <img
+          src="/ADI_full.svg"
+          alt="ADI — Arte y Diseño Independiente"
+          width="auto"
+          height="10rem"
+          loading="eager"
+          decoding="async"
+        />
+      </a>
+
       <h5 class="offcanvas-title" id="adiSidePanelLabel">Carrito & Perfil</h5>
     </div>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+
+    <!-- button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="offcanvas"
+      aria-label="Cerrar"
+    ></button -->
   </div>
 
   <div class="offcanvas-body">
@@ -31,28 +58,83 @@ const {
       ordersHref={ordersHref}
       bulkHref={bulkHref}
     />
-    <CartPanel catalogHref={catalogHref} checkoutHref={checkoutHref} />
+
+    <CartPanel
+      catalogHref={catalogHref}
+      checkoutHref={checkoutHref}
+    />
   </div>
 </div>
 
 <style>
-  .offcanvas { background: var(--adi-bg); color: var(--adi-text); }
+  .offcanvas {
+    background: var(--adi-bg);
+    color: var(--adi-text);
+  }
+
+  .adi-cart-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .adi-cart-logo {
+    display: inline-block;
+    opacity: 0.9;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .adi-cart-logo:hover {
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+
+  .adi-cart-logo img {
+    display: block;
+    width: auto;
+    height: 32px;
+  }
+
+  .adi-fab.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-6px);
+  }
 </style>
 
 <script is:inline>
-  // hide FAB while panel open
   document.addEventListener("shown.bs.offcanvas", (e) => {
     if (e?.target?.id === "adiSidePanel") {
       document.querySelector(".adi-fab")?.classList.add("is-hidden");
     }
   });
+
   document.addEventListener("hidden.bs.offcanvas", (e) => {
     if (e?.target?.id === "adiSidePanel") {
       document.querySelector(".adi-fab")?.classList.remove("is-hidden");
     }
   });
-</script>
 
-<style>
-  .adi-fab.is-hidden { opacity: 0; pointer-events: none; transform: translateY(-6px); }
-</style>
+  document.addEventListener("click", (e) => {
+    const link = e.target.closest("[data-adi-home]");
+    if (!link) return;
+
+    e.preventDefault();
+
+    const offcanvasEl = document.getElementById("adiSidePanel");
+    if (!offcanvasEl) {
+      window.location.href = link.getAttribute("href") || "/";
+      return;
+    }
+
+    const offcanvas =
+      bootstrap.Offcanvas.getInstance(offcanvasEl) ||
+      new bootstrap.Offcanvas(offcanvasEl);
+
+    offcanvas.hide();
+
+    setTimeout(() => {
+      window.location.href = link.getAttribute("href") || "/";
+    }, 220);
+  });
+</script>

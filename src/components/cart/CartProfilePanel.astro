@@ -3,11 +3,12 @@ const {
   loginHref = "/login",
   logoutHref = "/logout",
   ordersHref = "/account",
-  bulkHref = "/admin/bulk",
+  b2bHref = "/b2b",
 } = Astro.props;
 ---
 
 <div class="adi-card p-3 mb-3" data-adi-profile>
+
   <div class="d-flex align-items-start justify-content-between gap-3">
     <div>
       <div class="fw-semibold">Perfil</div>
@@ -28,8 +29,8 @@ const {
       Mis pedidos
     </a>
 
-    <a class="btn btn-outline-light" href={bulkHref} data-adi-bulk style="display:none;">
-      Admin · Bulk Upload
+    <a class="btn btn-outline-dark" href={b2bHref} data-adi-b2b>
+      Cotización B2B
     </a>
 
     <form method="post" action={logoutHref} class="m-0" data-adi-logout style="display:none;">
@@ -78,7 +79,6 @@ const {
 
     setDisplay(qs(root, "[data-adi-login]"), "");
     setDisplay(qs(root, "[data-adi-orders]"), "none");
-    setDisplay(qs(root, "[data-adi-bulk]"), "none");
     setDisplay(qs(root, "[data-adi-logout]"), "none");
   }
 
@@ -97,7 +97,6 @@ const {
     setDisplay(qs(root, "[data-adi-login]"), "none");
     setDisplay(qs(root, "[data-adi-orders]"), "");
     setDisplay(qs(root, "[data-adi-logout]"), "");
-    setDisplay(qs(root, "[data-adi-bulk]"), role === "admin" ? "" : "none");
   }
 
   document.addEventListener("DOMContentLoaded", async () => {

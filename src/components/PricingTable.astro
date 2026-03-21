@@ -1,31 +1,9 @@
 ---
 import { PRICING, PRODUCTS } from "../config/pricing";
 
-type PriceOpt = {
-  id: string;
-  label: string;
-  retail: number;
-  wholesale: number;
-};
-
-/** ✅ Fallback por categoría (esto asegura que hoodies/sudaderas siempre aparezcan) */
-const PRICE_BY_CATEGORY: Record<"tshirt" | "hoodie" | "sweatshirt", PriceOpt[]> = {
-  tshirt: [
-    { id: "custom", label: "Personalizada (DTF)", retail: 250, wholesale: 180 },
-    { id: "blank", label: "Sin personalizar", retail: 100, wholesale: 80 },
-  ],
-  hoodie: [
-    { id: "custom", label: "Personalizada (DTF)", retail: 400, wholesale: 350 },
-    { id: "blank", label: "Sin personalizar", retail: 300, wholesale: 250 },
-  ],
-  sweatshirt: [
-    { id: "custom", label: "Personalizada (DTF)", retail: 400, wholesale: 350 },
-    { id: "blank", label: "Sin personalizar", retail: 300, wholesale: 250 },
-  ],
-};
-
 const rows = (PRODUCTS ?? []).flatMap((p) => {
-  const opts = PRICE_BY_CATEGORY[p.category] ?? [];
+  const opts = p.prices ?? [];
+
   return opts.map((o) => ({
     key: `${p.id}-${o.id}`,
     productName: p.name,
@@ -69,7 +47,7 @@ const shipMetro = ship.metroCdmx ?? 0;
           id="priceSearch"
           class="form-control form-control-sm adi-price-search"
           type="search"
-          placeholder="Buscar (playera, sudadera, hoodie, sin personalizar...)"
+          placeholder="Buscar (playera, sudadera, hoodie, scrub, sin personalizar...)"
           aria-label="Buscar en la tabla"
         />
       </div>
@@ -156,6 +134,7 @@ const shipMetro = ship.metroCdmx ?? 0;
       search?.addEventListener("input", (e) => {
         const q = (e.target.value || "").toLowerCase().trim();
         const trs = table?.querySelectorAll("tbody tr") || [];
+
         trs.forEach((tr) => {
           const hay = tr.getAttribute("data-search") || "";
           if (!hay) return;
@@ -170,12 +149,12 @@ const shipMetro = ship.metroCdmx ?? 0;
       .adi-price-tools{
         display:flex; align-items:center; gap:.75rem; flex-wrap:wrap;
       }
+
       .adi-price-search{
         width: min(360px, 92vw);
         background: rgba(255,255,255,.78) !important;
       }
 
-      /* segmented */
       .adi-seg{
         display:inline-flex;
         border: 1px solid rgba(120,90,160,.22);
@@ -185,8 +164,10 @@ const shipMetro = ship.metroCdmx ?? 0;
         gap: 4px;
         box-shadow: 0 10px 30px rgba(100,60,150,.08);
       }
+
       .adi-seg-btn{
-        border:0; background:transparent;
+        border:0;
+        background:transparent;
         padding:.35rem .7rem;
         border-radius: 999px;
         font-weight:800;
@@ -195,15 +176,20 @@ const shipMetro = ship.metroCdmx ?? 0;
         cursor:pointer;
         transition: background-color .2s ease, transform .2s ease;
       }
-      .adi-seg-btn:hover{ background: rgba(180,108,255,.10); transform: translateY(-1px); }
+
+      .adi-seg-btn:hover{
+        background: rgba(180,108,255,.10);
+        transform: translateY(-1px);
+      }
+
       .adi-seg-btn.is-active{
         background: linear-gradient(135deg, var(--adi-accent), #8e5bff);
         color:#fff;
         box-shadow: 0 10px 26px rgba(180,108,255,.25);
       }
 
-      /* table */
       .adi-tableWrap{ overflow:hidden; }
+
       .adi-table{
         width:100%;
         border-collapse: separate;
@@ -221,13 +207,14 @@ const shipMetro = ship.metroCdmx ?? 0;
         white-space: nowrap;
       }
 
-      /* ✅ Zebra striping (2 colores alternados) */
       .adi-table tbody tr:nth-child(odd){
         background: rgba(255,255,255,.55);
       }
+
       .adi-table tbody tr:nth-child(even){
         background: rgba(180,108,255,.06);
       }
+
       .adi-table tbody tr:hover{
         background: rgba(180,108,255,.12);
       }
@@ -241,13 +228,28 @@ const shipMetro = ship.metroCdmx ?? 0;
       .adi-col-product{ width:56%; }
       .adi-col-retail, .adi-col-wholesale{ width:22%; text-align:right; }
 
-      .adi-prod-title{ font-weight: 900; color: var(--adi-text); }
-      .adi-prod-sub{ margin-top: 2px; font-size:.88rem; color: rgba(60,40,90,.65); }
+      .adi-prod-title{
+        font-weight: 900;
+        color: var(--adi-text);
+      }
 
-      .adi-money{ text-align:right; white-space:nowrap; }
+      .adi-prod-sub{
+        margin-top: 2px;
+        font-size:.88rem;
+        color: rgba(60,40,90,.65);
+      }
+
+      .adi-money{
+        text-align:right;
+        white-space:nowrap;
+      }
+
       .adi-pill{
-        display:inline-flex; align-items:center; justify-content:center;
-        height: 22px; padding: 0 .5rem;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        height: 22px;
+        padding: 0 .5rem;
         border-radius: 999px;
         border: 1px solid rgba(120,90,160,.18);
         background: rgba(255,255,255,.75);
@@ -256,9 +258,16 @@ const shipMetro = ship.metroCdmx ?? 0;
         font-size: .72rem;
         margin-right: .4rem;
       }
-      .adi-price{ font-weight: 950; color: rgba(42,31,64,.92); }
 
-      .adi-empty{ padding: 18px 16px; color: rgba(60,40,90,.65); }
+      .adi-price{
+        font-weight: 950;
+        color: rgba(42,31,64,.92);
+      }
+
+      .adi-empty{
+        padding: 18px 16px;
+        color: rgba(60,40,90,.65);
+      }
 
       .adi-footnote{
         padding: 14px 16px;
