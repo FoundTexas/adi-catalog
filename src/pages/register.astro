@@ -1,0 +1,400 @@
+---
+import AppLayout from "../layouts/AppLayout.astro";
+const API_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
+---
+
+<AppLayout title="ADI — Crear cuenta">
+  <section class="adi-section">
+    <div class="container" style="max-width: 560px;">
+      <div class="adi-card p-4 p-md-5">
+        <div class="text-center mb-4">
+          <div class="adi-soft small">ADI</div>
+          <h1 class="fw-bold mb-1">Crear cuenta</h1>
+          <div class="adi-soft">
+            Regístrate para comprar y dar seguimiento a tus pedidos.
+          </div>
+        </div>
+
+        <div id="formError" class="alert alert-danger mb-3 d-none" role="alert"></div>
+        <div id="formSuccess" class="alert alert-success mb-3 d-none" role="alert"></div>
+
+        <form id="registerForm" class="d-grid gap-3" novalidate>
+          <div>
+            <label class="form-label" for="email">Email</label>
+            <input
+              id="email"
+              class="form-control"
+              name="email"
+              type="email"
+              required
+              autocomplete="email"
+              placeholder="tu@email.com"
+            />
+          </div>
+
+          <div>
+            <label class="form-label" for="password">Contraseña</label>
+            <div class="password-wrap">
+              <input
+                id="password"
+                class="form-control password-input"
+                name="password"
+                type="password"
+                required
+                autocomplete="new-password"
+                minlength="7"
+              />
+
+              <button
+                type="button"
+                class="password-toggle"
+                id="togglePassword"
+                aria-label="Mostrar contraseña"
+                aria-controls="password"
+                aria-pressed="false"
+              >
+                <span id="eyeOpen1" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </span>
+                <span id="eyeClosed1" class="d-none" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 3l18 18"></path>
+                    <path d="M10.6 10.6A3 3 0 0 0 13.4 13.4"></path>
+                    <path d="M9.9 5.1A10.9 10.9 0 0 1 12 5c6.5 0 10 7 10 7a13.2 13.2 0 0 1-4.2 5.1"></path>
+                    <path d="M6.6 6.6C4 8.3 2 12 2 12a13.3 13.3 0 0 0 10 7 10.9 10.9 0 0 0 5.4-1.4"></path>
+                  </svg>
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="form-label" for="confirmPassword">Confirmar contraseña</label>
+            <div class="password-wrap">
+              <input
+                id="confirmPassword"
+                class="form-control password-input"
+                name="confirmPassword"
+                type="password"
+                required
+                autocomplete="new-password"
+                minlength="7"
+              />
+
+              <button
+                type="button"
+                class="password-toggle"
+                id="toggleConfirmPassword"
+                aria-label="Mostrar confirmación de contraseña"
+                aria-controls="confirmPassword"
+                aria-pressed="false"
+              >
+                <span id="eyeOpen2" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </span>
+                <span id="eyeClosed2" class="d-none" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 3l18 18"></path>
+                    <path d="M10.6 10.6A3 3 0 0 0 13.4 13.4"></path>
+                    <path d="M9.9 5.1A10.9 10.9 0 0 1 12 5c6.5 0 10 7 10 7a13.2 13.2 0 0 1-4.2 5.1"></path>
+                    <path d="M6.6 6.6C4 8.3 2 12 2 12a13.3 13.3 0 0 0 10 7 10.9 10.9 0 0 0 5.4-1.4"></path>
+                  </svg>
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div class="password-checks">
+            <div class="password-check-card" id="matchCard">
+              <div class="password-check-icon" id="matchIcon">✕</div>
+              <div>
+                <div class="password-check-label">Passwords match</div>
+                <div class="password-check-value" id="debugMatch">No</div>
+              </div>
+            </div>
+
+            <div class="password-check-card" id="minCard">
+              <div class="password-check-icon" id="minIcon">✕</div>
+              <div>
+                <div class="password-check-label">Password valid (&gt; 6)</div>
+                <div class="password-check-value" id="debugMin">No</div>
+              </div>
+            </div>
+          </div>
+
+          <button id="submitBtn" class="btn btn-primary w-100" type="submit">
+            Crear cuenta
+          </button>
+
+          <a class="btn btn-outline-light w-100" href="/login">
+            Ya tengo cuenta
+          </a>
+
+          <a class="btn btn-outline-light w-100" href="/catalogo">
+            Volver al catálogo
+          </a>
+        </form>
+
+        <div class="text-center mt-4 adi-soft small">
+          Te enviaremos un correo para verificar tu cuenta.
+        </div>
+      </div>
+    </div>
+  </section>
+</AppLayout>
+
+<script define:vars={{ API_URL }}>
+  const form = document.getElementById("registerForm");
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+  const confirmInput = document.getElementById("confirmPassword");
+  const errorBox = document.getElementById("formError");
+  const successBox = document.getElementById("formSuccess");
+  const submitBtn = document.getElementById("submitBtn");
+
+  const debugMatch = document.getElementById("debugMatch");
+  const debugMin = document.getElementById("debugMin");
+  const matchCard = document.getElementById("matchCard");
+  const minCard = document.getElementById("minCard");
+  const matchIcon = document.getElementById("matchIcon");
+  const minIcon = document.getElementById("minIcon");
+
+  const togglePassword = document.getElementById("togglePassword");
+  const toggleConfirmPassword = document.getElementById("toggleConfirmPassword");
+  const eyeOpen1 = document.getElementById("eyeOpen1");
+  const eyeClosed1 = document.getElementById("eyeClosed1");
+  const eyeOpen2 = document.getElementById("eyeOpen2");
+  const eyeClosed2 = document.getElementById("eyeClosed2");
+
+  function setError(message) {
+    errorBox.textContent = message;
+    errorBox.classList.remove("d-none");
+    successBox.classList.add("d-none");
+    successBox.textContent = "";
+  }
+
+  function setSuccess(message) {
+    successBox.textContent = message;
+    successBox.classList.remove("d-none");
+    errorBox.classList.add("d-none");
+    errorBox.textContent = "";
+  }
+
+  function clearMessages() {
+    errorBox.classList.add("d-none");
+    successBox.classList.add("d-none");
+    errorBox.textContent = "";
+    successBox.textContent = "";
+  }
+
+  function applyCheckState(card, icon, valueNode, isValid) {
+    card.classList.toggle("is-valid", isValid);
+    card.classList.toggle("is-invalid", !isValid);
+    icon.textContent = isValid ? "✓" : "✕";
+    valueNode.textContent = isValid ? "Yes" : "No";
+  }
+
+  function updateDebug() {
+    const password = String(passwordInput.value || "");
+    const confirmPassword = String(confirmInput.value || "");
+
+    const matches = password.length > 0 && confirmPassword.length > 0 && password === confirmPassword;
+    const validMin = password.length > 6;
+
+    applyCheckState(matchCard, matchIcon, debugMatch, matches);
+    applyCheckState(minCard, minIcon, debugMin, validMin);
+  }
+
+  function toggleVisibility(input, button, eyeOpen, eyeClosed, labels) {
+    const isPassword = input.getAttribute("type") === "password";
+    input.setAttribute("type", isPassword ? "text" : "password");
+    button.setAttribute("aria-pressed", isPassword ? "true" : "false");
+    button.setAttribute("aria-label", isPassword ? labels.hide : labels.show);
+    eyeOpen.classList.toggle("d-none", isPassword);
+    eyeClosed.classList.toggle("d-none", !isPassword);
+  }
+
+  passwordInput.addEventListener("input", updateDebug);
+  confirmInput.addEventListener("input", updateDebug);
+
+  togglePassword.addEventListener("click", () => {
+    toggleVisibility(
+      passwordInput,
+      togglePassword,
+      eyeOpen1,
+      eyeClosed1,
+      { show: "Mostrar contraseña", hide: "Ocultar contraseña" }
+    );
+  });
+
+  toggleConfirmPassword.addEventListener("click", () => {
+    toggleVisibility(
+      confirmInput,
+      toggleConfirmPassword,
+      eyeOpen2,
+      eyeClosed2,
+      { show: "Mostrar confirmación de contraseña", hide: "Ocultar confirmación de contraseña" }
+    );
+  });
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    clearMessages();
+    updateDebug();
+
+    const email = String(emailInput.value || "").trim().toLowerCase();
+    const password = String(passwordInput.value || "");
+    const confirmPassword = String(confirmInput.value || "");
+
+    if (!email || !password || !confirmPassword) {
+      setError("Completa todos los campos.");
+      return;
+    }
+
+    if (password.length <= 6) {
+      setError("La contraseña debe tener más de 6 caracteres.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Las contraseñas no coinciden.");
+      return;
+    }
+
+    submitBtn.setAttribute("disabled", "true");
+    submitBtn.textContent = "Creando cuenta...";
+
+    try {
+      const res = await fetch(`${API_URL}/api/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const body = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        setError(body?.message ?? `No se pudo crear la cuenta (${res.status})`);
+        return;
+      }
+
+      setSuccess(
+        body?.message ?? "Cuenta creada correctamente. Revisa tu correo para verificar tu cuenta."
+      );
+
+      form.reset();
+      updateDebug();
+    } catch (err) {
+      console.error("Register error:", err);
+      setError("Ocurrió un error al conectar con el servidor.");
+    } finally {
+      submitBtn.removeAttribute("disabled");
+      submitBtn.textContent = "Crear cuenta";
+    }
+  });
+
+  updateDebug();
+</script>
+
+<style>
+  .password-wrap {
+    position: relative;
+  }
+
+  .password-input {
+    padding-right: 3rem;
+  }
+
+  .password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 0.75rem;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.75;
+  }
+
+  .password-toggle:hover {
+    opacity: 1;
+  }
+
+  .password-checks {
+    display: grid;
+    gap: 0.85rem;
+    margin-top: 0.25rem;
+  }
+
+  .password-check-card {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.95rem 1rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.03);
+    transition: all 0.2s ease;
+  }
+
+  .password-check-card.is-valid {
+    border-color: rgba(25, 135, 84, 0.35);
+    background: rgba(25, 135, 84, 0.12);
+  }
+
+  .password-check-card.is-invalid {
+    border-color: rgba(220, 53, 69, 0.28);
+    background: rgba(220, 53, 69, 0.08);
+  }
+
+  .password-check-icon {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.08);
+  }
+
+  .password-check-card.is-valid .password-check-icon {
+    background: rgba(25, 135, 84, 0.22);
+  }
+
+  .password-check-card.is-invalid .password-check-icon {
+    background: rgba(220, 53, 69, 0.18);
+  }
+
+  .password-check-label {
+    font-size: 0.92rem;
+    opacity: 0.8;
+    line-height: 1.1;
+    margin-bottom: 0.15rem;
+  }
+
+  .password-check-value {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .d-none {
+    display: none !important;
+  }
+</style>

@@ -1,4 +1,3 @@
-// src/pages/api/session.json.ts
 import type { APIRoute } from "astro";
 import {
   decodeJwtPayload,
@@ -8,7 +7,7 @@ import {
   isExpired,
 } from "../../lib/jwt";
 
-
+export const prerender = false;
 
 export const GET: APIRoute = async ({ request }) => {
   const cookieHeader = request.headers.get("cookie") ?? "";
@@ -19,57 +18,41 @@ export const GET: APIRoute = async ({ request }) => {
     "Cache-Control": "no-store",
   };
 
-  if (!token) {
-    return new Response(
-      JSON.stringify({
-        authenticated: false,
-        debug: {
-          hasCookieHeader: !!cookieHeader,
-          cookieHeader,
-          hasAdiToken: false,
-        },
-      }),
-      {
-        status: 200,
-        headers,
-      },
-    );
+  let payload: Record<string, unknown> | null = null;
+  let expired: boolean | null = null;
+  let role: "admin" | "user" | null = null;
+  let email: string | null = null;
+
+  if (token) {
+    payload = decodeJwtPayload(token);
+    expired = payload ? isExpired(payload) : null;
+
+    if (payload && !expired) {
+      role = extractRole(payload);
+      email = extractEmail(payload);
+    }
   }
-
-  const payload = decodeJwtPayload(token);
-
-  if (!payload || isExpired(payload)) {
-    return new Response(
-      JSON.stringify({
-        authenticated: false,
-        debug: {
-          hasCookieHeader: !!cookieHeader,
-          hasAdiToken: true,
-          tokenPreview: `${token.slice(0, 20)}...`,
-          payloadValid: !!payload,
-          expired: payload ? isExpired(payload) : null,
-        },
-      }),
-      {
-        status: 200,
-        headers,
-      },
-    );
-  }
-
-  const role = extractRole(payload);
-  const email = extractEmail(payload) ?? null;
 
   return new Response(
-    JSON.stringify({
-      authenticated: true,
-      role,
-      email,
-      debug: {
-        hasCookieHeader: !!cookieHeader,
-        hasAdiToken: true,
+    JSON.stringify(
+      {
+        authenticated: Boolean(token && payload && !expired),
+        role,
+        email,
+        debug: {
+          hasCookieHeader: Boolean(cookieHeader),
+          cookieHeader,
+          hasAdiToken: Boolean(token),
+          tokenLength: token ? token.length : 0,
+          tokenPreview: token ? `${token.slice(0, 40)}...` : null,
+          payloadValid: Boolean(payload),
+          payload,
+          expired,
+        },
       },
-    }),
+      null,
+      2,
+    ),
     {
       status: 200,
       headers,

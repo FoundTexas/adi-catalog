@@ -1,0 +1,178 @@
+---
+// src/pages/verify-email.astro
+
+export const prerender = false;
+import AppLayout from "../layouts/AppLayout.astro";
+
+const API_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
+const isProd = import.meta.env.PROD;
+
+const token = String(Astro.url.searchParams.get("token") ?? "").trim();
+const emailFromQuery = String(Astro.url.searchParams.get("email") ?? "").trim();
+
+let status = token ? "loading" : "error";
+let title = "Verificando tu correo";
+let message = "Estamos validando tu enlace...";
+let error = "";
+let success = "";
+let resendMessage = "";
+let resendError = "";
+let email = emailFromQuery;
+
+if (Astro.request.method === "POST") {
+  const rawBody = await Astro.request.text();
+  const params = new URLSearchParams(rawBody);
+
+  email = String(params.get("email") ?? "").trim().toLowerCase();
+
+  if (!email) {
+    resendError = "Ingresa tu correo para reenviar el enlace.";
+    status = "error";
+    title = "No pudimos verificar tu correo";
+    message = "Puedes solicitar un nuevo enlace de verificación.";
+  } else {
+    const resendRes = await fetch(`${API_URL}/api/auth/resend-verification`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    const resendBody = await resendRes.json().catch(() => null);
+
+    status = "error";
+    title = "No pudimos verificar tu correo";
+    message = "Puedes solicitar un nuevo enlace de verificación.";
+
+    if (!resendRes.ok) {
+      resendError =
+        resendBody?.message ?? `No se pudo reenviar el correo (${resendRes.status}).`;
+    } else {
+      resendMessage =
+        resendBody?.message ??
+        "Te enviamos un nuevo correo de verificación. Revisa tu bandeja y spam.";
+    }
+  }
+} else if (token) {
+  const verifyRes = await fetch(`${API_URL}/api/auth/verify-email`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ token }),
+  });
+
+  const verifyBody = await verifyRes.json().catch(() => null);
+
+  if (!verifyRes.ok) {
+    status = "error";
+    title = "No pudimos verificar tu correo";
+    message =
+      verifyBody?.message ?? "El enlace es inválido o expiró. Puedes solicitar uno nuevo.";
+  } else {
+    const accessToken = String(verifyBody?.accessToken ?? "");
+
+    if (!accessToken) {
+      status = "error";
+      title = "No pudimos iniciar tu sesión";
+      message = "Tu correo se verificó, pero faltó el token de acceso.";
+    } else {
+      Astro.cookies.set("adi_token", accessToken, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: isProd,
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,
+      });
+
+      return Astro.redirect("/account");
+    }
+  }
+} else {
+  status = "error";
+  title = "No pudimos verificar tu correo";
+  message = "Falta el token de verificación en el enlace.";
+}
+---
+
+<AppLayout title="ADI — Verificación de correo" noIndex={true}>
+  <section class="adi-section">
+    <div class="container" style="max-width: 560px;">
+      <div class="adi-card p-4 p-md-5">
+        <div class="text-center mb-4">
+          <div class="adi-soft small mb-2">ADI</div>
+          <h1 class="fw-bold mb-2">{title}</h1>
+          <div class="adi-soft">{message}</div>
+        </div>
+
+        {status === "loading" && (
+          <div class="alert alert-info" role="alert">
+            Validando enlace...
+          </div>
+        )}
+
+        {error && (
+          <div class="alert alert-danger" role="alert">
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div class="alert alert-success" role="alert">
+            {success}
+          </div>
+        )}
+
+        {status === "error" && (
+          <>
+            {resendError && (
+              <div class="alert alert-danger mb-3" role="alert">
+                {resendError}
+              </div>
+            )}
+
+            {resendMessage && (
+              <div class="alert alert-success mb-3" role="alert">
+                {resendMessage}
+              </div>
+            )}
+
+            <form method="post" class="d-grid gap-3">
+              <div>
+                <label class="form-label">Correo electrónico</label>
+                <input
+                  class="form-control"
+                  name="email"
+                  type="email"
+                  required
+                  autocomplete="email"
+                  value={email}
+                  placeholder="tu@email.com"
+                />
+              </div>
+
+              <button class="btn btn-primary w-100" type="submit">
+                Reenviar correo de verificación
+              </button>
+
+              <a class="btn btn-outline-light w-100" href="/login">
+                Ir a iniciar sesión
+              </a>
+
+              <a class="btn btn-outline-light w-100" href="/catalogo">
+                Volver al catálogo
+              </a>
+            </form>
+
+            <div class="text-center mt-4 adi-soft small">
+              Revisa spam, promociones o social si no lo encuentras.
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  </section>
+</AppLayout>

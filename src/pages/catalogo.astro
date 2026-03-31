@@ -152,7 +152,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
       params.set("page", String(state.page));
       params.set("limit", String(state.limit));
 
-      return `${apiBaseUrl}/products?${params.toString()}`;
+      return `${apiBaseUrl}/api/products?${params.toString()}`;
     }
 
     function updateBrowserUrl(state) {

@@ -1,74 +1,110 @@
-// src/lib/jwt.ts
-export type JwtPayload = Record<string, any> & {
+export type JwtPayloadLike = {
   exp?: number;
+  iat?: number;
   email?: string;
-  sub?: number | string;
+  username?: string;
+  sub?: string;
   role?: string;
   roles?: string[];
   user?: {
     email?: string;
+    username?: string;
     role?: string;
     roles?: string[];
-    [k: string]: any;
   };
+  [key: string]: unknown;
 };
 
-function base64UrlToJson(b64url: string): any | null {
+export function getCookieFromHeader(
+  cookieHeader: string,
+  name: string,
+): string | null {
+  if (!cookieHeader || !name) {
+    return null;
+  }
+
+  const cookies = cookieHeader.split(";");
+
+  for (const cookie of cookies) {
+    const trimmed = cookie.trim();
+    const eqIndex = trimmed.indexOf("=");
+
+    if (eqIndex === -1) {
+      continue;
+    }
+
+    const key = trimmed.slice(0, eqIndex);
+    const value = trimmed.slice(eqIndex + 1);
+
+    if (key === name) {
+      try {
+        return decodeURIComponent(value);
+      } catch {
+        return value;
+      }
+    }
+  }
+
+  return null;
+}
+
+export function decodeJwtPayload(token: string): JwtPayloadLike | null {
   try {
-    const pad = "=".repeat((4 - (b64url.length % 4)) % 4);
-    const b64 = (b64url + pad).replace(/-/g, "+").replace(/_/g, "/");
+    const parts = String(token || "").split(".");
 
-    const json =
-      typeof atob === "function"
-        ? atob(b64)
-        : Buffer.from(b64, "base64").toString("utf8");
+    if (parts.length !== 3) {
+      return null;
+    }
 
-    return JSON.parse(json);
+    const payloadBase64Url = parts[1];
+    const base64 = payloadBase64Url
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
+
+    const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
+
+    const json = Buffer.from(padded, "base64").toString("utf8");
+    return JSON.parse(json) as JwtPayloadLike;
   } catch {
     return null;
   }
 }
 
-export function decodeJwtPayload(token: string): JwtPayload | null {
-  try {
-    const parts = token.split(".");
-    if (parts.length < 2) return null;
-    return base64UrlToJson(parts[1]) as JwtPayload | null;
-  } catch {
-    return null;
+export function isExpired(payload: JwtPayloadLike | null): boolean {
+  if (!payload?.exp) {
+    return false;
   }
-}
 
-export function extractEmail(payload: JwtPayload | null): string | null {
-  if (!payload) return null;
-  return payload.email ?? payload.user?.email ?? null;
-}
-
-export function extractRole(payload: JwtPayload | null): "admin" | "user" {
-  if (!payload) return "user";
-
-  const raw =
-    payload.role ??
-    payload.user?.role ??
-    payload.roles?.[0] ??
-    payload.user?.roles?.[0] ??
-    null;
-
-  if (!raw) return "user";
-  const s = String(raw).toLowerCase();
-  return s.includes("admin") ? "admin" : "user";
-}
-
-export function isExpired(payload: JwtPayload | null, nowSec = Math.floor(Date.now() / 1000)): boolean {
-  if (!payload?.exp) return false; // si no hay exp, no asumimos expirado
+  const nowSec = Math.floor(Date.now() / 1000);
   return Number(payload.exp) <= nowSec;
 }
 
-/**
- * Lee una cookie de un header cookie "a=b; c=d"
- */
-export function getCookieFromHeader(cookieHeader: string | null, name: string): string | null {
-  if (!cookieHeader) return null;
-  const m = cookieHeader.match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`));
-  return m ? decodeURIComponent(m[1]) : null;
+export function extractRole(
+  payload: JwtPayloadLike | null,
+): "admin" | "user" {
+  const raw =
+    payload?.role ??
+    payload?.user?.role ??
+    payload?.roles?.[0] ??
+    payload?.user?.roles?.[0] ??
+    null;
+
+  if (!raw) {
+    return "user";
+  }
+
+  const value = String(raw).toLowerCase();
+  return value.includes("admin") ? "admin" : "user";
+}
+
+export function extractEmail(payload: JwtPayloadLike | null): string | null {
+  const raw =
+    payload?.email ??
+    payload?.user?.email ??
+    payload?.username ??
+    payload?.user?.username ??
+    payload?.sub ??
+    null;
+
+  return raw ? String(raw) : null;
 }

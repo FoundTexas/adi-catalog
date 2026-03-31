@@ -1,6 +1,4 @@
 ---
-// src/pages/login.astro
-
 import AppLayout from "../layouts/AppLayout.astro";
 
 const API_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
@@ -8,49 +6,14 @@ const isProd = import.meta.env.PROD;
 
 const nextUrlRaw = Astro.url.searchParams.get("next") ?? "/account";
 const nextUrl =
-  nextUrlRaw.startsWith("/") && !nextUrlRaw.startsWith("//") ? nextUrlRaw : "/account";
+  nextUrlRaw.startsWith("/") && !nextUrlRaw.startsWith("//")
+    ? nextUrlRaw
+    : "/account";
 
-let error = "";
+const existingToken = Astro.cookies.get("adi_token")?.value ?? "";
 
-if (Astro.request.method === "POST") {
-  const form = await Astro.request.formData();
-  const email = String(form.get("email") ?? "").trim();
-  const password = String(form.get("password") ?? "");
-
-  if (!email || !password) {
-    error = "Ingresa email y password.";
-  } else {
-    const res = await fetch(`${API_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      error = body?.message ?? `Login failed (${res.status})`;
-    } else {
-      const data = await res.json().catch(() => ({}));
-      const token = String(data?.accessToken ?? "");
-
-      if (!token) {
-        error = "Login failed: missing accessToken";
-      } else {
-        Astro.cookies.set("adi_token", token, {
-          httpOnly: true,
-          sameSite: "lax",
-          secure: isProd,
-          path: "/",
-          maxAge: 60 * 60 * 24 * 7,
-        });
-
-        // ✅ ya NO usamos adi_user
-        Astro.cookies.delete("adi_user", { path: "/", secure: isProd, sameSite: "lax" });
-
-        return Astro.redirect(nextUrl);
-      }
-    }
-  }
+if (existingToken) {
+  return Astro.redirect("/account");
 }
 ---
 
@@ -64,23 +27,77 @@ if (Astro.request.method === "POST") {
           <div class="adi-soft">Accede a tu cuenta y pedidos.</div>
         </div>
 
-        {error && <div class="alert alert-danger mb-3" role="alert">{error}</div>}
+        <div id="formError" class="alert alert-danger mb-3 d-none" role="alert"></div>
 
-        <form method="post" class="d-grid gap-3">
+        <form id="loginForm" class="d-grid gap-3" novalidate>
           <div>
-            <label class="form-label">Email</label>
-            <input class="form-control" name="email" type="email" required autocomplete="email" />
+            <label class="form-label" for="email">Email</label>
+            <input
+              id="email"
+              class="form-control"
+              name="email"
+              type="email"
+              required
+              autocomplete="email"
+            />
           </div>
 
           <div>
-            <label class="form-label">Password</label>
-            <input class="form-control" name="password" type="password" required autocomplete="current-password" />
+            <label class="form-label" for="password">Password</label>
+
+            <div class="password-wrap">
+              <input
+                id="password"
+                class="form-control password-input"
+                name="password"
+                type="password"
+                required
+                autocomplete="current-password"
+              />
+
+              <button
+                type="button"
+                class="password-toggle"
+                id="togglePassword"
+                aria-label="Mostrar contraseña"
+                aria-controls="password"
+                aria-pressed="false"
+              >
+                <span class="icon-eye" id="eyeOpen" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </span>
+
+                <span class="icon-eye-off d-none" id="eyeClosed" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 3l18 18"></path>
+                    <path d="M10.6 10.6A3 3 0 0 0 13.4 13.4"></path>
+                    <path d="M9.9 5.1A10.9 10.9 0 0 1 12 5c6.5 0 10 7 10 7a13.2 13.2 0 0 1-4.2 5.1"></path>
+                    <path d="M6.6 6.6C4 8.3 2 12 2 12a13.3 13.3 0 0 0 10 7 10.9 10.9 0 0 0 5.4-1.4"></path>
+                  </svg>
+                </span>
+              </button>
+            </div>
           </div>
 
-          <button class="btn btn-primary w-100" type="submit">Entrar</button>
+          <button id="submitBtn" class="btn btn-primary w-100" type="submit">
+            Entrar
+          </button>
 
-          <a class="btn btn-outline-light w-100" href="/catalogo">Volver al catálogo</a>
+          <a class="btn btn-outline-light w-100" href="/register">
+            Crear cuenta
+          </a>
+
+          <a class="btn btn-outline-light w-100" href="/catalogo">
+            Volver al catálogo
+          </a>
         </form>
+
+        <div class="text-center mt-3 adi-soft small">
+          ¿No tienes cuenta? <a href="/register">Sign up aquí</a>
+        </div>
       </div>
 
       <div class="text-center mt-3 adi-soft small">
@@ -89,3 +106,158 @@ if (Astro.request.method === "POST") {
     </div>
   </section>
 </AppLayout>
+
+<script define:vars={{ API_URL, nextUrl, isProd }}>
+  const form = document.getElementById("loginForm");
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+  const submitBtn = document.getElementById("submitBtn");
+  const errorBox = document.getElementById("formError");
+
+  const toggleButton = document.getElementById("togglePassword");
+  const eyeOpen = document.getElementById("eyeOpen");
+  const eyeClosed = document.getElementById("eyeClosed");
+
+  function setError(message) {
+    if (!errorBox) return;
+    errorBox.textContent = message;
+    errorBox.classList.remove("d-none");
+  }
+
+  function clearError() {
+    if (!errorBox) return;
+    errorBox.textContent = "";
+    errorBox.classList.add("d-none");
+  }
+
+  function getSafeRedirect(url) {
+    if (typeof url === "string" && url.startsWith("/") && !url.startsWith("//")) {
+      return url;
+    }
+
+    return "/account";
+  }
+
+  if (passwordInput && toggleButton && eyeOpen && eyeClosed) {
+    toggleButton.addEventListener("click", () => {
+      const isPassword = passwordInput.getAttribute("type") === "password";
+
+      passwordInput.setAttribute("type", isPassword ? "text" : "password");
+      toggleButton.setAttribute("aria-pressed", isPassword ? "true" : "false");
+      toggleButton.setAttribute(
+        "aria-label",
+        isPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+      );
+
+      eyeOpen.classList.toggle("d-none", isPassword);
+      eyeClosed.classList.toggle("d-none", !isPassword);
+    });
+  }
+
+  if (form) {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      clearError();
+
+      const email = String(emailInput && emailInput.value ? emailInput.value : "").trim().toLowerCase();
+      const password = String(passwordInput && passwordInput.value ? passwordInput.value : "");
+
+      if (!email || !password) {
+        setError("Ingresa email y password.");
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.setAttribute("disabled", "true");
+        submitBtn.textContent = "Entrando...";
+      }
+
+      try {
+        let res = await fetch(`${API_URL}/api/auth/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        let body = await res.json().catch(() => null);
+
+        if (!res.ok && (res.status === 404 || res.status === 405)) {
+          res = await fetch(`${API_URL}/api/login`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json",
+            },
+            body: JSON.stringify({ email, password }),
+          });
+
+          body = await res.json().catch(() => null);
+        }
+
+        if (!res.ok) {
+          setError(
+            (body && (body.message || body.error)) || `Login failed (${res.status})`
+          );
+          return;
+        }
+
+        const token = String((body && (body.accessToken || body.token)) || "");
+
+        if (!token) {
+          setError("No se recibió el token de sesión.");
+          return;
+        }
+
+        document.cookie = `adi_token=${encodeURIComponent(token)}; Path=/; Max-Age=${60 * 60 * 24 * 7}; SameSite=Lax${isProd ? "; Secure" : ""}`;
+
+        window.location.replace(getSafeRedirect(nextUrl));
+      } catch (error) {
+        console.error("Login error:", error);
+        setError("Ocurrió un error al conectar con el servidor.");
+      } finally {
+        if (submitBtn) {
+          submitBtn.removeAttribute("disabled");
+          submitBtn.textContent = "Entrar";
+        }
+      }
+    });
+  }
+</script>
+
+<style>
+  .password-wrap {
+    position: relative;
+  }
+
+  .password-input {
+    padding-right: 3rem;
+  }
+
+  .password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 0.75rem;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.75;
+  }
+
+  .password-toggle:hover {
+    opacity: 1;
+  }
+
+  .d-none {
+    display: none !important;
+  }
+</style>

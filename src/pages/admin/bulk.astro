@@ -1,72 +1,222 @@
 ---
-
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { requireAdmin, logoutCookies } from "../../lib/requireAdmin";
 
 const API_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
+const isProd = import.meta.env.PROD;
+
 const nextPath = "/admin/bulk";
 
-const guard = requireAdmin(Astro);
+const cookieHeader = Astro.request.headers.get("cookie") ?? "";
+const tokenMatch = cookieHeader.match(/(?:^|;\s*)adi_token=([^;]+)/);
+const token = tokenMatch ? decodeURIComponent(tokenMatch[1]) : null;
 
-if (!guard.ok) {
-  // token missing/bad/expired/not_admin => logout real
-  logoutCookies(Astro);
+function decodeJwtPayloadSSR(jwt: string): any | null {
+  try {
+    const parts = jwt.split(".");
+    if (parts.length < 2) return null;
+
+    const payloadB64Url = parts[1];
+    const pad = "=".repeat((4 - (payloadB64Url.length % 4)) % 4);
+    const b64 = (payloadB64Url + pad).replace(/-/g, "+").replace(/_/g, "/");
+
+    const json =
+      typeof atob === "function"
+        ? atob(b64)
+        : Buffer.from(b64, "base64").toString("utf8");
+
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
+function isTokenExpired(payload: any): boolean {
+  const exp = payload?.exp;
+  if (!exp) return false;
+  const nowSec = Math.floor(Date.now() / 1000);
+  return Number(exp) <= nowSec;
+}
+
+function extractRole(payload: any): "admin" | "user" {
+  const raw =
+    payload?.role ??
+    payload?.user?.role ??
+    payload?.roles?.[0] ??
+    payload?.user?.roles?.[0] ??
+    null;
+
+  if (!raw) return "user";
+  const s = String(raw).toLowerCase();
+  return s.includes("admin") ? "admin" : "user";
+}
+
+function extractEmail(payload: any): string | null {
+  const raw =
+    payload?.email ??
+    payload?.user?.email ??
+    payload?.username ??
+    payload?.sub ??
+    null;
+
+  return raw ? String(raw) : null;
+}
+
+function logoutAndRedirect() {
+  Astro.cookies.delete("adi_token", {
+    path: "/",
+    secure: isProd,
+    sameSite: "lax",
+  });
+  Astro.cookies.delete("adi_user", {
+    path: "/",
+    secure: isProd,
+    sameSite: "lax",
+  });
+
   return Astro.redirect(`/login?next=${encodeURIComponent(nextPath)}`);
 }
 
-const { token, email } = guard;
+if (!token) {
+  return logoutAndRedirect();
+}
+
+const payload = decodeJwtPayloadSSR(token);
+if (!payload) {
+  return logoutAndRedirect();
+}
+
+if (isTokenExpired(payload)) {
+  return logoutAndRedirect();
+}
+
+const role = extractRole(payload);
+const email = extractEmail(payload) ?? "—";
+
+if (role !== "admin") {
+  return logoutAndRedirect();
+}
 ---
 
 <BaseLayout title="ADI — Admin Bulk" menuMode="b2c" menuAnchors={false}>
   <section class="adi-section">
-    <div class="container" style="max-width: 980px;">
-      <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-3">
+    <div class="container" style="max-width: 1200px;">
+      <div
+        class="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-3"
+      >
         <div>
           <div class="adi-soft small">Admin</div>
           <h1 class="fw-bold mb-1">Bulk Upload</h1>
           <div class="adi-soft">
-            Sube el Excel y las imágenes referenciadas en <code>imageFiles</code>.
+            Carga un Excel, edita la tabla, agrega registros y al final se
+            genera un nuevo Excel para enviarlo al backend.
           </div>
           <div class="adi-soft small mt-1">
-            Sesión: {email ?? "admin"} · rol: <span class="fw-semibold">admin</span>
+            Sesión: {email} · rol: <span class="fw-semibold">{role}</span>
           </div>
         </div>
 
-        <a class="btn btn-outline-light" href="/account">Volver a cuenta</a>
+        <div class="d-flex gap-2 flex-wrap">
+          <a
+            class="btn btn-outline-light"
+            href="/templates/products_bulk_template.xlsx"
+            download
+          >
+            Descargar template
+          </a>
+          <a class="btn btn-outline-light" href="/account">Volver a cuenta</a>
+        </div>
       </div>
 
       <div class="row g-3">
-        <div class="col-12 col-lg-6">
+        <div class="col-12">
           <div class="adi-card p-3 p-md-4">
-            <h2 class="h5 fw-bold mb-2">Subir archivos</h2>
-            <div class="adi-soft small mb-3">
-              El campo de imágenes es opcional. Puedes subir múltiples.
+            <div class="row g-3 align-items-end">
+              <div class="col-12 col-lg-4">
+                <label class="form-label">Importar Excel (.xlsx)</label>
+                <input
+                  id="excelInput"
+                  class="form-control"
+                  type="file"
+                  accept=".xlsx"
+                />
+              </div>
+
+              <div class="col-12 col-lg-4">
+                <label class="form-label">Imágenes</label>
+                <input
+                  id="imagesInput"
+                  class="form-control"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                />
+              </div>
+
+              <div class="col-12 col-lg-4 d-flex gap-2 flex-wrap">
+                <button id="addRowBtn" class="btn btn-primary" type="button"
+                  >Agregar registro</button
+                >
+                <button
+                  id="downloadGeneratedBtn"
+                  class="btn btn-outline-light"
+                  type="button"
+                >
+                  Descargar Excel generado
+                </button>
+                <button id="submitBulkBtn" class="btn btn-dark" type="button"
+                  >Enviar al backend</button
+                >
+              </div>
             </div>
 
-            <form id="bulkForm" class="d-grid gap-3">
-              <div>
-                <label class="form-label">Excel (.xlsx)</label>
-                <input class="form-control" name="file" type="file" accept=".xlsx" required />
-              </div>
-
-              <div>
-                <label class="form-label">Imágenes (multiple)</label>
-                <input class="form-control" name="images" type="file" accept="image/*" multiple />
-              </div>
-
-              <button class="btn btn-primary" type="submit">Subir</button>
-              <a class="btn btn-outline-light" href="/catalogo">Ir al catálogo</a>
-            </form>
+            <div class="adi-soft small mt-3">
+              Columnas esperadas: <code>sku</code>, <code>name</code>, <code
+                >description</code
+              >, <code>price</code>,
+              <code>currency</code>, <code>is_active</code>, <code
+                >category</code
+              >, <code>subcategory</code>,
+              <code>image_files</code>.
+            </div>
           </div>
         </div>
 
-        <div class="col-12 col-lg-6">
-          <div class="adi-card p-3 p-md-4 h-100">
-            <h2 class="h5 fw-bold mb-2">Resultado</h2>
-            <div class="adi-soft small mb-3">
-              Aquí verás la respuesta del API.
+        <div class="col-12">
+          <div class="adi-card p-3 p-md-4">
+            <div
+              class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-3"
+            >
+              <h2 class="h5 fw-bold mb-0">Tabla de productos</h2>
+              <div class="adi-soft small">
+                <span id="rowsCount">0</span> registros
+              </div>
             </div>
 
+            <div class="table-responsive">
+              <table class="table align-middle" id="productsTable">
+                <thead>
+                  <tr>
+                    <th>SKU</th>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Precio</th>
+                    <th>Moneda</th>
+                    <th>Activo</th>
+                    <th>Categoría</th>
+                    <th>Subcategoría</th>
+                    <th>image_files</th>
+                    <th style="width: 180px;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="productsTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="adi-card p-3 p-md-4">
+            <h2 class="h5 fw-bold mb-2">Resultado</h2>
             <pre
               id="out"
               class="mb-0"
@@ -77,36 +227,448 @@ const { token, email } = guard;
                 padding: 14px;
                 white-space: pre-wrap;
                 min-height: 220px;
-              "
-            ></pre>
+              ">
+            </pre>
           </div>
         </div>
       </div>
-
-      <div class="adi-soft small mt-3">
-        Tip: si algo falla por CORS/auth, lo hacemos proxy SSR desde Astro.
-      </div>
-
-      <script define:vars={{ API_URL, token }}>
-        const form = document.getElementById("bulkForm");
-        const out = document.getElementById("out");
-
-        form.addEventListener("submit", async (e) => {
-          e.preventDefault();
-          out.textContent = "Subiendo...";
-
-          const fd = new FormData(form);
-
-          const res = await fetch(`${API_URL}/products/bulk`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
-            body: fd,
-          });
-
-          const text = await res.text();
-          out.textContent = `HTTP ${res.status}\n\n${text}`;
-        });
-      </script>
     </div>
   </section>
+
+  <div
+    class="modal fade"
+    id="rowModal"
+    tabindex="-1"
+    aria-labelledby="rowModalTitle"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content bg-dark text-light border-secondary">
+        <div class="modal-header">
+          <h5 class="modal-title" id="rowModalTitle">Agregar registro</h5>
+          <button
+            type="button"
+            class="btn-close btn-close-white"
+            data-bs-dismiss="modal"
+            aria-label="Cerrar"></button>
+        </div>
+
+        <div class="modal-body">
+          <form id="rowForm" class="row g-3">
+            <input type="hidden" id="editIndex" />
+
+            <div class="col-md-6">
+              <label class="form-label">SKU</label>
+              <input id="f_sku" class="form-control" required />
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Nombre</label>
+              <input id="f_name" class="form-control" required />
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Descripción</label>
+              <textarea id="f_description" class="form-control" rows="3"
+              ></textarea>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Precio</label>
+              <input
+                id="f_price"
+                class="form-control"
+                type="number"
+                min="0"
+                step="0.01"
+              />
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Moneda</label>
+              <input id="f_currency" class="form-control" value="MXN" />
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Activo</label>
+              <select id="f_is_active" class="form-select">
+                <option value="1">Sí</option>
+                <option value="0">No</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Categoría</label>
+              <input id="f_category" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Subcategoría</label>
+              <input id="f_subcategory" class="form-control" />
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">image_files</label>
+              <input
+                id="f_image_files"
+                class="form-control"
+                placeholder="ej. scrub-azul.webp|scrub-negro.webp"
+              />
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-outline-light"
+            data-bs-dismiss="modal">Cancelar</button
+          >
+          <button type="button" class="btn btn-primary" id="saveRowBtn"
+            >Guardar</button
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script define:vars={{ API_URL, token }}>
+    const excelInput = document.getElementById("excelInput");
+    const imagesInput = document.getElementById("imagesInput");
+    const addRowBtn = document.getElementById("addRowBtn");
+    const downloadGeneratedBtn = document.getElementById(
+      "downloadGeneratedBtn",
+    );
+    const submitBulkBtn = document.getElementById("submitBulkBtn");
+    const productsTbody = document.getElementById("productsTbody");
+    const rowsCount = document.getElementById("rowsCount");
+    const out = document.getElementById("out");
+
+    const rowModalEl = document.getElementById("rowModal");
+    const rowModalTitle = document.getElementById("rowModalTitle");
+    const saveRowBtn = document.getElementById("saveRowBtn");
+
+    const fields = {
+      editIndex: document.getElementById("editIndex"),
+      sku: document.getElementById("f_sku"),
+      name: document.getElementById("f_name"),
+      description: document.getElementById("f_description"),
+      price: document.getElementById("f_price"),
+      currency: document.getElementById("f_currency"),
+      is_active: document.getElementById("f_is_active"),
+      category: document.getElementById("f_category"),
+      subcategory: document.getElementById("f_subcategory"),
+      image_files: document.getElementById("f_image_files"),
+    };
+
+    let rows = [];
+    let rowModal = null;
+    let XLSX = null;
+
+    function normalizeRow(input = {}) {
+      return {
+        sku: String(input.sku ?? "").trim(),
+        name: String(input.name ?? "").trim(),
+        description: String(input.description ?? "").trim(),
+        price: String(input.price ?? "").trim(),
+        currency: String(input.currency ?? "MXN").trim() || "MXN",
+        is_active:
+          String(
+            input.is_active ?? input.isActive ?? input.active ?? "1",
+          ).trim() || "1",
+        category: String(input.category ?? "").trim(),
+        subcategory: String(input.subcategory ?? "").trim(),
+        image_files: String(input.image_files ?? input.imageFiles ?? "").trim(),
+      };
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function renderTable() {
+      productsTbody.innerHTML = "";
+
+      if (!rows.length) {
+        productsTbody.innerHTML = `
+          <tr>
+            <td colspan="10" class="text-center adi-soft py-4">
+              No hay registros cargados.
+            </td>
+          </tr>
+        `;
+        rowsCount.textContent = "0";
+        return;
+      }
+
+      rows.forEach((row, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${escapeHtml(row.sku)}</td>
+          <td>${escapeHtml(row.name)}</td>
+          <td style="max-width:260px; white-space:normal;">${escapeHtml(row.description)}</td>
+          <td>${escapeHtml(row.price)}</td>
+          <td>${escapeHtml(row.currency)}</td>
+          <td>${escapeHtml(row.is_active)}</td>
+          <td>${escapeHtml(row.category)}</td>
+          <td>${escapeHtml(row.subcategory)}</td>
+          <td style="max-width:220px; white-space:normal;">${escapeHtml(row.image_files)}</td>
+          <td>
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-sm btn-outline-light" data-action="edit" data-index="${index}">Editar</button>
+              <button type="button" class="btn btn-sm btn-outline-danger" data-action="delete" data-index="${index}">Eliminar</button>
+            </div>
+          </td>
+        `;
+        productsTbody.appendChild(tr);
+      });
+
+      rowsCount.textContent = String(rows.length);
+    }
+
+    function openModalForCreate() {
+      rowModalTitle.textContent = "Agregar registro";
+      fields.editIndex.value = "";
+      fields.sku.value = "";
+      fields.name.value = "";
+      fields.description.value = "";
+      fields.price.value = "";
+      fields.currency.value = "MXN";
+      fields.is_active.value = "1";
+      fields.category.value = "";
+      fields.subcategory.value = "";
+      fields.image_files.value = "";
+
+      if (!rowModal) {
+        console.error("Bootstrap Modal no está inicializado.");
+        out.textContent =
+          "No se pudo abrir el modal. Revisa que Bootstrap JS esté cargado.";
+        return;
+      }
+
+      rowModal.show();
+    }
+
+    function openModalForEdit(index) {
+      const row = rows[index];
+      if (!row) return;
+
+      rowModalTitle.textContent = "Editar registro";
+      fields.editIndex.value = String(index);
+      fields.sku.value = row.sku;
+      fields.name.value = row.name;
+      fields.description.value = row.description;
+      fields.price.value = row.price;
+      fields.currency.value = row.currency;
+      fields.is_active.value = row.is_active;
+      fields.category.value = row.category;
+      fields.subcategory.value = row.subcategory;
+      fields.image_files.value = row.image_files;
+
+      if (!rowModal) {
+        console.error("Bootstrap Modal no está inicializado.");
+        out.textContent =
+          "No se pudo abrir el modal. Revisa que Bootstrap JS esté cargado.";
+        return;
+      }
+
+      rowModal.show();
+    }
+
+    function getRowFromForm() {
+      return normalizeRow({
+        sku: fields.sku.value,
+        name: fields.name.value,
+        description: fields.description.value,
+        price: fields.price.value,
+        currency: fields.currency.value,
+        is_active: fields.is_active.value,
+        category: fields.category.value,
+        subcategory: fields.subcategory.value,
+        image_files: fields.image_files.value,
+      });
+    }
+
+    function validateRow(row) {
+      if (!row.sku) return "SKU es obligatorio.";
+      if (!row.name) return "Nombre es obligatorio.";
+      return "";
+    }
+
+    function buildWorkbook() {
+      const exportRows = rows.map((row) => ({
+        sku: row.sku,
+        name: row.name,
+        description: row.description,
+        price: row.price,
+        currency: row.currency,
+        is_active: row.is_active,
+        category: row.category,
+        subcategory: row.subcategory,
+        image_files: row.image_files,
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(exportRows, {
+        header: [
+          "sku",
+          "name",
+          "description",
+          "price",
+          "currency",
+          "is_active",
+          "category",
+          "subcategory",
+          "image_files",
+        ],
+      });
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "products");
+      return wb;
+    }
+
+    function downloadGeneratedExcel() {
+      if (!rows.length) {
+        out.textContent = "No hay registros para exportar.";
+        return;
+      }
+
+      const wb = buildWorkbook();
+      XLSX.writeFile(wb, "products_bulk_generated.xlsx");
+    }
+
+    async function loadExcelToTable(file) {
+      const data = await file.arrayBuffer();
+      const wb = XLSX.read(data);
+      const firstSheetName = wb.SheetNames[0];
+      const ws = wb.Sheets[firstSheetName];
+      const json = XLSX.utils.sheet_to_json(ws, { defval: "" });
+
+      rows = json.map((item) => normalizeRow(item));
+      renderTable();
+      out.textContent = `Se cargaron ${rows.length} registros desde el Excel.`;
+    }
+
+    async function submitBulk() {
+      if (!rows.length) {
+        out.textContent = "No hay registros para enviar.";
+        return;
+      }
+
+      out.textContent = "Generando Excel y enviando...";
+
+      try {
+        const wb = buildWorkbook();
+        const xlsxArray = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+
+        const excelFile = new File(
+          [xlsxArray],
+          "products_bulk_generated.xlsx",
+          {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          },
+        );
+
+        const fd = new FormData();
+        fd.append("file", excelFile);
+
+        const imageFiles = imagesInput.files;
+        if (imageFiles?.length) {
+          for (const img of imageFiles) {
+            fd.append("images[]", img);
+          }
+        }
+
+        const res = await fetch(`${API_URL}/api/products/bulk`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+          body: fd,
+        });
+
+        const text = await res.text();
+        out.textContent = `HTTP ${res.status}\n\n${text}`;
+      } catch (error) {
+        console.error("Bulk upload error", error);
+        out.textContent = `Error:\n\n${String(error)}`;
+      }
+    }
+
+    async function init() {
+      if (!window.bootstrap?.Modal) {
+        console.error("Bootstrap Modal no disponible en window.bootstrap");
+        out.textContent =
+          "Bootstrap JS no está cargado. El modal no funcionará.";
+      } else {
+        rowModal = new window.bootstrap.Modal(rowModalEl);
+      }
+
+      const sheetJs =
+        await import("https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs");
+      XLSX = sheetJs;
+
+      addRowBtn?.addEventListener("click", openModalForCreate);
+
+      saveRowBtn?.addEventListener("click", () => {
+        const row = getRowFromForm();
+        const validationError = validateRow(row);
+
+        if (validationError) {
+          out.textContent = validationError;
+          return;
+        }
+
+        const editIndex = fields.editIndex.value;
+
+        if (editIndex === "") {
+          rows.push(row);
+        } else {
+          rows[Number(editIndex)] = row;
+        }
+
+        renderTable();
+        rowModal?.hide();
+      });
+
+      productsTbody?.addEventListener("click", (event) => {
+        const btn = event.target.closest("button");
+        if (!btn) return;
+
+        const action = btn.dataset.action;
+        const index = Number(btn.dataset.index);
+
+        if (action === "edit") {
+          openModalForEdit(index);
+          return;
+        }
+
+        if (action === "delete") {
+          rows.splice(index, 1);
+          renderTable();
+        }
+      });
+
+      excelInput?.addEventListener("change", async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        await loadExcelToTable(file);
+      });
+
+      downloadGeneratedBtn?.addEventListener("click", downloadGeneratedExcel);
+      submitBulkBtn?.addEventListener("click", submitBulk);
+
+      renderTable();
+    }
+
+    window.addEventListener("load", () => {
+      init();
+    });
+  </script>
 </BaseLayout>
