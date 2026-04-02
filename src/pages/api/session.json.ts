@@ -7,7 +7,7 @@ import {
   isExpired,
 } from "../../lib/jwt";
 
-export const prerender = false;
+//export const prerender = false;
 
 export const GET: APIRoute = async ({ request }) => {
   const cookieHeader = request.headers.get("cookie") ?? "";

@@ -20,6 +20,6 @@
     "react-dom": "^19.2.4"
   },
   "devDependencies": {
-    "@astrojs/node": "^9.5.4"
+    "@astrojs/node": "^9.5.5"
   }
 }

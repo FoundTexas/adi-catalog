@@ -22,23 +22,45 @@ const shipMetro = ship.metroCdmx ?? 0;
 
 <section id="precios" class="adi-section adi-section-flow">
   <div class="container">
-    <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-3">
+    <div
+      class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-3"
+    >
       <div>
         <h2 class="fw-bold mb-1">Tabla de precios</h2>
         <div class="adi-soft">
-          Menudeo (1–{PRICING.wholesaleThreshold - 1}) · Mayoreo ({PRICING.wholesaleThreshold}+)
+          Menudeo (1–{PRICING.wholesaleThreshold - 1}) · Mayoreo ({
+            PRICING.wholesaleThreshold
+          }+)
         </div>
       </div>
 
       <div class="adi-price-tools">
         <div class="adi-seg" role="tablist" aria-label="Selector de precio">
-          <button class="adi-seg-btn is-active" data-mode="both" type="button" role="tab" aria-selected="true">
+          <button
+            class="adi-seg-btn is-active"
+            data-mode="both"
+            type="button"
+            role="tab"
+            aria-selected="true"
+          >
             Ambos
           </button>
-          <button class="adi-seg-btn" data-mode="retail" type="button" role="tab" aria-selected="false">
+          <button
+            class="adi-seg-btn"
+            data-mode="retail"
+            type="button"
+            role="tab"
+            aria-selected="false"
+          >
             Menudeo
           </button>
-          <button class="adi-seg-btn" data-mode="wholesale" type="button" role="tab" aria-selected="false">
+          <button
+            class="adi-seg-btn"
+            data-mode="wholesale"
+            type="button"
+            role="tab"
+            aria-selected="false"
+          >
             Mayoreo
           </button>
         </div>
@@ -65,40 +87,49 @@ const shipMetro = ship.metroCdmx ?? 0;
           </thead>
 
           <tbody>
-            {rows.map((r) => (
-              <tr data-search={r.search}>
-                <td class="adi-prod">
-                  <div class="adi-prod-title">{r.productName}</div>
-                  <div class="adi-prod-sub">{r.optionLabel}</div>
-                </td>
+            {
+              rows.map((r) => (
+                <tr data-search={r.search}>
+                  <td class="adi-prod">
+                    <div class="adi-prod-title">{r.productName}</div>
+                    <div class="adi-prod-sub">{r.optionLabel}</div>
+                  </td>
 
-                <td class="adi-money" data-col="retail">
-                  <span class="adi-pill">MXN</span>
-                  <span class="adi-price">${r.retail}</span>
-                </td>
+                  <td class="adi-money" data-col="retail">
+                    <span class="adi-pill">MXN</span>
+                    <span class="adi-price">${r.retail}</span>
+                  </td>
 
-                <td class="adi-money" data-col="wholesale">
-                  <span class="adi-pill">MXN</span>
-                  <span class="adi-price">${r.wholesale}</span>
-                </td>
-              </tr>
-            ))}
+                  <td class="adi-money" data-col="wholesale">
+                    <span class="adi-pill">MXN</span>
+                    <span class="adi-price">${r.wholesale}</span>
+                  </td>
+                </tr>
+              ))
+            }
 
-            {rows.length === 0 ? (
-              <tr>
-                <td colspan="3" class="adi-empty">No hay precios configurados todavía.</td>
-              </tr>
-            ) : null}
+            {
+              rows.length === 0 ? (
+                <tr>
+                  <td colspan="3" class="adi-empty">
+                    No hay precios configurados todavía.
+                  </td>
+                </tr>
+              ) : null
+            }
           </tbody>
         </table>
       </div>
 
       <div class="adi-footnote">
         <div class="adi-soft small">
-          {(PRICING.notes?.vat ?? "Precios en MXN.")} {(PRICING.notes?.shipping ?? "Envío no incluido.")}
+          {PRICING.notes?.vat ?? "Precios en MXN."}
+          {PRICING.notes?.shipping ?? "Envío no incluido."}
         </div>
         <div class="adi-soft small">
-          Envío nacional: menudeo <b>${shipRetail}</b> · mayoreo <b>${shipWholesale}</b> · Metro CDMX: <b>${shipMetro}</b> (a coordinar).
+          Envío nacional: menudeo <b>${shipRetail}</b> · mayoreo <b
+            >${shipWholesale}</b
+          > · Metro CDMX: <b>${shipMetro}</b> (a coordinar).
         </div>
       </div>
     </div>
@@ -110,13 +141,18 @@ const shipMetro = ship.metroCdmx ?? 0;
 
       const setMode = (mode) => {
         const retailCols = table?.querySelectorAll('[data-col="retail"]') || [];
-        const wholesaleCols = table?.querySelectorAll('[data-col="wholesale"]') || [];
+        const wholesaleCols =
+          table?.querySelectorAll('[data-col="wholesale"]') || [];
 
         const showRetail = mode === "both" || mode === "retail";
         const showWholesale = mode === "both" || mode === "wholesale";
 
-        retailCols.forEach((el) => (el.style.display = showRetail ? "" : "none"));
-        wholesaleCols.forEach((el) => (el.style.display = showWholesale ? "" : "none"));
+        retailCols.forEach(
+          (el) => (el.style.display = showRetail ? "" : "none"),
+        );
+        wholesaleCols.forEach(
+          (el) => (el.style.display = showWholesale ? "" : "none"),
+        );
 
         segBtns.forEach((b) => {
           const active = b.getAttribute("data-mode") === mode;
@@ -128,7 +164,9 @@ const shipMetro = ship.metroCdmx ?? 0;
       setMode("both");
 
       segBtns.forEach((btn) => {
-        btn.addEventListener("click", () => setMode(btn.getAttribute("data-mode")));
+        btn.addEventListener("click", () =>
+          setMode(btn.getAttribute("data-mode")),
+        );
       });
 
       search?.addEventListener("input", (e) => {
@@ -144,142 +182,174 @@ const shipMetro = ship.metroCdmx ?? 0;
     </script>
 
     <style>
-      .adi-section-flow{ display:block; min-height:auto; }
-
-      .adi-price-tools{
-        display:flex; align-items:center; gap:.75rem; flex-wrap:wrap;
+      .adi-section-flow {
+        display: block;
+        min-height: auto;
       }
 
-      .adi-price-search{
+      .adi-price-tools {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+
+      .adi-price-search {
         width: min(360px, 92vw);
-        background: rgba(255,255,255,.78) !important;
+        background: rgba(255, 255, 255, 0.78) !important;
       }
 
-      .adi-seg{
-        display:inline-flex;
-        border: 1px solid rgba(120,90,160,.22);
-        background: rgba(255,255,255,.7);
+      .adi-seg {
+        display: inline-flex;
+        border: 1px solid rgba(120, 90, 160, 0.22);
+        background: rgba(255, 255, 255, 0.7);
         padding: 4px;
         border-radius: 999px;
         gap: 4px;
-        box-shadow: 0 10px 30px rgba(100,60,150,.08);
+        box-shadow: 0 10px 30px rgba(100, 60, 150, 0.08);
       }
 
-      .adi-seg-btn{
-        border:0;
-        background:transparent;
-        padding:.35rem .7rem;
+      .adi-seg-btn {
+        border: 0;
+        background: transparent;
+        padding: 0.35rem 0.7rem;
         border-radius: 999px;
-        font-weight:800;
-        font-size:.85rem;
-        color: rgba(42,31,64,.78);
-        cursor:pointer;
-        transition: background-color .2s ease, transform .2s ease;
+        font-weight: 800;
+        font-size: 0.85rem;
+        color: rgba(42, 31, 64, 0.78);
+        cursor: pointer;
+        transition:
+          background-color 0.2s ease,
+          transform 0.2s ease;
       }
 
-      .adi-seg-btn:hover{
-        background: rgba(180,108,255,.10);
+      .adi-seg-btn:hover {
+        background: rgba(180, 108, 255, 0.1);
         transform: translateY(-1px);
       }
 
-      .adi-seg-btn.is-active{
+      .adi-seg-btn.is-active {
         background: linear-gradient(135deg, var(--adi-accent), #8e5bff);
-        color:#fff;
-        box-shadow: 0 10px 26px rgba(180,108,255,.25);
+        color: #fff;
+        box-shadow: 0 10px 26px rgba(180, 108, 255, 0.25);
       }
 
-      .adi-tableWrap{ overflow:hidden; }
+      .adi-tableWrap {
+        overflow: hidden;
+      }
 
-      .adi-table{
-        width:100%;
+      .adi-tableWrap .table-responsive {
+        max-height: 60vh;
+        overflow: auto;
+      }
+
+      .adi-table {
+        width: 100%;
         border-collapse: separate;
         border-spacing: 0;
-        background: rgba(255,255,255,.68);
+        background: rgba(255, 255, 255, 0.68);
       }
 
-      .adi-table thead th{
-        background: rgba(255,255,255,.92);
-        border-bottom: 1px solid rgba(120,90,160,.16);
-        color: rgba(42,31,64,.85);
+      .adi-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: rgba(255, 255, 255, 0.92);
+      }
+
+      .adi-table thead th {
+        background: rgba(255, 255, 255, 0.92);
+        border-bottom: 1px solid rgba(120, 90, 160, 0.16);
+        color: rgba(42, 31, 64, 0.85);
         font-weight: 900;
-        font-size: .9rem;
+        font-size: 0.9rem;
         padding: 14px 16px;
         white-space: nowrap;
       }
 
-      .adi-table tbody tr:nth-child(odd){
-        background: rgba(255,255,255,.55);
+      .adi-table tbody tr:nth-child(odd) {
+        background: rgba(255, 255, 255, 0.55);
       }
 
-      .adi-table tbody tr:nth-child(even){
-        background: rgba(180,108,255,.06);
+      .adi-table tbody tr:nth-child(even) {
+        background: rgba(180, 108, 255, 0.06);
       }
 
-      .adi-table tbody tr:hover{
-        background: rgba(180,108,255,.12);
+      .adi-table tbody tr:hover {
+        background: rgba(180, 108, 255, 0.12);
       }
 
-      .adi-table tbody td{
+      .adi-table tbody td {
         padding: 14px 16px;
-        border-bottom: 1px solid rgba(120,90,160,.10);
+        border-bottom: 1px solid rgba(120, 90, 160, 0.1);
         vertical-align: middle;
       }
 
-      .adi-col-product{ width:56%; }
-      .adi-col-retail, .adi-col-wholesale{ width:22%; text-align:right; }
+      .adi-col-product {
+        width: 56%;
+      }
+      .adi-col-retail,
+      .adi-col-wholesale {
+        width: 22%;
+        text-align: right;
+      }
 
-      .adi-prod-title{
+      .adi-prod-title {
         font-weight: 900;
         color: var(--adi-text);
       }
 
-      .adi-prod-sub{
+      .adi-prod-sub {
         margin-top: 2px;
-        font-size:.88rem;
-        color: rgba(60,40,90,.65);
+        font-size: 0.88rem;
+        color: rgba(60, 40, 90, 0.65);
       }
 
-      .adi-money{
-        text-align:right;
-        white-space:nowrap;
+      .adi-money {
+        text-align: right;
+        white-space: nowrap;
       }
 
-      .adi-pill{
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
+      .adi-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         height: 22px;
-        padding: 0 .5rem;
+        padding: 0 0.5rem;
         border-radius: 999px;
-        border: 1px solid rgba(120,90,160,.18);
-        background: rgba(255,255,255,.75);
-        color: rgba(60,40,90,.65);
+        border: 1px solid rgba(120, 90, 160, 0.18);
+        background: rgba(255, 255, 255, 0.75);
+        color: rgba(60, 40, 90, 0.65);
         font-weight: 900;
-        font-size: .72rem;
-        margin-right: .4rem;
+        font-size: 0.72rem;
+        margin-right: 0.4rem;
       }
 
-      .adi-price{
+      .adi-price {
         font-weight: 950;
-        color: rgba(42,31,64,.92);
+        color: rgba(42, 31, 64, 0.92);
       }
 
-      .adi-empty{
+      .adi-empty {
         padding: 18px 16px;
-        color: rgba(60,40,90,.65);
+        color: rgba(60, 40, 90, 0.65);
       }
 
-      .adi-footnote{
+      .adi-footnote {
         padding: 14px 16px;
-        border-top: 1px solid rgba(120,90,160,.12);
-        background: rgba(255,255,255,.72);
-        display:grid;
+        border-top: 1px solid rgba(120, 90, 160, 0.12);
+        background: rgba(255, 255, 255, 0.72);
+        display: grid;
         gap: 6px;
       }
 
-      @media (max-width: 575px){
-        .adi-table thead th{ padding: 12px 12px; }
-        .adi-table tbody td{ padding: 12px 12px; }
+      @media (max-width: 575px) {
+        .adi-table thead th {
+          padding: 12px 12px;
+        }
+        .adi-table tbody td {
+          padding: 12px 12px;
+        }
       }
     </style>
   </div>
