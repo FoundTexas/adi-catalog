@@ -1,119 +1,7 @@
 ---
-
-
 import AppLayout from "../layouts/AppLayout.astro";
 
 const API_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
-const isProd = import.meta.env.PROD;
-
-const nextPath = "/account";
-
-// SSR cookie header (más confiable que Astro.cookies en algunos setups SSR)
-const cookieHeader = Astro.request.headers.get("cookie") ?? "";
-const tokenMatch = cookieHeader.match(/(?:^|;\s*)adi_token=([^;]+)/);
-const token = tokenMatch ? decodeURIComponent(tokenMatch[1]) : null;
-
-let orders: any[] = [];
-let ordersError = "";
-
-// ---------- JWT helpers (SSR-safe) ----------
-function decodeJwtPayloadSSR(jwt: string): any | null {
-  try {
-    const parts = jwt.split(".");
-    if (parts.length < 2) return null;
-
-    const payloadB64Url = parts[1];
-    const pad = "=".repeat((4 - (payloadB64Url.length % 4)) % 4);
-    const b64 = (payloadB64Url + pad).replace(/-/g, "+").replace(/_/g, "/");
-
-    const json =
-      typeof atob === "function"
-        ? atob(b64)
-        : Buffer.from(b64, "base64").toString("utf8");
-
-    return JSON.parse(json);
-  } catch {
-    return null;
-  }
-}
-
-function isTokenExpired(payload: any): boolean {
-  const exp = payload?.exp;
-  if (!exp) return false; // si no hay exp, no lo marcamos como expirado
-  const nowSec = Math.floor(Date.now() / 1000);
-  return Number(exp) <= nowSec;
-}
-
-function extractRole(payload: any): "admin" | "user" {
-  const raw =
-    payload?.role ??
-    payload?.user?.role ??
-    payload?.roles?.[0] ??
-    payload?.user?.roles?.[0] ??
-    null;
-
-  if (!raw) return "user";
-  const s = String(raw).toLowerCase();
-  return s.includes("admin") ? "admin" : "user";
-}
-
-function extractEmail(payload: any): string | null {
-  const raw =
-    payload?.email ??
-    payload?.user?.email ??
-    payload?.username ??
-    payload?.sub ??
-    null;
-  return raw ? String(raw) : null;
-}
-
-function logoutAndRedirect() {
-  // borra cookies (path / para cubrir todo el sitio)
-  Astro.cookies.delete("adi_token", { path: "/", secure: isProd, sameSite: "lax" });
-
-  // cleanup por compatibilidad si existía antes
-  Astro.cookies.delete("adi_user", { path: "/", secure: isProd, sameSite: "lax" });
-
-  return Astro.redirect(`/login?next=${encodeURIComponent(nextPath)}`);
-}
-
-// ---------- Validate session ----------
-if (!token) {
-  return logoutAndRedirect();
-}
-
-const payload = decodeJwtPayloadSSR(token);
-if (!payload) {
-  return logoutAndRedirect();
-}
-
-if (isTokenExpired(payload)) {
-  return logoutAndRedirect();
-}
-
-const role = extractRole(payload);
-const email = extractEmail(payload) ?? "—";
-
-// ---------- Load orders ----------
-try {
-  const res = await fetch(`${API_URL}/orders/me`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/json",
-    },
-  });
-
-  if (res.ok) {
-    const data = await res.json();
-    orders = Array.isArray(data) ? data : [];
-  } else {
-    // si es 401/403 probablemente token inválido en API → logout
-    if (res.status === 401 || res.status === 403) return logoutAndRedirect();
-    ordersError = `No se pudieron cargar pedidos (${res.status})`;
-  }
-} catch {
-  ordersError = "No se pudieron cargar pedidos (error de red)";
-}
 ---
 
 <AppLayout title="ADI — Mi cuenta">
@@ -124,71 +12,223 @@ try {
           <div class="adi-soft small">Cuenta</div>
           <h1 class="fw-bold mb-1">Mi cuenta</h1>
           <div class="adi-soft">
-            {email} · rol: <span class="fw-semibold">{role}</span>
+            <span id="accountEmail">Cargando...</span> · rol:
+            <span id="accountRole" class="fw-semibold">—</span>
           </div>
-
-          {/*
-          // Debug opcional (quítalo en prod):
-          <div class="adi-soft small mt-1">
-            sub: {String(payload?.sub ?? "—")} · rawRole:{" "}
-            {String(payload?.role ?? payload?.roles?.[0] ?? payload?.user?.role ?? payload?.user?.roles?.[0] ?? "—")}
-          </div>
-          */}
         </div>
 
-        <form method="post" action="/logout" class="m-0">
-          <button class="btn btn-outline-light" type="submit">Cerrar sesión</button>
-        </form>
+        <button id="logoutBtn" class="btn btn-outline-light" type="button">
+          Cerrar sesión
+        </button>
       </div>
 
       <div class="adi-card p-3 p-md-4 mb-3">
         <div class="d-flex gap-2 flex-wrap">
           <a class="btn btn-dark" href="/catalogo">Ir al catálogo</a>
-          {role === "admin" && (
-            <a class="btn btn-primary" href="/admin/bulk">Admin · Bulk Upload</a>
-          )}
+          <a id="adminBulkLink" class="btn btn-primary d-none" href="/admin/bulk">
+            Admin · Bulk Upload
+          </a>
         </div>
       </div>
 
       <div class="adi-card p-3 p-md-4">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
           <h2 class="h5 fw-bold mb-0">Mis pedidos</h2>
-          <div class="adi-soft small">{orders.length} pedidos</div>
+          <div id="ordersCount" class="adi-soft small">0 pedidos</div>
         </div>
 
-        {ordersError && <div class="alert alert-danger mb-0">{ordersError}</div>}
+        <div id="ordersError" class="alert alert-danger mb-0 d-none"></div>
 
-        {!ordersError && orders.length === 0 && (
-          <div class="text-center adi-soft py-4">
-            Aún no tienes pedidos.
-          </div>
-        )}
+        <div id="ordersEmpty" class="text-center adi-soft py-4 d-none">
+          Aún no tienes pedidos.
+        </div>
 
-        {!ordersError && orders.length > 0 && (
-          <div class="table-responsive">
-            <table class="table align-middle mb-0">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Status</th>
-                  <th>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map((o) => (
-                  <tr>
-                    <td class="fw-semibold">#{o.id}</td>
-                    <td>{o.status}</td>
-                    <td class="fw-semibold">
-                      ${(Number(o.totalCents ?? 0) / 100).toFixed(2)} {o.currency ?? "MXN"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <div id="ordersTableWrap" class="table-responsive d-none">
+          <table class="table align-middle mb-0">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Status</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </section>
 </AppLayout>
+
+<script define:vars={{ API_URL }}>
+  const nextPath = "/account";
+
+  const accountEmail = document.getElementById("accountEmail");
+  const accountRole = document.getElementById("accountRole");
+  const adminBulkLink = document.getElementById("adminBulkLink");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  const ordersCount = document.getElementById("ordersCount");
+  const ordersError = document.getElementById("ordersError");
+  const ordersEmpty = document.getElementById("ordersEmpty");
+  const ordersTableWrap = document.getElementById("ordersTableWrap");
+  const ordersTableBody = document.getElementById("ordersTableBody");
+
+  function getCookie(name) {
+    const match = document.cookie.match(
+      new RegExp("(?:^|; )" + name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "=([^;]*)")
+    );
+
+    return match ? decodeURIComponent(match[1]) : null;
+  }
+
+  function deleteCookie(name) {
+    document.cookie = `${name}=; Path=/; Max-Age=0; SameSite=Lax`;
+  }
+
+  function redirectToLogin() {
+    window.location.replace(`/login?next=${encodeURIComponent(nextPath)}`);
+  }
+
+  function decodeJwtPayload(jwt) {
+    try {
+      const parts = jwt.split(".");
+      if (parts.length < 2) return null;
+
+      const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+      const json = atob(base64.padEnd(base64.length + ((4 - base64.length % 4) % 4), "="));
+
+      return JSON.parse(json);
+    } catch {
+      return null;
+    }
+  }
+
+  function isTokenExpired(payload) {
+    if (!payload?.exp) return false;
+    return Number(payload.exp) <= Math.floor(Date.now() / 1000);
+  }
+
+  function extractRole(payload) {
+    const raw =
+      payload?.role ??
+      payload?.user?.role ??
+      payload?.roles?.[0] ??
+      payload?.user?.roles?.[0] ??
+      null;
+
+    return String(raw ?? "").toLowerCase().includes("admin") ? "admin" : "user";
+  }
+
+  function extractEmail(payload) {
+    return String(
+      payload?.email ??
+      payload?.user?.email ??
+      payload?.username ??
+      payload?.sub ??
+      "—"
+    );
+  }
+
+  function logout() {
+    deleteCookie("adi_token");
+    deleteCookie("adi_user");
+    redirectToLogin();
+  }
+
+  function showOrdersError(message) {
+    ordersError.textContent = message;
+    ordersError.classList.remove("d-none");
+    ordersEmpty.classList.add("d-none");
+    ordersTableWrap.classList.add("d-none");
+  }
+
+  function renderOrders(orders) {
+    ordersCount.textContent = `${orders.length} pedidos`;
+
+    if (!orders.length) {
+      ordersEmpty.classList.remove("d-none");
+      ordersTableWrap.classList.add("d-none");
+      return;
+    }
+
+    ordersTableBody.innerHTML = orders
+      .map((o) => {
+        const total = (Number(o.totalCents ?? 0) / 100).toFixed(2);
+        const currency = o.currency ?? "MXN";
+
+        return `
+          <tr>
+            <td class="fw-semibold">#${o.id}</td>
+            <td>${o.status ?? "—"}</td>
+            <td class="fw-semibold">$${total} ${currency}</td>
+          </tr>
+        `;
+      })
+      .join("");
+
+    ordersTableWrap.classList.remove("d-none");
+    ordersEmpty.classList.add("d-none");
+  }
+
+  async function initAccount() {
+    const token = getCookie("adi_token");
+
+    if (!token) {
+      redirectToLogin();
+      return;
+    }
+
+    const payload = decodeJwtPayload(token);
+
+    if (!payload || isTokenExpired(payload)) {
+      logout();
+      return;
+    }
+
+    const role = extractRole(payload);
+    const email = extractEmail(payload);
+
+    accountEmail.textContent = email;
+    accountRole.textContent = role;
+
+    if (role === "admin") {
+      adminBulkLink.classList.remove("d-none");
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/api/orders/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
+
+      if (res.status === 401 || res.status === 403) {
+        logout();
+        return;
+      }
+
+      if (!res.ok) {
+        showOrdersError(`No se pudieron cargar pedidos (${res.status})`);
+        return;
+      }
+
+      const data = await res.json();
+      renderOrders(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error(error);
+      showOrdersError("No se pudieron cargar pedidos (error de red)");
+    }
+  }
+
+  logoutBtn?.addEventListener("click", logout);
+
+  initAccount();
+</script>
+
+<style>
+  .d-none {
+    display: none !important;
+  }
+</style>
