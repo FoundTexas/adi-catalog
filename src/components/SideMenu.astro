@@ -1,0 +1,100 @@
+<nav class="adi-side-menu" aria-label="Navegación por secciones">
+  <a href="#hero" class="adi-side-link active" data-section="hero">
+    <span class="adi-side-dot"></span>
+    <span class="adi-side-text">Inicio</span>
+  </a>
+
+  <a href="#catalogo" class="adi-side-link" data-section="catalogo">
+    <span class="adi-side-dot"></span>
+    <span class="adi-side-text">Catálogo</span>
+  </a>
+
+  <a href="#precios" class="adi-side-link" data-section="precios">
+    <span class="adi-side-dot"></span>
+    <span class="adi-side-text">Precios</span>
+  </a>
+
+  <a href="#trabajos" class="adi-side-link" data-section="trabajos">
+    <span class="adi-side-dot"></span>
+    <span class="adi-side-text">Trabajos</span>
+  </a>
+
+  <a href="#contacto" class="adi-side-link" data-section="contacto">
+    <span class="adi-side-dot"></span>
+    <span class="adi-side-text">Contacto</span>
+  </a>
+</nav>
+
+<script>
+  const sectionIds = ["hero", "catalogo", "precios", "trabajos", "contacto"];
+
+  const cleanUrlHash = () => {
+    if (window.location.hash) {
+      history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search
+      );
+    }
+  };
+
+  // Limpia /#id al refrescar o entrar con hash.
+  cleanUrlHash();
+
+  const sections = sectionIds
+    .map((id) => document.getElementById(id))
+    .filter(Boolean);
+
+  const links = Array.from(document.querySelectorAll(".adi-side-link"));
+
+  const setActiveLink = (id) => {
+    links.forEach((link) => {
+      const isActive = link.getAttribute("data-section") === id;
+      link.classList.toggle("active", isActive);
+    });
+  };
+
+  links.forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+
+      const id = link.getAttribute("data-section");
+      const section = id ? document.getElementById(id) : null;
+
+      if (!section) return;
+
+      section.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+
+      setActiveLink(id);
+
+      // Evita que aparezca /#id en la URL.
+      history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search
+      );
+    });
+  });
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const visibleEntries = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+
+      if (visibleEntries.length > 0) {
+        setActiveLink(visibleEntries[0].target.id);
+      }
+    },
+    {
+      root: null,
+      rootMargin: "-35% 0px -45% 0px",
+      threshold: [0.1, 0.25, 0.5, 0.75],
+    }
+  );
+
+  sections.forEach((section) => observer.observe(section));
+</script>

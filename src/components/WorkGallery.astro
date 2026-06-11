@@ -64,14 +64,19 @@ const items: WorkItem[] = Array.from(byFolder.entries())
   .sort((a, b) => a.sortKey.localeCompare(b.sortKey));
 ---
 
-<section id="trabajos" class="adi-section adi-section-flow">
-  <div class="container pb-4">
-    <div class="mb-3">
-      <h2 class="fw-bold mb-1">Trabajos realizados</h2>
-      <div class="adi-soft">
-        Ejemplos reales de estilos de impresión y producción.
-      </div>
-    </div>
+<section id="trabajos" class="adi-section py-5 adi-section-flow">
+  <div class="container text-center">
+    <p class="text-uppercase small fw-semibold adi-soft mb-2">
+      Trabajos recientes
+    </p>
+
+    <h2 class="fw-bold mb-3">Producción real para marcas, equipos y eventos</h2>
+
+    <p class="adi-soft mb-4 mx-auto" style="max-width:700px">
+      Desde uniformes y merch corporativo hasta prendas personalizadas para
+      campañas, desarrollamos producción textil con identidad visual y atención
+      directa.
+    </p>
   </div>
 
   <div class="adi-works-wrap" data-parallax-root>
@@ -174,7 +179,7 @@ const items: WorkItem[] = Array.from(byFolder.entries())
         }
         requestTick();
       },
-      { threshold: 0.01 }
+      { threshold: 0.01 },
     );
 
     tiles.forEach((t) => io.observe(t));
@@ -256,7 +261,8 @@ const items: WorkItem[] = Array.from(byFolder.entries())
 
   const updateUI = (title) => {
     if (titleEl) titleEl.textContent = title || "Trabajo";
-    if (counterEl) counterEl.textContent = `${idx + 1} / ${currentImages.length || 1}`;
+    if (counterEl)
+      counterEl.textContent = `${idx + 1} / ${currentImages.length || 1}`;
     if (prevBtn) prevBtn.disabled = currentImages.length <= 1;
     if (nextBtn) nextBtn.disabled = currentImages.length <= 1;
     renderDots();

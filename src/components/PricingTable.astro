@@ -96,12 +96,12 @@ const shipMetro = ship.metroCdmx ?? 0;
                   </td>
 
                   <td class="adi-money" data-col="retail">
-                    <span class="adi-pill">MXN</span>
+                    <span class="adi-pill d-none d-md-inline-flex">MXN</span>
                     <span class="adi-price">${r.retail}</span>
                   </td>
 
                   <td class="adi-money" data-col="wholesale">
-                    <span class="adi-pill">MXN</span>
+                    <span class="adi-pill d-none d-md-inline-flex">MXN</span>
                     <span class="adi-price">${r.wholesale}</span>
                   </td>
                 </tr>
@@ -126,10 +126,26 @@ const shipMetro = ship.metroCdmx ?? 0;
           {PRICING.notes?.vat ?? "Precios en MXN."}
           {PRICING.notes?.shipping ?? "Envío no incluido."}
         </div>
-        <div class="adi-soft small">
-          Envío nacional: menudeo <b>${shipRetail}</b> · mayoreo <b
-            >${shipWholesale}</b
-          > · Metro CDMX: <b>${shipMetro}</b> (a coordinar).
+        <div
+          class="adi-soft small d-flex flex-wrap align-items-center gap-1 gap-sm-2"
+        >
+          <span class="me-1">Envío nacional:</span>
+
+          <span class="d-inline-flex align-items-center">
+            <span class="me-1">· menudeo</span>
+            <b>MXN ${shipRetail}</b>
+          </span>
+
+          <span class="d-inline-flex align-items-center">
+            <span class="me-1">· mayoreo</span>
+            <b>MXN ${shipWholesale}</b>
+          </span>
+
+          <span class="d-inline-flex align-items-center">
+            <span class="me-1">· Metro CDMX:</span>
+            <b> (a coordinar).</b>
+          </span>
+
         </div>
       </div>
     </div>
@@ -258,7 +274,7 @@ const shipMetro = ship.metroCdmx ?? 0;
       }
 
       .adi-table thead th {
-        background: rgba(255, 255, 255, 0.92);
+        background: rgb(255, 255, 255);
         border-bottom: 1px solid rgba(120, 90, 160, 0.16);
         color: rgba(42, 31, 64, 0.85);
         font-weight: 900;

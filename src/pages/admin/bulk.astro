@@ -6,7 +6,7 @@ const isProd = import.meta.env.PROD;
 
 const nextPath = "/admin/bulk";
 
-const cookieHeader = Astro.request.headers.get("cookie") ?? "";
+const cookieHeader = ""; //Astro.request.headers.get("cookie") ?? "";
 const tokenMatch = cookieHeader.match(/(?:^|;\s*)adi_token=([^;]+)/);
 const token = tokenMatch ? decodeURIComponent(tokenMatch[1]) : null;
 

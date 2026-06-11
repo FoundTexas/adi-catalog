@@ -64,13 +64,12 @@ export const PRICING = {
 export const PRODUCTS: Product[] = [
   {
     id: "tshirt-basic",
-    name: "Playera Heavy Cotton",
+    name: "Playera Algodón",
     category: "tshirt",
     description: "Ideal para el día a día, marcas, eventos.",
 
     prices: [
       { id: "custom", label: "Personalizada (DTF)", retail: 250, wholesale: 180 },
-      { id: "blank", label: "Sin personalizar", retail: 100, wholesale: 80 },
     ],
 
     colors: [
@@ -119,7 +118,6 @@ export const PRODUCTS: Product[] = [
 
     prices: [
       { id: "custom", label: "Personalizada (DTF)", retail: 300, wholesale: 250 },
-      { id: "blank", label: "Sin personalizar", retail: 200, wholesale: 150 },
     ],
 
     colors: [
@@ -163,7 +161,7 @@ export const PRODUCTS: Product[] = [
 
     prices: [
       { id: "set", label: "Bordado", retail: 950, wholesale: 700 },
-      { id: "blank", label: "Sin personalizar", retail: 800, wholesale: 650 },
+      //{ id: "blank", label: "Sin personalizar", retail: 800, wholesale: 650 },
     ],
 
     colors: [
@@ -197,13 +195,12 @@ export const PRODUCTS: Product[] = [
 
   {
     id: "sudadera-cuello-redondo",
-    name: "Sudadera Cuello Redondo",
+    name: "Sudadera",
     category: "sweatshirt",
     description: "Sudadera cuello redondo de acabado afelpado.",
 
     prices: [
       { id: "custom", label: "Personalizada (DTF)", retail: 400, wholesale: 350 },
-      { id: "blank", label: "Sin personalizar", retail: 300, wholesale: 250 },
     ],
 
     colors: [
@@ -238,14 +235,14 @@ export const PRODUCTS: Product[] = [
 
   {
     id: "hoodie-basic",
-    name: "Hoodie Heavy Blend",
+    name: "Hoodie",
     category: "hoodie",
     description:
       "Sudadera premium con gorro y bolsa frontal. Ideal para streetwear, marcas, merch y uniformes. Excelente para impresión DTF.",
 
     prices: [
       { id: "custom", label: "Personalizada (DTF)", retail: 450, wholesale: 350 },
-      { id: "blank", label: "Sin personalizar", retail: 350, wholesale: 250 },
+      //{ id: "blank", label: "Sin personalizar", retail: 350, wholesale: 250 },
     ],
 
     colors: [
@@ -293,7 +290,7 @@ export const PRODUCTS: Product[] = [
 
     prices: [
       { id: "custom", label: "Personalizada (DTF)", retail: 250, wholesale: 180 },
-      { id: "blank", label: "Sin personalizar", retail: 100, wholesale: 80 },
+      //{ id: "blank", label: "Sin personalizar", retail: 100, wholesale: 80 },
     ],
 
     colors: [

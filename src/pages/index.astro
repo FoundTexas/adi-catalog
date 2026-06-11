@@ -1,14 +1,17 @@
 ---
 import Hero from "../components/Hero.astro";
-import TopMenu from "../components/TopMenu.astro";
+import ProductsSection from "../components/ProductsSection.astro";
+import PricingTable from "../components/PricingTable.astro";
 import WorkGallery from "../components/WorkGallery.astro";
-import AppLayout from "../layouts/AppLayout.astro";
+import DirectContact from "../components/DirectContact.astro";
+import SideMenu from "../components/SideMenu.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
 
 const pageTitle =
-  "ADI | Textiles personalizados, merch y diseño mexicano independiente";
+  "ADI | Uniformes, merch y producción textil por volumen en México";
 
 const pageDescription =
-  "Textiles personalizados en México para empresas, marcas y proyectos. Uniformes, merch y colecciones de diseño mexicano independiente.";
+  "Producción textil por volumen para empresas, marcas y eventos en México. Playeras personalizadas, uniformes, merch y branding con atención directa.";
 
 const canonical = "https://adi.foundtexas.net/";
 
@@ -19,188 +22,25 @@ const schema = {
   url: canonical,
   logo: "https://adi.foundtexas.net/ADI_mini.svg",
   description: pageDescription,
-  areaServed: "MX"
+  areaServed: "MX",
 };
 ---
 
-<AppLayout
+<BaseLayout
   title={pageTitle}
   description={pageDescription}
   canonical={canonical}
   schema={schema}
 >
-  <TopMenu mode = "none" />
+  <SideMenu />
+
   <Hero />
 
-  <!-- TRABAJOS -->
-  <section class="adi-section py-5">
-    <div class="container text-center">
-      <p class="text-uppercase small fw-semibold adi-soft mb-2">
-        Trabajos recientes
-      </p>
+  <ProductsSection />
 
-      <h2 class="fw-bold mb-3">
-        Producción real para marcas, equipos y colecciones
-      </h2>
+  <PricingTable />
 
-      <p class="adi-soft mb-4 mx-auto" style="max-width:700px">
-        Desde merch para empresas hasta colecciones con artistas mexicanos,
-        desarrollamos prendas con identidad visual y producción cuidada.
-      </p>
-    </div>
+  <WorkGallery />
 
-    <WorkGallery />
-  </section>
-
-  <!-- B2B / B2C -->
-  <section class="adi-section pb-5">
-    <div class="container">
-      <div class="text-center mb-4">
-        <h2 class="fw-bold">
-          Soluciones para empresas y diseño independiente
-        </h2>
-
-        <p class="adi-soft">
-          ADI conecta personalización textil, merch y arte mexicano independiente.
-        </p>
-      </div>
-
-      <div class="row g-4">
-        <!-- B2B -->
-        <div class="col-md-6">
-          <div class="adi-card p-4 h-100">
-            <span class="badge text-bg-dark mb-3">
-              Mayoreo para empresas y marcas
-            </span>
-
-            <h3 class="fw-bold mb-2">
-              Uniformes, merch y producción por volumen
-            </h3>
-
-            <p class="adi-soft mb-3">
-              Soluciones para equipos, eventos, activaciones, uniformes
-              y marcas que buscan producción textil con atención directa.
-            </p>
-
-            <ul class="adi-soft ps-3 mb-4">
-              <li>Pedidos por volumen</li>
-              <li>Merch para marcas y eventos</li>
-              <li>Opciones de branding</li>
-              <li>Atención personalizada</li>
-            </ul>
-
-            <a href="/b2b" class="btn btn-dark">
-              Cotizar proyecto
-            </a>
-          </div>
-        </div>
-
-        <!-- B2C -->
-        <div class="col-md-6">
-          <div class="adi-card p-4 h-100">
-            <span class="badge text-bg-light border mb-3">
-              Diseño mexicano independiente
-            </span>
-
-            <h3 class="fw-bold mb-2">
-              Colecciones de artistas emergentes mexicanos
-            </h3>
-
-            <p class="adi-soft mb-3">
-              También impulsamos prendas y colecciones con identidad propia,
-              desarrolladas junto a artistas y diseñadores independientes.
-            </p>
-
-            <ul class="adi-soft ps-3 mb-4">
-              <li>Diseños originales</li>
-              <li>Colaboraciones con artistas</li>
-              <li>Streetwear creativo mexicano</li>
-            </ul>
-
-            <a href="/catalogo" class="btn btn-outline-dark">
-              Explorar diseños
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- SERVICIOS -->
-  <section class="adi-section py-5">
-    <div class="container">
-      <div class="text-center mb-4">
-        <p class="text-uppercase small fw-semibold adi-soft">
-          Qué podemos desarrollar contigo
-        </p>
-
-        <h2 class="fw-bold">
-          Textiles personalizados para distintos proyectos
-        </h2>
-
-        <p class="adi-soft mb-0 mx-auto" style="max-width:700px">
-          Producción textil para marcas, empresas, eventos y colecciones creativas.
-        </p>
-      </div>
-
-      <div class="row g-4">
-        <div class="col-md-6 col-lg-3">
-          <div class="adi-card p-4 h-100 text-center">
-            <h3 class="h5 fw-bold">Playeras personalizadas</h3>
-            <p class="adi-soft mb-0">
-              Para merch, campañas, equipos y marcas.
-            </p>
-          </div>
-        </div>
-
-        <div class="col-md-6 col-lg-3">
-          <div class="adi-card p-4 h-100 text-center">
-            <h3 class="h5 fw-bold">Hoodies y sudaderas</h3>
-            <p class="adi-soft mb-0">
-              Prendas con identidad visual y mayor valor percibido.
-            </p>
-          </div>
-        </div>
-
-        <div class="col-md-6 col-lg-3">
-          <div class="adi-card p-4 h-100 text-center">
-            <h3 class="h5 fw-bold">Uniformes</h3>
-            <p class="adi-soft mb-0">
-              Para negocios, staff, operación y eventos.
-            </p>
-          </div>
-        </div>
-
-        <div class="col-md-6 col-lg-3">
-          <div class="adi-card p-4 h-100 text-center">
-            <h3 class="h5 fw-bold">Merch</h3>
-            <p class="adi-soft mb-0">
-              Para marcas, activaciones y proyectos creativos.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CTA FINAL -->
-    <div class="container mt-5">
-      <div class="adi-card p-5 text-center">
-        <h2 class="fw-bold mb-3">
-          Cotiza tu producción textil
-        </h2>
-
-        <p class="adi-soft mb-4">
-          Ya sea mayoreo para empresas o una colección creativa,
-          te ayudamos a desarrollar tu proyecto con atención directa.
-        </p>
-
-        <div class="d-flex justify-content-center gap-2 flex-wrap">
-          <a href="/b2b" class="btn btn-dark">
-            Cotizar producción
-          </a>
-          
-        </div>
-      </div>
-    </div>
-  </section>
-</AppLayout>
+  <DirectContact />
+</BaseLayout>

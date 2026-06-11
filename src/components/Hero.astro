@@ -1,9 +1,8 @@
 <section class="adi-section pt-5">
-  <div class="container">
+  <div class="container" id="hero">
     <div class="row align-items-center g-4">
       <!-- TEXTO -->
       <div class="col-lg-6">
-
         <div class="mt-4">
           <a
             href="/"
@@ -25,38 +24,45 @@
         </div>
 
         <h1 class="fw-bold mb-3">
-          Producción y personalización textil en México
+          Prersonalización textil para empresas, marcas y eventos
         </h1>
 
         <p class="adi-subtitle mb-4">
-          Producción por volumen para empresas y marcas. Impulsamos diseños de
-          artistas mexicanos.
+          Producción por menudeo y mayoreo desde 5 piezas, con atención directa,
+          producción local y opciones ideales para uniformes, staff, merch,
+          activaciones y branding.
         </p>
 
         <div class="d-flex flex-wrap gap-2 mb-4">
-          <span class="badge text-bg-dark border">Producción por volumen</span>
           <span class="badge text-bg-dark border">Uniformes y merch</span>
-          <span class="badge text-bg-dark border"
-            >Arte mexicano independiente</span
-          >
-          <span class="badge text-bg-dark border">Atención directa</span>
+          <span class="badge text-bg-dark border">Producción local</span>
         </div>
 
-        <div class="d-flex flex-wrap gap-2 mb-3">
-          <a href="/b2b" class="btn btn-dark btn-lg"> Cotizar proyecto </a>
+        <div class="d-flex flex-wrap gap-3 mb-3">
+          <a
+            class="btn btn-primary btn-lg"
+            href="#precios"
+            data-scroll-target="precios"
+          >
+            Ver precios
+          </a>
 
-          <a href="/catalogo" class="btn btn-outline-dark btn-lg">
-            Explorar diseños
+          <a
+            class="btn btn-outline-dark btn-lg"
+            href="#catalogo"
+            data-scroll-target="catalogo"
+          >
+            Ver catálogo
           </a>
         </div>
 
-        <div class="small adi-soft">
-          Ideal para empresas, eventos, equipos, marcas emergentes y artistas
-          independientes.
+        <div class="adi-soft small">
+          Ideal para empresas, eventos, equipos, marcas emergentes, artistas
+          independientes y campañas corporativas.
         </div>
       </div>
 
-      <!-- IMÁGENES -->
+      <!-- IMÁGENES + PROCESO -->
       <div class="col-lg-6">
         <div class="row g-3">
           <!-- imagen principal -->
@@ -102,6 +108,68 @@
           </div>
         </div>
       </div>
+
+      <!-- EJEMPLO B2B -->
+      <div class="col-12">
+        <div class="row align-items-center g-4 mt-2">
+          <div class="col-md-6">
+            <div class="adi-b2b-card p-3 p-lg-4 overflow-hidden">
+              <img
+                src="/img/b2b/b2b-hero-main.webp"
+                alt="Producción textil para empresas y eventos"
+                class="img-fluid rounded-4 mb-3"
+                width="700"
+                height="520"
+                loading="lazy"
+              />
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="fw-semibold mb-3">¿Cómo trabajamos?</div>
+
+            <ol class="adi-soft mb-0 ps-3">
+              <li>Eliges producto y cantidades</li>
+              <li>Nos compartes tu logo, idea o necesidad</li>
+              <li>Te cotizamos y producimos</li>
+            </ol>
+
+            <hr class="my-3" />
+
+            <div class="adi-soft small">
+              Producción local · Comunicación directa · Proyectos por volumen
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+
+  <script>
+    const scrollButtons = Array.from(
+      document.querySelectorAll("[data-scroll-target]")
+    );
+
+    scrollButtons.forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+
+        const id = button.getAttribute("data-scroll-target");
+        const section = id ? document.getElementById(id) : null;
+
+        if (!section) return;
+
+        section.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+
+        history.replaceState(
+          null,
+          "",
+          window.location.pathname + window.location.search
+        );
+      });
+    });
+  </script>
 </section>

@@ -1,38 +1,119 @@
 ---
 import { PRICING } from "../config/pricing";
+
+const whatsappUrl = PRICING.contact.whatsappUrl;
+const email = PRICING.contact.email;
+
+const quoteItems = [
+  "Producto o prenda",
+  "Cantidad aproximada",
+  "Tallas",
+  "Color de prenda",
+  "Logo, diseño o idea",
+  "Fecha tentativa",
+];
+
+const services = [
+  "Playeras personalizadas",
+  "Uniformes para staff",
+  "Merch para eventos",
+  "Producción por volumen",
+  "Impresión DTF",
+  "Branding textil",
+];
 ---
 
-<section id="contacto" class="pb-3">
-  <div class="container text-center">
-    <p class="adi-soft mb-3">
-      Calidad textil · impresión DTF · Producción local
-    </p>
-  </div>
-  <div class="container">
-    <div class="bg-dark rounded-3 text-white p-4">
-      <div
-        class="d-flex justify-content-between align-items-start gap-3 flex-wrap"
-      >
-        <div>
-          <h2 class="fw-bold mb-1">Trato directo</h2>
-          <div class="">
-            ¿Lo resolvemos rápido? Escríbenos directo y lo aterrizamos.
+<footer id="contacto" class="adi-section adi-footer-section">
+  <div class="container adi-footer">
+    <div class="adi-footer-card adi-card-dark">
+      <div class="row g-5 align-items-start">
+        <!-- MENSAJE PRINCIPAL -->
+        <div class="col-lg-5">
+          <p class="text-uppercase small fw-semibold mb-2 adi-footer-kicker">
+            Contacto directo
+          </p>
+
+          <h2 class="fw-bold mb-3">
+            Cotiza tu producción textil
+          </h2>
+
+          <p class="adi-soft mb-4">
+            Cuéntanos qué quieres producir y te ayudamos a aterrizar producto,
+            cantidades, materiales, tiempos y costos para tu proyecto.
+          </p>
+
+          <div class="d-flex flex-wrap gap-2">
+            <a
+              class="btn btn-primary btn-lg"
+              href={whatsappUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Cotizar por WhatsApp
+            </a>
+
+            <a
+              class="btn btn-outline-light btn-lg"
+              href={`mailto:${email}`}
+            >
+              Enviar correo
+            </a>
           </div>
         </div>
 
-        <div class="d-flex gap-2 flex-wrap">
-          <a
-            class="btn btn-primary"
-            href={PRICING.contact.whatsappUrl}
-            target="_blank"
-            rel="noreferrer">WhatsApp</a
-          >
-          <a
-            class="btn btn-outline-light"
-            href={`mailto:${PRICING.contact.email}`}>Correo</a
-          >
+        <!-- PARA COTIZAR -->
+        <div class="col-lg-4">
+          <h3 class="h5 fw-bold mb-3">
+            Para cotizar más rápido
+          </h3>
+
+          <p class="adi-soft mb-3">
+            Si ya tienes estos datos, mándalos en tu primer mensaje:
+          </p>
+
+          <div class="d-flex flex-wrap gap-2">
+            {quoteItems.map((item) => (
+              <span class="badge text-bg-light border">
+                {item}
+              </span>
+            ))}
+          </div>
+
+          <p class="adi-soft small mt-3 mb-0">
+            No necesitas tener todo definido. También podemos ayudarte a elegir
+            la mejor opción según tu presupuesto y objetivo.
+          </p>
+        </div>
+
+        <!-- SERVICIOS -->
+        <div class="col-lg-3">
+          <h3 class="h5 fw-bold mb-3">
+            Podemos ayudarte con
+          </h3>
+
+          <ul class="adi-footer-list">
+            {services.map((service) => (
+              <li>{service}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <hr class="my-5" />
+
+      <div class="row g-4 align-items-center adi-footer-bottom">
+        <div class="col-md-6">
+          <div class="adi-soft small">
+            Calidad textil · Impresión DTF · Producción local · Atención directa
+          </div>
+        </div>
+
+        <div class="col-md-6 text-md-end">
+          <div class="adi-soft small">
+            © {new Date().getFullYear()} ADI — Arte y Diseño Independiente
+          </div>
         </div>
       </div>
     </div>
   </div>
-</section>
+</footer>
