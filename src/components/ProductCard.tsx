@@ -117,9 +117,6 @@ export default function ProductCard({ product }: { product: Product }) {
             </a>
           )}
 
-          <a className="btn btn-primary ms-auto" href="#cotizar">
-            Cotizar
-          </a>
         </div>
       </div>
 
