@@ -1,8 +1,10 @@
 <section class="adi-section pt-5">
   <div class="container" id="hero">
-    <div class="row align-items-center g-4">
+    <div
+      class="row align-items-center justify-content-center justify-content-md-start g-4"
+    >
       <!-- TEXTO -->
-      <div class="col-lg-6">
+      <div class="col-12 col-lg-6 text-center text-lg-start">
         <div class="mt-4">
           <a
             href="/"
@@ -24,7 +26,7 @@
         </div>
 
         <h1 class="fw-bold mb-3">
-          Prersonalización textil para empresas, marcas y eventos
+          Personalización textil para empresas, marcas y eventos
         </h1>
 
         <p class="adi-subtitle mb-4">
@@ -33,12 +35,16 @@
           activaciones y branding.
         </p>
 
-        <div class="d-flex flex-wrap gap-2 mb-4">
+        <div
+          class="d-flex flex-wrap gap-2 mb-4 justify-content-center justify-content-lg-start"
+        >
           <span class="badge text-bg-dark border">Uniformes y merch</span>
           <span class="badge text-bg-dark border">Producción local</span>
         </div>
 
-        <div class="d-flex flex-wrap gap-3 mb-3">
+        <div
+          class="d-flex flex-wrap gap-3 mb-3 justify-content-center justify-content-lg-start"
+        >
           <a
             class="btn btn-primary btn-lg"
             href="#precios"
@@ -111,9 +117,11 @@
 
       <!-- EJEMPLO B2B -->
       <div class="col-12">
-        <div class="row align-items-center g-4 mt-2">
+        <div
+          class="row align-items-center g-4 mt-2 flex-column-reverse flex-md-row"
+        >
           <div class="col-md-6">
-            <div class="adi-b2b-card p-3 p-lg-4 overflow-hidden">
+            <div class="adi-b2b-card p-lg-4 overflow-hidden">
               <img
                 src="/img/b2b/b2b-hero-main.webp"
                 alt="Producción textil para empresas y eventos"
@@ -126,13 +134,27 @@
           </div>
 
           <div class="col-md-6">
-            <div class="fw-semibold mb-3">¿Cómo trabajamos?</div>
+            <h2 class="fw-semibold mb-3">¿Cómo trabajamos?</h2>
 
-            <ol class="adi-soft mb-0 ps-3">
-              <li>Eliges producto y cantidades</li>
-              <li>Nos compartes tu logo, idea o necesidad</li>
-              <li>Te cotizamos y producimos</li>
-            </ol>
+            <div class="d-flex flex-column gap-2 mb-0">
+              <span
+                class="badge text-bg-dark border rounded-pill py-3 px-4 text-center text-md-start"
+              >
+                1. Eliges producto y cantidades
+              </span>
+
+              <span
+                class="badge text-bg-dark border rounded-pill py-3 px-4 text-center text-md-start"
+              >
+                2. Nos compartes tu logo o idea
+              </span>
+
+              <span
+                class="badge text-bg-dark border rounded-pill py-3 px-4 text-center text-md-start"
+              >
+                3. Te cotizamos y producimos
+              </span>
+            </div>
 
             <hr class="my-3" />
 
@@ -147,7 +169,7 @@
 
   <script>
     const scrollButtons = Array.from(
-      document.querySelectorAll("[data-scroll-target]")
+      document.querySelectorAll("[data-scroll-target]"),
     );
 
     scrollButtons.forEach((button) => {
@@ -167,7 +189,7 @@
         history.replaceState(
           null,
           "",
-          window.location.pathname + window.location.search
+          window.location.pathname + window.location.search,
         );
       });
     });

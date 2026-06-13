@@ -204,7 +204,6 @@ img {
 }
 
 .adi-subtitle {
-  max-width: 540px;
   font-size: 1.25rem;
   line-height: 1.6;
   color: var(--adi-soft);
