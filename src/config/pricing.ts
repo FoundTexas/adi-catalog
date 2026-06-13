@@ -197,7 +197,7 @@ export const PRODUCTS: Product[] = [
     id: "sudadera-cuello-redondo",
     name: "Sudadera",
     category: "sweatshirt",
-    description: "Sudadera cuello redondo de acabado afelpado.",
+    description: "Sudadera de acabado afelpado.",
 
     prices: [
       { id: "custom", label: "Personalizada (DTF)", retail: 400, wholesale: 350 },
@@ -238,7 +238,7 @@ export const PRODUCTS: Product[] = [
     name: "Hoodie",
     category: "hoodie",
     description:
-      "Sudadera premium con gorro y bolsa frontal. Ideal para streetwear, marcas, merch y uniformes. Excelente para impresión DTF.",
+      "Sudadera con gorro y bolsa frontal.",
 
     prices: [
       { id: "custom", label: "Personalizada (DTF)", retail: 450, wholesale: 350 },
