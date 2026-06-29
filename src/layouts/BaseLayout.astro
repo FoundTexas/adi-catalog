@@ -1,7 +1,7 @@
 ---
 const {
-  title = "ADI | Uniformes, merch y producción textil por volumen en México",
-  description = "Producción textil por volumen para empresas, marcas y eventos en México. Playeras personalizadas, uniformes, merch y branding con atención directa.",
+  title = "Uniformes y playeras personalizadas en CDMX | ADI",
+  description = "Personalizamos playeras, polos, uniformes, sudaderas, hoodies, scrubs y tote bags con bordado y DTF en CDMX. Pedidos desde 5 piezas y envíos en México.",
   image = "https://adi.foundtexas.net/og/adi-og-home.jpg",
   canonical = "https://adi.foundtexas.net/",
   noIndex = false,
@@ -24,6 +24,7 @@ import "../styles/global.css";
 
     <title>{title}</title>
     <meta name="description" content={description} />
+
     <meta name="author" content="ADI - Arte y Diseño Independiente" />
     <meta name="robots" content={robotsContent} />
 
@@ -63,10 +64,7 @@ import "../styles/global.css";
 
     {
       schema && (
-        <script
-          type="application/ld+json"
-          set:html={JSON.stringify(schema)}
-        />
+        <script type="application/ld+json" set:html={JSON.stringify(schema)} />
       )
     }
   </head>
@@ -76,6 +74,8 @@ import "../styles/global.css";
       <slot />
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    ></script>
   </body>
 </html>

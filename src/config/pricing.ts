@@ -117,7 +117,7 @@ export const PRODUCTS: Product[] = [
     description: "Ideal para uniformes, equipos, eventos.",
 
     prices: [
-      { id: "custom", label: "Personalizada (DTF)", retail: 300, wholesale: 250 },
+      { id: "custom", label: "Personalizada (Bordado)", retail: 350, wholesale: 275 },
     ],
 
     colors: [
@@ -155,12 +155,12 @@ export const PRODUCTS: Product[] = [
 
   {
     id: "pijama-quirurgica",
-    name: "Scrubs",
+    name: "Scrub completo",
     category: "scrub",
     description: "Pijamas quirúrgicas de tela anti fluido.",
 
     prices: [
-      { id: "set", label: "Bordado", retail: 950, wholesale: 700 },
+      { id: "set", label: "Bordado", retail: 1200, wholesale: 1000 },
       //{ id: "blank", label: "Sin personalizar", retail: 800, wholesale: 650 },
     ],
 
@@ -176,7 +176,7 @@ export const PRODUCTS: Product[] = [
     ],
 
     spec: {
-      material: "50% Algodón / 50% Poliéster",
+      material: "Antífluido",
       fit: "Regular",
       print: "DTF / Vinil textil / Serigrafía (según pedido)",
       care: "Lavar al revés, agua fría. Evitar secadora en alta temperatura.",
@@ -230,6 +230,16 @@ export const PRODUCTS: Product[] = [
       fit: "Regular",
       print: "DTF",
       care: "Lavar al revés, no secadora en alta temperatura.",
+    },
+
+    sizeChart: {
+      title: "Tabla de tallas – Hoodie",
+      rows: [
+        { size: "S", widthCm: 52, lengthCm: 68 },
+        { size: "M", widthCm: 56, lengthCm: 70 },
+        { size: "L", widthCm: 60, lengthCm: 72 },
+        { size: "XL", widthCm: 64, lengthCm: 74 },
+      ],
     },
   },
 
@@ -286,7 +296,7 @@ export const PRODUCTS: Product[] = [
     id: "tshirt-5050",
     name: "Playera 50/50",
     category: "tshirt",
-    description: "Mezcla 50% algodón / 50% poliéster. Excelente para impresión DTF.",
+    description: "Mezcla 50% algodón / 50% poliéster.",
 
     prices: [
       { id: "custom", label: "Personalizada (DTF)", retail: 250, wholesale: 180 },

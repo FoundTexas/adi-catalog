@@ -18,7 +18,7 @@ export default function ProductCard({ product }: { product: Product }) {
   );
 
   return (
-    <div className="adi-card">
+    <div className="adi-card h-100 w-100 d-flex flex-column">
       {/* IMAGE */}
       <div className="product-media overflow-hidden">
         <img

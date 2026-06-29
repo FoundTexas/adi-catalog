@@ -82,10 +82,7 @@ export default function ProductsCatalog({ products }: Props) {
           ‹
         </button>
 
-        <div
-          ref={carouselRef}
-          className="row g-3 justify-content-center align-items-start products-mobile-track"
-        >
+        <div ref={carouselRef} className="row g-3 justify-content-center align-items-stretch products-mobile-track">
           {products.map((product) => (
             <div
               key={product.id}
