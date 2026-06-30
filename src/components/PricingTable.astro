@@ -20,13 +20,13 @@ const shipWholesale = ship.nationalWholesale ?? 0;
 const shipMetro = ship.metroCdmx ?? 0;
 ---
 
-<section id="precios" class="adi-section adi-section-flow">
+<section class="adi-section adi-section-flow">
   <div class="container">
     <div
       class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-3"
     >
       <div class="w-100">
-        <h2 class="fw-bold mb-1 text-center ">Tabla de precios</h2>
+        <h2 class="fw-bold mb-1 text-center " id="precios">Tabla de precios</h2>
         <div class="adi-soft text-center ">
           Menudeo (1–{PRICING.wholesaleThreshold - 1}) · Mayoreo ({
             PRICING.wholesaleThreshold

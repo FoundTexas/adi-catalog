@@ -8,17 +8,21 @@
     <span class="adi-side-dot"></span>
     <span class="adi-side-text">Trabajos</span>
   </a>
-  
+
   <a href="#catalogo" class="adi-side-link" data-section="catalogo">
     <span class="adi-side-dot"></span>
     <span class="adi-side-text">Catálogo</span>
+  </a>
+
+  <a href="#diseno" class="adi-side-link" data-section="diseno">
+    <span class="adi-side-dot"></span>
+    <span class="adi-side-text">Tu diseño</span>
   </a>
 
   <a href="#precios" class="adi-side-link" data-section="precios">
     <span class="adi-side-dot"></span>
     <span class="adi-side-text">Precios</span>
   </a>
-
 
   <a href="#contacto" class="adi-side-link" data-section="contacto">
     <span class="adi-side-dot"></span>
@@ -34,7 +38,7 @@
       history.replaceState(
         null,
         "",
-        window.location.pathname + window.location.search
+        window.location.pathname + window.location.search,
       );
     }
   };
@@ -75,7 +79,7 @@
       history.replaceState(
         null,
         "",
-        window.location.pathname + window.location.search
+        window.location.pathname + window.location.search,
       );
     });
   });
@@ -94,7 +98,7 @@
       root: null,
       rootMargin: "-35% 0px -45% 0px",
       threshold: [0.1, 0.25, 0.5, 0.75],
-    }
+    },
   );
 
   sections.forEach((section) => observer.observe(section));
