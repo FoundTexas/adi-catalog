@@ -228,14 +228,7 @@ export default function QuoteCalculator() {
               <button className="btn btn-dark adi-pill" onClick={mailTo}>
                 Enviar por correo
               </button>
-              <a
-                className="btn btn-outline-dark adi-pill"
-                href={PRICING.contact.whatsappUrl}
-                target="_blank"
-                rel="noreferrer"
-              >
-                WhatsApp
-              </a>
+
             </div>
           </div>
         </div>

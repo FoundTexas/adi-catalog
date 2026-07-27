@@ -46,7 +46,7 @@ export const PRICING = {
 
   contact: {
     email: "adi.photostock@gmail.com",
-    whatsappUrl: "https://wa.me/525549138324",
+    whatsappUrl: "https://wa.me/52",
   },
 
   notes: {
