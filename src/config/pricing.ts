@@ -64,9 +64,9 @@ export const PRICING = {
 export const PRODUCTS: Product[] = [
   {
     id: "tshirt-basic",
-    name: "Playera Algodón",
+    name: "Playera Corte Recto",
     category: "tshirt",
-    description: "Ideal para el día a día, marcas, eventos.",
+    description: "100% Algodón. Ideal para el día a día, marcas, eventos.",
 
     prices: [
       { id: "custom", label: "Personalizada (DTF)", retail: 250, wholesale: 180 },
@@ -101,6 +101,42 @@ export const PRODUCTS: Product[] = [
 
     sizeChart: {
       title: "Tabla de tallas – Playera",
+      rows: [
+        { size: "S", widthCm: 48, lengthCm: 70 },
+        { size: "M", widthCm: 52, lengthCm: 72 },
+        { size: "L", widthCm: 56, lengthCm: 74 },
+        { size: "XL", widthCm: 60, lengthCm: 76 },
+      ],
+    },
+  },
+
+  {
+    id: "tshirt-fem",
+    name: "Playera Corte Femenino",
+    category: "tshirt",
+    description: "Playera 100% algodon corte femenino.",
+
+    prices: [
+      { id: "custom", label: "Personalizada (DTF)", retail: 250, wholesale: 180 },
+      //{ id: "blank", label: "Sin personalizar", retail: 100, wholesale: 80 },
+    ],
+
+    colors: [
+      { key: "blanco", label: "Blanco", hex: "#ffffff", image: "/img/tee-fem/blanco.webp" },
+      { key: "negro", label: "Negro", hex: "#111111", image: "/img/tee-fem/negro.webp" },
+      { key: "marino", label: "Marino", hex: "#0b1b3a", image: "/img/tee-fem/marino.webp" },
+      { key: "rojo", label: "Rojo", hex: "#d32f2f", image: "/img/tee-fem/rojo.webp" },
+    ],
+
+    spec: {
+      material: "100% Algodón",
+      fit: "Regular",
+      print: "DTF / Vinil textil / Serigrafía (según pedido)",
+      care: "Lavar al revés, agua fría. Evitar secadora en alta temperatura.",
+    },
+
+    sizeChart: {
+      title: "Tabla de tallas – Playera 50/50",
       rows: [
         { size: "S", widthCm: 48, lengthCm: 70 },
         { size: "M", widthCm: 52, lengthCm: 72 },
@@ -160,7 +196,7 @@ export const PRODUCTS: Product[] = [
     description: "Pijamas quirúrgicas de tela anti fluido.",
 
     prices: [
-      { id: "set", label: "Bordado", retail: 1200, wholesale: 1000 },
+      { id: "set", label: "Bordado", retail: 1000, wholesale: 800 },
       //{ id: "blank", label: "Sin personalizar", retail: 800, wholesale: 650 },
     ],
 
@@ -292,62 +328,4 @@ export const PRODUCTS: Product[] = [
     },
   },
 
-  {
-    id: "tshirt-5050",
-    name: "Playera 50/50",
-    category: "tshirt",
-    description: "Mezcla 50% algodón / 50% poliéster.",
-
-    prices: [
-      { id: "custom", label: "Personalizada (DTF)", retail: 250, wholesale: 180 },
-      //{ id: "blank", label: "Sin personalizar", retail: 100, wholesale: 80 },
-    ],
-
-    colors: [
-      { key: "blanco", label: "Blanco", hex: "#ffffff", image: "/img/tee-5050/blanco.webp" },
-      { key: "negro", label: "Negro", hex: "#111111", image: "/img/tee-5050/negro.webp" },
-      { key: "oxford", label: "Oxford", hex: "#6e6f72", image: "/img/tee-5050/oxford.webp" },
-      { key: "gris_jaspe", label: "Gris Jaspe", hex: "#9a9a9a", image: "/img/tee-5050/gris_jaspe.webp" },
-      { key: "grafito", label: "Grafito", hex: "#2f3437", image: "/img/tee-5050/grafito.webp" },
-      { key: "cemento", label: "Cemento", hex: "#7e8c8d", image: "/img/tee-5050/cemento.webp" },
-      { key: "arena", label: "Arena", hex: "#d9cbb3", image: "/img/tee-5050/arena.webp" },
-      { key: "beige", label: "Beige", hex: "#c7b299", image: "/img/tee-5050/beige.webp" },
-      { key: "marino", label: "Marino", hex: "#0b1b3a", image: "/img/tee-5050/marino.webp" },
-      { key: "azul_rey", label: "Azul Rey", hex: "#1f4ed8", image: "/img/tee-5050/azul_rey.webp" },
-      { key: "cielo", label: "Cielo", hex: "#8fd0f1", image: "/img/tee-5050/cielo.webp" },
-      { key: "azul_petroleo", label: "Azul Petróleo", hex: "#102b4b", image: "/img/tee-5050/azul_petroleo.webp" },
-      { key: "plumbago", label: "Plumbago", hex: "#5f7f9b", image: "/img/tee-5050/plumbago.webp" },
-      { key: "turquesa", label: "Turquesa", hex: "#1aa7c9", image: "/img/tee-5050/turquesa.webp" },
-      { key: "bandera", label: "Bandera", hex: "#0f6a2e", image: "/img/tee-5050/bandera.webp" },
-      { key: "militar", label: "Militar", hex: "#4b5320", image: "/img/tee-5050/militar.webp" },
-      { key: "botella", label: "Botella", hex: "#0f3d2e", image: "/img/tee-5050/botella.webp" },
-      { key: "manzana", label: "Manzana", hex: "#8dc63f", image: "/img/tee-5050/manzana.webp" },
-      { key: "canario", label: "Canario", hex: "#f6c64b", image: "/img/tee-5050/canario.webp" },
-      { key: "naranja", label: "Naranja", hex: "#f36a21", image: "/img/tee-5050/naranja.webp" },
-      { key: "cafe", label: "Café", hex: "#3b2418", image: "/img/tee-5050/cafe.webp" },
-      { key: "rojo", label: "Rojo", hex: "#d32f2f", image: "/img/tee-5050/rojo.webp" },
-      { key: "rosa", label: "Rosa", hex: "#f2b6d3", image: "/img/tee-5050/rosa.webp" },
-      { key: "fiusha", label: "Fiusha", hex: "#d81b60", image: "/img/tee-5050/fiusha.webp" },
-      { key: "vino", label: "Vino", hex: "#5b1020", image: "/img/tee-5050/vino.webp" },
-      { key: "morado", label: "Morado", hex: "#6a1b9a", image: "/img/tee-5050/morado.webp" },
-      { key: "lila", label: "Lila", hex: "#b79ad8", image: "/img/tee-5050/lila.webp" },
-    ],
-
-    spec: {
-      material: "50% Algodón / 50% Poliéster",
-      fit: "Regular",
-      print: "DTF / Vinil textil / Serigrafía (según pedido)",
-      care: "Lavar al revés, agua fría. Evitar secadora en alta temperatura.",
-    },
-
-    sizeChart: {
-      title: "Tabla de tallas – Playera 50/50",
-      rows: [
-        { size: "S", widthCm: 48, lengthCm: 70 },
-        { size: "M", widthCm: 52, lengthCm: 72 },
-        { size: "L", widthCm: 56, lengthCm: 74 },
-        { size: "XL", widthCm: 60, lengthCm: 76 },
-      ],
-    },
-  },
 ];
