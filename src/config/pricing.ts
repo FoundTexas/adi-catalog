@@ -158,9 +158,9 @@ export const PRODUCTS: Product[] = [
     ],
 
     colors: [
+      { key: "beige", label: "Beige", hex: "#b9a485", image: "/img/oversize/beige.webp" },
       { key: "blanco", label: "Blanco", hex: "#ffffff", image: "/img/oversize/blanco.webp" },
       { key: "negro", label: "Negro", hex: "#111111", image: "/img/oversize/negro.webp" },
-      { key: "beige", label: "Beige", hex: "#b9a485", image: "/img/oversize/beige.webp" },
     ],
 
     spec: {
