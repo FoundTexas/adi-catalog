@@ -147,6 +147,41 @@ export const PRODUCTS: Product[] = [
   },
 
   {
+    id: "tshirt-oversize",
+    name: "Playera Corte Oversize",
+    category: "tshirt",
+    description: "Playera corte oversize de algodon peinado.",
+
+    prices: [
+      { id: "custom", label: "Personalizada (DTF)", retail: 330, wholesale: 250 },
+      //{ id: "blank", label: "Sin personalizar", retail: 100, wholesale: 80 },
+    ],
+
+    colors: [
+      { key: "blanco", label: "Blanco", hex: "#ffffff", image: "/img/oversize/blanco.webp" },
+      { key: "negro", label: "Negro", hex: "#111111", image: "/img/oversize/negro.webp" },
+      { key: "beige", label: "Beige", hex: "#b9a485", image: "/img/oversize/beige.webp" },
+    ],
+
+    spec: {
+      material: "100% Algodón",
+      fit: "Regular",
+      print: "DTF / Vinil textil / Serigrafía (según pedido)",
+      care: "Lavar al revés, agua fría. Evitar secadora en alta temperatura.",
+    },
+
+    sizeChart: {
+      title: "Tabla de tallas – Playera 50/50",
+      rows: [
+        { size: "S", widthCm: 48, lengthCm: 70 },
+        { size: "M", widthCm: 52, lengthCm: 72 },
+        { size: "L", widthCm: 56, lengthCm: 74 },
+        { size: "XL", widthCm: 60, lengthCm: 76 },
+      ],
+    },
+  },
+
+  {
     id: "polo",
     name: "Polo",
     category: "polo",
