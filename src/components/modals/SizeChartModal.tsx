@@ -52,6 +52,7 @@ export default function SizeChartModal({ open, onClose, chart, subtitle }: Props
                 <tr>
                   <th>Talla</th>
                   <th>Ancho (cm)</th>
+                  <th>Hombros (cm)</th>
                   <th>Largo (cm)</th>
                 </tr>
               </thead>
@@ -60,6 +61,7 @@ export default function SizeChartModal({ open, onClose, chart, subtitle }: Props
                   <tr key={r.size}>
                     <td>{r.size}</td>
                     <td>{r.widthCm}</td>
+                    <td>{r.shouldersCm}</td>
                     <td>{r.lengthCm}</td>
                   </tr>
                 ))}

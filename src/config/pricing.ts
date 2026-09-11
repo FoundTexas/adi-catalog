@@ -4,6 +4,7 @@ export type SizeRow = {
   size: string;
   widthCm: number;
   lengthCm: number;
+  shouldersCm: number;
 };
 
 export type PriceOpt = {
@@ -16,7 +17,7 @@ export type PriceOpt = {
 export type Product = {
   id: string;
   name: string;
-  category: "tshirt" | "hoodie" | "polo" | "sweatshirt" | "scrub";
+  category: "tshirt" | "hoodie" | "polo" | "sweatshirt" | "scrub" | "bag";
   description: string;
 
   prices: PriceOpt[];
@@ -102,10 +103,10 @@ export const PRODUCTS: Product[] = [
     sizeChart: {
       title: "Tabla de tallas – Playera",
       rows: [
-        { size: "S", widthCm: 48, lengthCm: 70 },
-        { size: "M", widthCm: 52, lengthCm: 72 },
-        { size: "L", widthCm: 56, lengthCm: 74 },
-        { size: "XL", widthCm: 60, lengthCm: 76 },
+        { size: "S", widthCm: 48, lengthCm: 70, shouldersCm: 0 },
+        { size: "M", widthCm: 52, lengthCm: 72, shouldersCm: 0 },
+        { size: "L", widthCm: 56, lengthCm: 74, shouldersCm: 0 },
+        { size: "XL", widthCm: 60, lengthCm: 76, shouldersCm: 0 },
       ],
     },
   },
@@ -138,10 +139,10 @@ export const PRODUCTS: Product[] = [
     sizeChart: {
       title: "Tabla de tallas – Playera 50/50",
       rows: [
-        { size: "S", widthCm: 48, lengthCm: 70 },
-        { size: "M", widthCm: 52, lengthCm: 72 },
-        { size: "L", widthCm: 56, lengthCm: 74 },
-        { size: "XL", widthCm: 60, lengthCm: 76 },
+        { size: "S", widthCm: 48, lengthCm: 70, shouldersCm: 0 },
+        { size: "M", widthCm: 52, lengthCm: 72, shouldersCm: 0 },
+        { size: "L", widthCm: 56, lengthCm: 74, shouldersCm: 0 },
+        { size: "XL", widthCm: 60, lengthCm: 76, shouldersCm: 0 },
       ],
     },
   },
@@ -173,10 +174,10 @@ export const PRODUCTS: Product[] = [
     sizeChart: {
       title: "Tabla de tallas – Playera 50/50",
       rows: [
-        { size: "S", widthCm: 48, lengthCm: 70 },
-        { size: "M", widthCm: 52, lengthCm: 72 },
-        { size: "L", widthCm: 56, lengthCm: 74 },
-        { size: "XL", widthCm: 60, lengthCm: 76 },
+        { size: "S", widthCm: 48, lengthCm: 70, shouldersCm: 0 },
+        { size: "M", widthCm: 52, lengthCm: 72, shouldersCm: 0 },
+        { size: "L", widthCm: 56, lengthCm: 74, shouldersCm: 0 },
+        { size: "XL", widthCm: 60, lengthCm: 76, shouldersCm: 0 },
       ],
     },
   },
@@ -216,19 +217,19 @@ export const PRODUCTS: Product[] = [
     sizeChart: {
       title: "Tabla de tallas – Playera 50/50",
       rows: [
-        { size: "S", widthCm: 48, lengthCm: 70 },
-        { size: "M", widthCm: 52, lengthCm: 72 },
-        { size: "L", widthCm: 56, lengthCm: 74 },
-        { size: "XL", widthCm: 60, lengthCm: 76 },
+        { size: "S", widthCm: 48, lengthCm: 70, shouldersCm: 0 },
+        { size: "M", widthCm: 52, lengthCm: 72, shouldersCm: 0 },
+        { size: "L", widthCm: 56, lengthCm: 74, shouldersCm: 0 },
+        { size: "XL", widthCm: 60, lengthCm: 76, shouldersCm: 0 },
       ],
     },
   },
 
   {
-    id: "pijama-quirurgica",
-    name: "Scrub completo",
+    id: "scrub-top",
+    name: "Top Scrub Femenino",
     category: "scrub",
-    description: "Pijamas quirúrgicas de tela anti fluido.",
+    description: "Pijama quirúrgica de tela anti fluido.",
 
     prices: [
       { id: "set", label: "Bordado", retail: 1000, wholesale: 800 },
@@ -256,10 +257,90 @@ export const PRODUCTS: Product[] = [
     sizeChart: {
       title: "Tabla de tallas – Scrubs",
       rows: [
-        { size: "S", widthCm: 48, lengthCm: 70 },
-        { size: "M", widthCm: 52, lengthCm: 72 },
-        { size: "L", widthCm: 56, lengthCm: 74 },
-        { size: "XL", widthCm: 60, lengthCm: 76 },
+        { size: "S", widthCm: 42, lengthCm: 64, shouldersCm: 0 },
+        { size: "M", widthCm: 45, lengthCm: 66, shouldersCm: 0 },
+        { size: "L", widthCm: 48, lengthCm: 68, shouldersCm: 0 },
+        { size: "XL", widthCm: 52, lengthCm: 68, shouldersCm: 0 },
+      ],
+    },
+  },
+
+  {
+    id: "pijama-quirurgica",
+    name: "Scrub Femenino",
+    category: "scrub",
+    description: "Pijama quirúrgica de tela anti fluido.",
+
+    prices: [
+      { id: "set", label: "Bordado", retail: 1000, wholesale: 800 },
+      //{ id: "blank", label: "Sin personalizar", retail: 800, wholesale: 650 },
+    ],
+
+    colors: [
+      { key: "vino", label: "Vino", hex: "#5b1020", image: "/img/scrub/vino.webp" },
+      { key: "blanco", label: "Blanco", hex: "#ffffff", image: "/img/scrub/blanco.webp" },
+      { key: "negro", label: "Negro", hex: "#111111", image: "/img/scrub/negro.webp" },
+      { key: "marino", label: "Marino", hex: "#0b1b3a", image: "/img/scrub/marino.webp" },
+      { key: "plumbago", label: "Plumbago", hex: "#5f7f9b", image: "/img/scrub/plumbago.webp" },
+      { key: "menta", label: "Menta", hex: "#B2D7AB", image: "/img/scrub/menta.webp" },
+      { key: "militar", label: "Militar", hex: "#4b5320", image: "/img/scrub/militar.webp" },
+      { key: "rosa", label: "Rosa", hex: "#f2b6d3", image: "/img/scrub/rosa.webp" },
+    ],
+
+    spec: {
+      material: "Antífluido",
+      fit: "Regular",
+      print: "DTF / Vinil textil / Serigrafía (según pedido)",
+      care: "Lavar al revés, agua fría. Evitar secadora en alta temperatura.",
+    },
+
+    sizeChart: {
+      title: "Tabla de tallas – Scrubs",
+      rows: [
+        { size: "S", widthCm: 42, lengthCm: 64, shouldersCm: 0 },
+        { size: "M", widthCm: 45, lengthCm: 66, shouldersCm: 0 },
+        { size: "L", widthCm: 48, lengthCm: 68, shouldersCm: 0 },
+        { size: "XL", widthCm: 52, lengthCm: 68, shouldersCm: 0 },
+      ],
+    },
+  },
+
+  {
+    id: "tote-bag",
+    name: "Tote Bag de manta",
+    category: "bag",
+    description: "Tote bags hechas de manta con estampado DTF.",
+
+    prices: [
+      { id: "set", label: "DTF", retail: 50, wholesale: 20 },
+      //{ id: "blank", label: "Sin personalizar", retail: 800, wholesale: 650 },
+    ],
+
+    colors: [
+      { key: "vino", label: "Vino", hex: "#5b1020", image: "/img/scrub/vino.webp" },
+      { key: "blanco", label: "Blanco", hex: "#ffffff", image: "/img/scrub/blanco.webp" },
+      { key: "negro", label: "Negro", hex: "#111111", image: "/img/scrub/negro.webp" },
+      { key: "marino", label: "Marino", hex: "#0b1b3a", image: "/img/scrub/marino.webp" },
+      { key: "plumbago", label: "Plumbago", hex: "#5f7f9b", image: "/img/scrub/plumbago.webp" },
+      { key: "menta", label: "Menta", hex: "#B2D7AB", image: "/img/scrub/menta.webp" },
+      { key: "militar", label: "Militar", hex: "#4b5320", image: "/img/scrub/militar.webp" },
+      { key: "rosa", label: "Rosa", hex: "#f2b6d3", image: "/img/scrub/rosa.webp" },
+    ],
+
+    spec: {
+      material: "Antífluido",
+      fit: "Regular",
+      print: "DTF / Vinil textil / Serigrafía (según pedido)",
+      care: "Lavar al revés, agua fría. Evitar secadora en alta temperatura.",
+    },
+
+    sizeChart: {
+      title: "Tabla de tallas – Scrubs",
+      rows: [
+        { size: "S", widthCm: 42, lengthCm: 64, shouldersCm: 0 },
+        { size: "M", widthCm: 45, lengthCm: 66, shouldersCm: 0 },
+        { size: "L", widthCm: 48, lengthCm: 68, shouldersCm: 0 },
+        { size: "XL", widthCm: 52, lengthCm: 68, shouldersCm: 0 },
       ],
     },
   },
@@ -306,10 +387,10 @@ export const PRODUCTS: Product[] = [
     sizeChart: {
       title: "Tabla de tallas – Hoodie",
       rows: [
-        { size: "S", widthCm: 52, lengthCm: 68 },
-        { size: "M", widthCm: 56, lengthCm: 70 },
-        { size: "L", widthCm: 60, lengthCm: 72 },
-        { size: "XL", widthCm: 64, lengthCm: 74 },
+        { size: "S", widthCm: 52, lengthCm: 68, shouldersCm: 0 },
+        { size: "M", widthCm: 56, lengthCm: 70, shouldersCm: 0 },
+        { size: "L", widthCm: 60, lengthCm: 72, shouldersCm: 0 },
+        { size: "XL", widthCm: 64, lengthCm: 74, shouldersCm: 0 },
       ],
     },
   },
@@ -355,10 +436,10 @@ export const PRODUCTS: Product[] = [
     sizeChart: {
       title: "Tabla de tallas – Hoodie",
       rows: [
-        { size: "S", widthCm: 52, lengthCm: 68 },
-        { size: "M", widthCm: 56, lengthCm: 70 },
-        { size: "L", widthCm: 60, lengthCm: 72 },
-        { size: "XL", widthCm: 64, lengthCm: 74 },
+        { size: "S", widthCm: 52, lengthCm: 68, shouldersCm: 0 },
+        { size: "M", widthCm: 56, lengthCm: 70, shouldersCm: 0 },
+        { size: "L", widthCm: 60, lengthCm: 72, shouldersCm: 0 },
+        { size: "XL", widthCm: 64, lengthCm: 74, shouldersCm: 0 },
       ],
     },
   },
