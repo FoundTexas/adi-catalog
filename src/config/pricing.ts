@@ -226,105 +226,18 @@ export const PRODUCTS: Product[] = [
   },
 
   {
-    id: "scrub-top",
-    name: "Top Scrub Femenino",
-    category: "scrub",
-    description: "Pijama quirúrgica de tela anti fluido.",
-
-    prices: [
-      { id: "set", label: "Bordado", retail: 1000, wholesale: 800 },
-      //{ id: "blank", label: "Sin personalizar", retail: 800, wholesale: 650 },
-    ],
-
-    colors: [
-      { key: "vino", label: "Vino", hex: "#5b1020", image: "/img/scrub/vino.webp" },
-      { key: "blanco", label: "Blanco", hex: "#ffffff", image: "/img/scrub/blanco.webp" },
-      { key: "negro", label: "Negro", hex: "#111111", image: "/img/scrub/negro.webp" },
-      { key: "marino", label: "Marino", hex: "#0b1b3a", image: "/img/scrub/marino.webp" },
-      { key: "plumbago", label: "Plumbago", hex: "#5f7f9b", image: "/img/scrub/plumbago.webp" },
-      { key: "menta", label: "Menta", hex: "#B2D7AB", image: "/img/scrub/menta.webp" },
-      { key: "militar", label: "Militar", hex: "#4b5320", image: "/img/scrub/militar.webp" },
-      { key: "rosa", label: "Rosa", hex: "#f2b6d3", image: "/img/scrub/rosa.webp" },
-    ],
-
-    spec: {
-      material: "Antífluido",
-      fit: "Regular",
-      print: "DTF / Vinil textil / Serigrafía (según pedido)",
-      care: "Lavar al revés, agua fría. Evitar secadora en alta temperatura.",
-    },
-
-    sizeChart: {
-      title: "Tabla de tallas – Scrubs",
-      rows: [
-        { size: "S", widthCm: 42, lengthCm: 64, shouldersCm: 0 },
-        { size: "M", widthCm: 45, lengthCm: 66, shouldersCm: 0 },
-        { size: "L", widthCm: 48, lengthCm: 68, shouldersCm: 0 },
-        { size: "XL", widthCm: 52, lengthCm: 68, shouldersCm: 0 },
-      ],
-    },
-  },
-
-  {
-    id: "pijama-quirurgica",
-    name: "Scrub Femenino",
-    category: "scrub",
-    description: "Pijama quirúrgica de tela anti fluido.",
-
-    prices: [
-      { id: "set", label: "Bordado", retail: 1000, wholesale: 800 },
-      //{ id: "blank", label: "Sin personalizar", retail: 800, wholesale: 650 },
-    ],
-
-    colors: [
-      { key: "vino", label: "Vino", hex: "#5b1020", image: "/img/scrub/vino.webp" },
-      { key: "blanco", label: "Blanco", hex: "#ffffff", image: "/img/scrub/blanco.webp" },
-      { key: "negro", label: "Negro", hex: "#111111", image: "/img/scrub/negro.webp" },
-      { key: "marino", label: "Marino", hex: "#0b1b3a", image: "/img/scrub/marino.webp" },
-      { key: "plumbago", label: "Plumbago", hex: "#5f7f9b", image: "/img/scrub/plumbago.webp" },
-      { key: "menta", label: "Menta", hex: "#B2D7AB", image: "/img/scrub/menta.webp" },
-      { key: "militar", label: "Militar", hex: "#4b5320", image: "/img/scrub/militar.webp" },
-      { key: "rosa", label: "Rosa", hex: "#f2b6d3", image: "/img/scrub/rosa.webp" },
-    ],
-
-    spec: {
-      material: "Antífluido",
-      fit: "Regular",
-      print: "DTF / Vinil textil / Serigrafía (según pedido)",
-      care: "Lavar al revés, agua fría. Evitar secadora en alta temperatura.",
-    },
-
-    sizeChart: {
-      title: "Tabla de tallas – Scrubs",
-      rows: [
-        { size: "S", widthCm: 42, lengthCm: 64, shouldersCm: 0 },
-        { size: "M", widthCm: 45, lengthCm: 66, shouldersCm: 0 },
-        { size: "L", widthCm: 48, lengthCm: 68, shouldersCm: 0 },
-        { size: "XL", widthCm: 52, lengthCm: 68, shouldersCm: 0 },
-      ],
-    },
-  },
-
-  {
     id: "tote-bag",
     name: "Tote Bag de manta",
     category: "bag",
     description: "Tote bags hechas de manta con estampado DTF.",
 
     prices: [
-      { id: "set", label: "DTF", retail: 50, wholesale: 20 },
+      { id: "set", label: "DTF", retail: 100, wholesale: 50 },
       //{ id: "blank", label: "Sin personalizar", retail: 800, wholesale: 650 },
     ],
 
     colors: [
-      { key: "vino", label: "Vino", hex: "#5b1020", image: "/img/scrub/vino.webp" },
-      { key: "blanco", label: "Blanco", hex: "#ffffff", image: "/img/scrub/blanco.webp" },
-      { key: "negro", label: "Negro", hex: "#111111", image: "/img/scrub/negro.webp" },
-      { key: "marino", label: "Marino", hex: "#0b1b3a", image: "/img/scrub/marino.webp" },
-      { key: "plumbago", label: "Plumbago", hex: "#5f7f9b", image: "/img/scrub/plumbago.webp" },
-      { key: "menta", label: "Menta", hex: "#B2D7AB", image: "/img/scrub/menta.webp" },
-      { key: "militar", label: "Militar", hex: "#4b5320", image: "/img/scrub/militar.webp" },
-      { key: "rosa", label: "Rosa", hex: "#f2b6d3", image: "/img/scrub/rosa.webp" },
+      { key: "manta", label: "Manta", hex: "#ffffff", image: "/img/bags/tote.png" },
     ],
 
     spec: {
